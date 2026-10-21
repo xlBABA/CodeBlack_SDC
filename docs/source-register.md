@@ -83,3 +83,46 @@ Each page was opened on `checked_at` and its licence read from the page itself. 
 | uci_diabetes_130 | UCI ML Repository — Diabetes 130-US Hospitals for Years 1999-2008 | https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008 | CC BY 4.0 | 2026-10-22 | ph_diabetes_readmission | **De-identified, public patient records. No part of the dataset is included in this app**; the project only links to the UCI page |
 
 Checked and **not used**: SEC Financial Statement Data Sets (page returned 403 to automated checks), Our World in Data COVID-19 repository (archived; licence file not found), WHO Global Health Observatory (no licence text found on the page).
+
+## Learning resources (`data/resources.json`)
+
+Each resource's `source_id` equals its `resource_id`. Price, hours and their basis are in `data/resources.json`; see "Learning-resource hours" above.
+
+| source_id | name | url | price status | checked_at | checked_by | used for |
+|---|---|---|---|---|---|---|
+| mslearn_tsql_query_modify | Microsoft Learn — Query and modify data with Transact-SQL | https://learn.microsoft.com/en-us/training/paths/get-started-querying-with-transact-sql/ | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: sql |
+| mslearn_python_part1_fundamentals | Microsoft Learn — Get Started with Python Programming: Part 1 - Fundamentals | https://learn.microsoft.com/en-us/training/paths/get-started-with-python-fundamentals/ | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: python |
+| mslearn_power_bi_prepare_visualize | Microsoft Learn — Prepare and visualize data with Microsoft Power BI | https://learn.microsoft.com/en-us/training/paths/prepare-visualize-data-power-bi/ | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: data_visualization |
+| mslearn_vba_getting_started_office | Microsoft Learn (official Office VBA documentation) — Getting started with VBA in Office | https://learn.microsoft.com/en-us/office/vba/library-reference/concepts/getting-started-with-vba-in-office | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: vba |
+| mathworks_matlab_onramp | MathWorks (MATLAB Academy) — MATLAB Onramp | https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted | price: not_stated | 2026-10-22 | automated fetch (Claude Code) | skill: matlab |
+| fcc_statistics_video_monika_wahi | freeCodeCamp.org (instructor: Monika Wahi) — Statistics video course by Monika Wahi (freeCodeCamp) | https://expertbeacon.com/learn-college-level-statistics-in-this-free-8-hour-course/ | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: mathematics |
+| mit_ocw_18_05_probability_statistics | MIT OpenCourseWare — 18.05 Introduction to Probability and Statistics (Spring 2022) | https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/ | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: mathematics |
+| sas_programming_1_essentials | SAS — SAS Programming 1: Essentials | https://learn.sas.com/course/view.php?id=118 | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: analytical_scientific_software |
+| fcc_excel_beginners_full_course | freeCodeCamp.org — Microsoft Excel Tutorial for Beginners - Full Course | https://www.kdnuggets.com/2022/09/free-microsoft-excel-beginners-course.html | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: excel |
+| alison_thinking_critically | Alison — Thinking Critically | https://alison.com/course/thinking-critically | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: critical_thinking |
+| onshape_cad_basics_pathway | Onshape Learning Center — CAD Basics (Learning Pathway) | https://learn.onshape.com/learning-paths/introduction-to-cad | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: cad_software |
+
+## Scenario assumptions
+
+How our dated GitHub signals feed Hussain's two scenarios (`services/matching/scenarios.py`, read from `origin/feature/hussain-matching` at commit 53de9cc):
+
+1. **Our signal.** For each covered skill, `services/trends` counts new GitHub repositories tagged with that skill's topic in the last 30 days and compares the count with the previous 30 days. A change of more than +15% is `rising`, more than -15% is `falling`, anything else is `stable`, and a failed or incomplete fetch is `unknown`. Every signal has `observed_at` and `retrieved_at`.
+2. **What a scenario does with it.** Only `rising` and `falling` signals are used, and each one changes the *weight* of that one skill in the match score:
+   - **Moderate AI adoption:** rising skill × 1.10 (+10%), falling skill × 0.90 (-10%).
+   - **Fast AI adoption:** rising skill × 1.25 (+25%), falling skill × 0.75 (-25%).
+   - `stable` and `unknown` signals change nothing. If one skill gets both a rising and a falling signal, it is left unchanged and a note is added. With no signals at all, the scenario changes nothing and says so.
+   - The signal's `source_id` (`github_search_repos`) is added to the role's `evidence_ids`, so the result shows where the change came from.
+3. **Today's effect** (first snapshot, retrieved 2026-10-21): python, matlab, excel, vba and cad_software are `rising`; sql, data_visualization and financial_analysis_software are `stable`; nothing is `falling`. The 6 skills without a GitHub topic (critical_thinking, mathematics, complex_problem_solving, systems_analysis, attention_to_detail, analytical_scientific_software) never get a signal, so scenarios never change their weight.
+
+**These percentages are team assumptions, not forecasts.** The ±10% and ±25% values are the team's illustrative choices (see `UNCERTAINTY_NOTE` in `scenarios.py`). They are not research results and do not predict the job market or any student's outcome.
+
+**What the signal measures.** It measures developer activity on GitHub, not job demand. More new repositories about a tool does not mean more job openings that need it.
+
+**Uncertainty this leaves:**
+- The link from developer activity to hiring demand is assumed, not measured.
+- GitHub topic tags are voluntary, so activity can be undercounted.
+- Both 30-day windows are counted on the same day, so older repositories have had longer to be deleted or tagged. This can lean the comparison one way.
+- One snapshot is a single comparison, not a trend over time.
+- GitHub is global, not specific to Malaysia or any one job market.
+- The 15% threshold and the scenario multipliers are team choices, so different choices would give different scores.
+- A scenario only re-weights skills inside the `profile_alignment_estimate`. It never turns the score into a hiring probability.

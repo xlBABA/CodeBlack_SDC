@@ -4,6 +4,7 @@
   "resources": [
     {
       "resource_id": "mslearn_tsql_query_modify",
+      "source_id": "mslearn_tsql_query_modify",
       "skill_ids": ["sql"],
       "title": "Query and modify data with Transact-SQL",
       "provider": "Microsoft Learn",
@@ -18,6 +19,7 @@
     },
     {
       "resource_id": "mslearn_python_part1_fundamentals",
+      "source_id": "mslearn_python_part1_fundamentals",
       "skill_ids": ["python"],
       "title": "Get Started with Python Programming: Part 1 - Fundamentals",
       "provider": "Microsoft Learn",
@@ -32,6 +34,7 @@
     },
     {
       "resource_id": "mslearn_power_bi_prepare_visualize",
+      "source_id": "mslearn_power_bi_prepare_visualize",
       "skill_ids": ["data_visualization"],
       "title": "Prepare and visualize data with Microsoft Power BI",
       "provider": "Microsoft Learn",
@@ -46,6 +49,7 @@
     },
     {
       "resource_id": "mslearn_vba_getting_started_office",
+      "source_id": "mslearn_vba_getting_started_office",
       "skill_ids": ["vba"],
       "title": "Getting started with VBA in Office",
       "provider": "Microsoft Learn (official Office VBA documentation)",
@@ -62,6 +66,7 @@
     },
     {
       "resource_id": "mathworks_matlab_onramp",
+      "source_id": "mathworks_matlab_onramp",
       "skill_ids": ["matlab"],
       "title": "MATLAB Onramp",
       "provider": "MathWorks (MATLAB Academy)",
@@ -78,6 +83,7 @@
     },
     {
       "resource_id": "fcc_statistics_video_monika_wahi",
+      "source_id": "fcc_statistics_video_monika_wahi",
       "skill_ids": ["mathematics"],
       "rank": 1,
       "title": "Statistics video course by Monika Wahi (freeCodeCamp)",
@@ -97,6 +103,7 @@
     },
     {
       "resource_id": "mit_ocw_18_05_probability_statistics",
+      "source_id": "mit_ocw_18_05_probability_statistics",
       "skill_ids": ["mathematics"],
       "rank": 2,
       "title": "18.05 Introduction to Probability and Statistics (Spring 2022)",
@@ -114,6 +121,7 @@
     },
     {
       "resource_id": "sas_programming_1_essentials",
+      "source_id": "sas_programming_1_essentials",
       "skill_ids": ["analytical_scientific_software"],
       "title": "SAS Programming 1: Essentials",
       "provider": "SAS",
@@ -130,6 +138,7 @@
     },
     {
       "resource_id": "fcc_excel_beginners_full_course",
+      "source_id": "fcc_excel_beginners_full_course",
       "skill_ids": ["excel"],
       "title": "Microsoft Excel Tutorial for Beginners - Full Course",
       "provider": "freeCodeCamp.org",
@@ -145,6 +154,7 @@
     },
     {
       "resource_id": "alison_thinking_critically",
+      "source_id": "alison_thinking_critically",
       "skill_ids": ["critical_thinking"],
       "title": "Thinking Critically",
       "provider": "Alison",
@@ -159,6 +169,7 @@
     },
     {
       "resource_id": "onshape_cad_basics_pathway",
+      "source_id": "onshape_cad_basics_pathway",
       "skill_ids": ["cad_software"],
       "title": "CAD Basics (Learning Pathway)",
       "provider": "Onshape Learning Center",
