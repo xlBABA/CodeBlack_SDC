@@ -2,7 +2,7 @@
 from functools import lru_cache
 from typing import Optional
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +18,22 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./futurepath.db"
 
     CORS_ORIGINS: str = "http://localhost:5173"
+
+    @field_validator("CORS_ORIGINS")
+    @classmethod
+    def _reject_wildcard_origin(cls, value: str) -> str:
+        # main.py always sets allow_credentials=True; a wildcard origin
+        # combined with credentials is both a browser-rejected combination
+        # and a real security risk, so invalid config fails loudly at
+        # startup rather than silently degrading CORS protection.
+        parts = [part.strip() for part in value.split(",") if part.strip()]
+        if "*" in parts:
+            raise ValueError(
+                "CORS_ORIGINS must not include '*' — this backend always "
+                "sends allow_credentials=True; list explicit trusted "
+                "origins instead."
+            )
+        return value
 
     # Fixture adapters stand in until real providers (Hussain/Jawad) are
     # integrated. False signals "I expect real inference" — Milestone 6A
