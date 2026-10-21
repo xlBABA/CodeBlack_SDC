@@ -66,3 +66,20 @@ Current team estimates (checked 2026-10-22):
 `checked_by` in `data/resources.json` records how each page was verified: `automated fetch (Claude Code)` or `Jawad, manually in browser` (used for pages that block automated requests or need a sign-in). When a skill has more than one resource, `rank` (lower = preferred) decides which one `get_roadmap` uses; mathematics uses the statistics video (rank 1) and keeps MIT 18.05 as rank 2.
 
 Rules: a resource has either `estimated_hours` (provider) or `team_estimate_hours` (team), never both. `total_estimated_hours` includes both kinds, and the roadmap's warnings name every step that uses a team estimate.
+
+## Project datasets and tutorials (`data/projects.json`)
+
+Each page was opened on `checked_at` and its licence read from the page itself. Datasets are **linked, never copied** into the app.
+
+| source_id | name | url | licence (as stated on the page) | checked_at | used by | notes |
+|---|---|---|---|---|---|---|
+| uci_online_retail_ii | UCI ML Repository — Online Retail II | https://archive.ics.uci.edu/dataset/502/online+retail+ii | CC BY 4.0 | 2026-10-22 | da_online_retail_dashboard | Transaction data with anonymised customer IDs |
+| uci_bank_marketing | UCI ML Repository — Bank Marketing | https://archive.ics.uci.edu/dataset/222/bank+marketing | CC BY 4.0 | 2026-10-22 | da_bank_campaign_analysis | |
+| uci_default_credit_card | UCI ML Repository — Default of Credit Card Clients | https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients | CC BY 4.0 | 2026-10-22 | fa_credit_default_analysis | 30,000 rows, 23 features. Includes sex, marital status and age; the project excludes them from its risk score |
+| worldbank_wdi | World Bank — World Development Indicators | https://datacatalog.worldbank.org/search/dataset/0037712/World-Development-Indicators | Creative Commons Attribution 4.0 | 2026-10-22 | fa_macro_indicator_workbook, ph_health_indicator_trends | Catalog page shows dateModified 2026-10-12 |
+| uci_ai4i_2020 | UCI ML Repository — AI4I 2020 Predictive Maintenance Dataset | https://archive.ics.uci.edu/dataset/601/ai4i+2020+predictive+maintenance+dataset | CC BY 4.0 | 2026-10-22 | me_predictive_maintenance | |
+| uci_ccpp | UCI ML Repository — Combined Cycle Power Plant | https://archive.ics.uci.edu/dataset/294/combined+cycle+power+plant | CC BY 4.0 | 2026-10-22 | me_power_plant_regression | |
+| onshape_cad_basics | Onshape Learning Center — CAD Basics (Learning Pathway) | https://learn.onshape.com/learning-paths/introduction-to-cad | Onshape terms of use (tutorial, not a dataset) | 2026-10-22 | me_parametric_bracket_cad | `source_type: tutorial`; free sign-in required; checked manually by Jawad in a browser |
+| uci_diabetes_130 | UCI ML Repository — Diabetes 130-US Hospitals for Years 1999-2008 | https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008 | CC BY 4.0 | 2026-10-22 | ph_diabetes_readmission | **De-identified, public patient records. No part of the dataset is included in this app**; the project only links to the UCI page |
+
+Checked and **not used**: SEC Financial Statement Data Sets (page returned 403 to automated checks), Our World in Data COVID-19 repository (archived; licence file not found), WHO Global Health Observatory (no licence text found on the page).
