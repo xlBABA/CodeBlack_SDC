@@ -5,7 +5,7 @@ from services.trends.tests.fakes import FakeClock, ScriptedTransport, github_res
 def test_fetch_window_count_parses_response():
     transport = ScriptedTransport([github_response(42)])
     client = GitHubTrendClient(
-        token=None, transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"])
+        token="", transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"])
     )
     result = client.fetch_window_count("sql", "2026-09-21", "2026-10-21")
     assert result.total_count == 42
@@ -16,14 +16,14 @@ def test_fetch_window_count_parses_response():
 
 def test_fetch_window_count_flags_incomplete_results():
     transport = ScriptedTransport([github_response(42, incomplete=True)])
-    client = GitHubTrendClient(transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
+    client = GitHubTrendClient(token="", transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
     result = client.fetch_window_count("sql", "2026-09-21", "2026-10-21")
     assert result.incomplete is True
 
 
 def test_http_failure_raises_fetch_error_not_a_fake_count():
     transport = ScriptedTransport([http_error("HTTP 403: rate limited")])
-    client = GitHubTrendClient(transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
+    client = GitHubTrendClient(token="", transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
     try:
         client.fetch_window_count("sql", "2026-09-21", "2026-10-21")
         raise AssertionError("expected GitHubFetchError")
@@ -33,7 +33,7 @@ def test_http_failure_raises_fetch_error_not_a_fake_count():
 
 def test_unexpected_response_shape_raises():
     transport = ScriptedTransport([{"message": "Bad credentials"}])
-    client = GitHubTrendClient(transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
+    client = GitHubTrendClient(token="", transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
     try:
         client.fetch_window_count("sql", "2026-09-21", "2026-10-21")
         raise AssertionError("expected GitHubFetchError")
@@ -43,7 +43,7 @@ def test_unexpected_response_shape_raises():
 
 def test_query_uses_topic_and_created_range():
     transport = ScriptedTransport([github_response(1)])
-    client = GitHubTrendClient(transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
+    client = GitHubTrendClient(token="", transport=transport, sleep_fn=no_sleep, clock=FakeClock(["2026-10-21T12:00:00Z"]))
     client.fetch_window_count("data-visualization", "2026-09-21", "2026-10-21")
     url, headers = transport.calls[0]
     assert "topic%3Adata-visualization" in url
@@ -65,9 +65,31 @@ def test_throttle_sleeps_between_calls_without_a_token():
     transport = ScriptedTransport([github_response(1), github_response(2)])
     sleeps: list[float] = []
     client = GitHubTrendClient(
-        transport=transport, sleep_fn=sleeps.append, clock=FakeClock(["2026-10-21T12:00:00Z"])
+        token="", transport=transport, sleep_fn=sleeps.append, clock=FakeClock(["2026-10-21T12:00:00Z"])
     )
     client.fetch_window_count("sql", "2026-09-21", "2026-10-21")
     client.fetch_window_count("sql", "2026-09-21", "2026-10-21")
     assert len(sleeps) == 1  # throttled before the second call, not the first
     assert sleeps[0] > 0
+
+
+def test_load_token_reads_env_file_and_ignores_other_keys():
+    import os
+    import tempfile
+    from pathlib import Path
+
+    from services.trends.github_client import load_token
+
+    saved = os.environ.pop("GITHUB_TOKEN", None)
+    tmp = Path(tempfile.mkdtemp()) / ".env"
+    try:
+        tmp.write_text("OTHER=x\nGITHUB_TOKEN=fake-from-file\n", encoding="utf-8")
+        assert load_token(tmp) == "fake-from-file"
+        tmp.write_text("GITHUB_TOKEN=\n", encoding="utf-8")
+        assert load_token(tmp) is None
+        assert load_token(tmp.parent / "missing.env") is None
+    finally:
+        if saved is not None:
+            os.environ["GITHUB_TOKEN"] = saved
+        tmp.unlink(missing_ok=True)
+        tmp.parent.rmdir()

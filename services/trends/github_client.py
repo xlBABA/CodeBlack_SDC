@@ -3,9 +3,9 @@ and tagged with a given topic. One call = one (topic, window) count.
 
 Rate limits (GitHub Search endpoint specifically, not the general API):
 unauthenticated ~10 requests/minute, ~30/minute with a token. We throttle to
-stay under that; the token (optional) comes from the GITHUB_TOKEN env var
-(see .env.example) and is never logged or included in error messages beyond
-"token present/absent".
+stay under that; the token (optional) comes from the GITHUB_TOKEN env var or
+services/trends/.env (git-ignored; see .env.example) and is never logged or
+included in error messages.
 
 The real HTTP call is isolated in `_default_transport` and injected via the
 `transport` parameter, so tests run fully offline with a fake transport.
@@ -20,9 +20,11 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Callable
 
 SEARCH_URL = "https://api.github.com/search/repositories"
+DEFAULT_ENV_PATH = Path(__file__).resolve().parent / ".env"
 UNAUTH_MIN_INTERVAL_SECONDS = 6.5  # ~9/min, under the ~10/min unauthenticated limit
 AUTH_MIN_INTERVAL_SECONDS = 2.1    # ~28/min, under the ~30/min authenticated limit
 
@@ -42,6 +44,20 @@ class WindowCount:
     total_count: int
     incomplete: bool  # GitHub's own "incomplete_results" flag
     retrieved_at: str  # ISO 8601 UTC, e.g. 2026-10-21T12:00:00Z
+
+
+def load_token(env_path: Path = DEFAULT_ENV_PATH) -> str | None:
+    """GITHUB_TOKEN from the environment, else from services/trends/.env.
+    The value is never printed or logged."""
+    if os.environ.get("GITHUB_TOKEN"):
+        return os.environ["GITHUB_TOKEN"]
+    if not env_path.exists():
+        return None
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        key, sep, value = line.strip().partition("=")
+        if sep and key.strip() == "GITHUB_TOKEN":
+            return value.strip().strip('"').strip("'") or None
+    return None
 
 
 def _utcnow_iso() -> str:
@@ -69,7 +85,7 @@ class GitHubTrendClient:
         sleep_fn: Callable[[float], None] = time.sleep,
         clock: Callable[[], str] = _utcnow_iso,
     ):
-        self.token = token if token is not None else os.environ.get("GITHUB_TOKEN")
+        self.token = token if token is not None else load_token()
         self._transport = transport
         self._sleep_fn = sleep_fn
         self._clock = clock

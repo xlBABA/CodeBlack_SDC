@@ -49,12 +49,19 @@ def save_snapshot(
     previous: WindowCount | None,
     base_dir: Path = DEFAULT_SNAPSHOT_DIR,
 ) -> None:
+    """Overwrites the skill's snapshot. The old snapshot's current window is
+    kept as `prior_snapshot` so "what changed since last time" can be shown."""
     path = snapshot_path(skill_id, base_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
+    old = load_snapshot(skill_id, base_dir)
     payload = {
         "skill_id": skill_id,
+        # A stored file is never live: whoever reads it later is serving cached data.
+        "source_status": "cached",
+        "source_id": "github_search_repos",
         "current": _window_to_dict(current),
         "previous": _window_to_dict(previous),
+        "prior_snapshot": _window_to_dict(old[0]) if old else None,
     }
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
@@ -69,3 +76,11 @@ def load_snapshot(
         return None
     data = json.loads(path.read_text(encoding="utf-8"))
     return _dict_to_window(data.get("current")), _dict_to_window(data.get("previous"))
+
+
+def load_prior_snapshot(skill_id: str, base_dir: Path = DEFAULT_SNAPSHOT_DIR) -> WindowCount | None:
+    """The current window of the snapshot before the latest one, if any."""
+    path = snapshot_path(skill_id, base_dir)
+    if not path.exists():
+        return None
+    return _dict_to_window(json.loads(path.read_text(encoding="utf-8")).get("prior_snapshot"))

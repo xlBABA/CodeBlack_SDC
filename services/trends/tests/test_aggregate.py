@@ -47,7 +47,8 @@ def test_build_trend_signal_shape_matches_contract():
         "metric_value", "unit", "observed_at", "retrieved_at", "direction",
         "confidence_note", "role_ids",
     }
-    assert set(signal.keys()) == expected_keys
+    # every contract field, plus exactly one documented extension
+    assert set(signal.keys()) == expected_keys | {"change_since_last_snapshot"}
     assert signal["skill_id"] == "sql"
     assert signal["direction"] == "rising"  # +30%
     assert signal["metric_value"] == 130

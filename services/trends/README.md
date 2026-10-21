@@ -58,9 +58,21 @@ skill_id in `data/skills.json` appears in exactly one of the two.
 | `ingest.py` | `refresh_all()` - the orchestrator. Per skill: reuse a same-day cached "previous" window to save a call, fetch "current", save a new snapshot. On failure, fall back to the last saved snapshot (`source_status: "cached"`), or `"unavailable"` if none exists yet. **Never returns "live" on a failed fetch.** |
 | `tests/` | Offline only - a fake `transport`/`sleep_fn`/`clock` is injected, no network, no real delays. |
 
+## For Rehan (backend)
+`get_trends(role_id=None, limit=20)` is `TrendProvider.latest`. It only reads
+`data/trend_snapshots/` (no network), so it always returns
+`source_status: "cached"` (or `"unavailable"` if there are no snapshots).
+`refresh_all()` is the real refetch for a "Refresh" button.
+
+Each signal has one field beyond the contract's `TrendSignal`:
+`change_since_last_snapshot` = `{old_count, old_window, old_retrieved_at,
+new_count, new_window, new_retrieved_at}`, or `null` on the first snapshot.
+It needs adding to `contracts/openapi.yaml` if the frontend should use it.
+
 ## Rate limiting and secrets
-`GITHUB_TOKEN` (optional) goes in a root `.env` (see `.env.example` here for
-the variable name) - never committed, never logged. Without it, calls are
+`GITHUB_TOKEN` (optional) goes in `services/trends/.env` (git-ignored by
+`services/trends/.gitignore`; see `.env.example` for the variable name) or the
+environment - never committed, never logged. Without it, calls are
 throttled to ~9/min; with it, ~28/min. A full `refresh_all()` normally makes
 8 calls (one "current" fetch per covered skill) once a "previous" window is
 cached for the day, or 16 calls the first time that day.
@@ -86,5 +98,8 @@ transport.
 - This is a **developer/tech-ecosystem activity signal**, not hiring demand
   (`CLAUDE.md`: "Research/GitHub activity != verified hiring demand"). Every
   `TrendSignal.confidence_note` says so explicitly.
+- Both windows are counted *today*. Repos created in the older window have had
+  longer to be deleted (e.g. spam) or to gain a topic tag, so the comparison
+  can lean slightly one way. Treat small "rising" results with care.
 - The "previous window" cache is keyed to the calendar day; it is refetched
   (one extra call per skill) the first time `refresh_all()` runs on a new day.

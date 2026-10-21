@@ -18,7 +18,7 @@ from pathlib import Path
 from .aggregate import build_trend_signal
 from .github_client import GitHubFetchError, GitHubTrendClient, WindowCount
 from .queries import COVERED_SKILLS
-from .snapshot import DEFAULT_SNAPSHOT_DIR, load_snapshot, save_snapshot
+from .snapshot import DEFAULT_SNAPSHOT_DIR, load_prior_snapshot, load_snapshot, save_snapshot
 
 WINDOW_DAYS = 30
 ROLES_PATH = Path(__file__).resolve().parents[2] / "data" / "roles.json"
@@ -84,15 +84,20 @@ def refresh_skill(
             current, previous = None, None
             status = "unavailable"
 
+    prior: WindowCount | None = None
     if status == "live":
+        prior = saved[0] if saved else None  # read before the save overwrites it
         save_snapshot(skill_id, current, previous, base_dir)
         retrieved_at = current.retrieved_at
     elif status == "cached":
+        prior = load_prior_snapshot(skill_id, base_dir)
         retrieved_at = current.retrieved_at
     else:
         retrieved_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    signal = build_trend_signal(skill_id, current, previous, role_ids, retrieved_at=retrieved_at)
+    signal = build_trend_signal(
+        skill_id, current, previous, role_ids, retrieved_at=retrieved_at, prior=prior
+    )
     if status != "live":
         prefix = "STALE (cached snapshot): " if status == "cached" else "UNAVAILABLE: "
         signal["confidence_note"] = prefix + signal["confidence_note"]
@@ -137,4 +142,45 @@ def refresh_all(
         "signals": signals,
         "last_successful_refresh_at": last_live_at,
         "source_status": overall,
+    }
+
+
+def get_trends(
+    role_id: str | None = None,
+    limit: int = 20,
+    *,
+    base_dir: Path = DEFAULT_SNAPSHOT_DIR,
+) -> dict:
+    """TrendProvider.latest (contracts/API_CONTRACT.md, GET /trends).
+
+    Pure read of the saved snapshots - no network call, so it is always
+    "cached" (or "unavailable" if no snapshot exists). Use refresh_all() to
+    fetch new data from GitHub.
+    """
+    role_ids_by_skill = _role_ids_by_skill()
+    signals = []
+    any_snapshot = False
+    for skill_id in COVERED_SKILLS:
+        saved = load_snapshot(skill_id, base_dir)
+        if not saved or saved[0] is None:
+            continue
+        any_snapshot = True
+        current, previous = saved
+        role_ids = role_ids_by_skill.get(skill_id, [])
+        if role_id is not None and role_id not in role_ids:
+            continue
+        signal = build_trend_signal(
+            skill_id, current, previous, role_ids,
+            retrieved_at=current.retrieved_at,
+            prior=load_prior_snapshot(skill_id, base_dir),
+        )
+        signal["confidence_note"] = (
+            f"Cached snapshot retrieved {current.retrieved_at}: " + signal["confidence_note"]
+        )
+        signals.append(signal)
+
+    return {
+        "signals": signals[: max(0, limit)],
+        "last_successful_refresh_at": max((s["retrieved_at"] for s in signals), default=None),
+        "source_status": "cached" if any_snapshot else "unavailable",
     }

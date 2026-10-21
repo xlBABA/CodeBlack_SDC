@@ -39,6 +39,7 @@ def build_trend_signal(
     role_ids: list[str],
     *,
     retrieved_at: str,
+    prior: WindowCount | None = None,
 ) -> dict:
     """Build one contract TrendSignal dict (API_CONTRACT.md).
 
@@ -90,4 +91,22 @@ def build_trend_signal(
         "direction": direction,
         "confidence_note": confidence_note,
         "role_ids": role_ids,
+        # Extension beyond API_CONTRACT.md's TrendSignal (demo field); null on the first snapshot.
+        "change_since_last_snapshot": change_since_last_snapshot(prior, current),
+    }
+
+
+def change_since_last_snapshot(prior: WindowCount | None, current: WindowCount | None) -> dict | None:
+    """Old vs new 30-day count between two saved snapshots, with both dates.
+    The two counts cover different (overlapping) 30-day windows, so this is a
+    refresh-to-refresh delta, not the rising/falling comparison."""
+    if prior is None or current is None:
+        return None
+    return {
+        "old_count": prior.total_count,
+        "old_window": f"{prior.start}..{prior.end}",
+        "old_retrieved_at": prior.retrieved_at,
+        "new_count": current.total_count,
+        "new_window": f"{current.start}..{current.end}",
+        "new_retrieved_at": current.retrieved_at,
     }
