@@ -1,0 +1,106 @@
+{
+  "_note": "Every URL below was opened on checked_at and its title/content matched the skill. estimated_hours is only ever the provider's own stated duration; null means the provider states none (never estimated by us). price.status: free_stated = the provider's page says free; no_charge_observed = no price shown and the page opened without sign-in or payment; not_stated = no price information found.",
+  "data_mode": "cached",
+  "resources": [
+    {
+      "resource_id": "mslearn_tsql_query_modify",
+      "skill_ids": ["sql"],
+      "title": "Query and modify data with Transact-SQL",
+      "provider": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/paths/get-started-querying-with-transact-sql/",
+      "level": "beginner",
+      "price": {"status": "no_charge_observed", "note": "No price shown; page opened without sign-in or payment."},
+      "estimated_hours": 5.75,
+      "hours_source": "Provider-stated: 345 minutes (duration_in_minutes in Microsoft Learn's official catalog API, learn.microsoft.com/api/catalog).",
+      "prerequisites": {"text": "Familiarity with working with tables of data, for example in a spreadsheet.", "skill_ids": []},
+      "checked_at": "2026-10-22"
+    },
+    {
+      "resource_id": "mslearn_python_part1_fundamentals",
+      "skill_ids": ["python"],
+      "title": "Get Started with Python Programming: Part 1 - Fundamentals",
+      "provider": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/paths/get-started-with-python-fundamentals/",
+      "level": "beginner",
+      "price": {"status": "no_charge_observed", "note": "No price shown; page opened without sign-in or payment."},
+      "estimated_hours": 3.2,
+      "hours_source": "Provider-stated: 192 minutes (duration_in_minutes in Microsoft Learn's official catalog API).",
+      "prerequisites": {"text": "None stated (page level: Beginner).", "skill_ids": []},
+      "checked_at": "2026-10-22"
+    },
+    {
+      "resource_id": "mslearn_power_bi_prepare_visualize",
+      "skill_ids": ["data_visualization"],
+      "title": "Prepare and visualize data with Microsoft Power BI",
+      "provider": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/training/paths/prepare-visualize-data-power-bi/",
+      "level": "beginner",
+      "price": {"status": "no_charge_observed", "note": "No price shown; page opened without sign-in or payment."},
+      "estimated_hours": 8.2,
+      "hours_source": "Provider-stated: 492 minutes (duration_in_minutes in Microsoft Learn's official catalog API).",
+      "prerequisites": {"text": "Before starting this learning path, you should be familiar with data and analytics concepts.", "skill_ids": []},
+      "checked_at": "2026-10-22"
+    },
+    {
+      "resource_id": "mslearn_vba_getting_started_office",
+      "skill_ids": ["vba"],
+      "title": "Getting started with VBA in Office",
+      "provider": "Microsoft Learn (official Office VBA documentation)",
+      "url": "https://learn.microsoft.com/en-us/office/vba/library-reference/concepts/getting-started-with-vba-in-office",
+      "level": "introductory article",
+      "price": {"status": "no_charge_observed", "note": "Public documentation; opened without sign-in or payment."},
+      "estimated_hours": null,
+      "hours_source": "Not stated by provider (the page has a word count, not a duration).",
+      "prerequisites": {"text": "Page says: \"This article is for experienced Office users who want to learn about VBA\".", "skill_ids": ["excel"]},
+      "checked_at": "2026-10-22"
+    },
+    {
+      "resource_id": "mathworks_matlab_onramp",
+      "skill_ids": ["matlab"],
+      "title": "MATLAB Onramp",
+      "provider": "MathWorks (MATLAB Academy)",
+      "url": "https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted",
+      "level": "introductory, self-paced",
+      "price": {"status": "not_stated", "note": "The page did not state a price in the text we could read."},
+      "estimated_hours": null,
+      "hours_source": "Not stated in the page text we could read (format: self-paced).",
+      "prerequisites": {"text": "None stated.", "skill_ids": []},
+      "checked_at": "2026-10-22"
+    },
+    {
+      "resource_id": "mit_ocw_18_05_probability_statistics",
+      "skill_ids": ["mathematics"],
+      "title": "18.05 Introduction to Probability and Statistics (Spring 2022)",
+      "provider": "MIT OpenCourseWare",
+      "url": "https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/",
+      "level": "undergraduate",
+      "price": {"status": "free_stated", "note": "Page links the same materials on MIT Open Learning Library, \"which is free to use\"."},
+      "estimated_hours": null,
+      "hours_source": "Not stated by provider.",
+      "prerequisites": {"text": "None stated on the course page.", "skill_ids": []},
+      "checked_at": "2026-10-22"
+    },
+    {
+      "resource_id": "sas_programming_1_essentials",
+      "skill_ids": ["analytical_scientific_software"],
+      "title": "SAS Programming 1: Essentials",
+      "provider": "SAS",
+      "url": "https://learn.sas.com/course/view.php?id=118",
+      "level": "introductory",
+      "price": {"status": "free_stated", "note": "Labelled \"FREE COURSE\" on https://www.sas.com/en_us/training/offers/free-training.html."},
+      "estimated_hours": null,
+      "hours_source": "Not stated for the free self-paced version. The course page shows \"Duration: 21 hours\" only under its Live Class Schedule, a different format, so it is not used.",
+      "prerequisites": {"text": "None stated.", "skill_ids": []},
+      "checked_at": "2026-10-22"
+    }
+  ],
+  "skills_without_resource": {
+    "excel": "LearnFree 'Excel: Foundations' loaded but only its title was readable (no lessons or price); Microsoft's Excel video-training URL now redirects to a general help hub; Microsoft Learn's Excel modules teach Copilot/Power Platform add-ons, not Excel basics.",
+    "cad_software": "FreeCAD wiki blocked automated access; Onshape Learning Center is login-gated; Autodesk Fusion self-paced learning returned 403.",
+    "financial_analysis_software": "Proprietary enterprise tools (Hyperion, RiskCalc); no free official training page was verified.",
+    "critical_thinking": "Open University OpenLearn (states study hours) refused automated access (403); the Microsoft Learn 'critical thinking' module is for teachers designing lessons, not for learners.",
+    "complex_problem_solving": "OpenLearn refused automated access (403); no other verified free course.",
+    "systems_analysis": "OpenLearn refused automated access (403); no other verified free course.",
+    "attention_to_detail": "A work style, not a course topic; no verified free course."
+  }
+}
