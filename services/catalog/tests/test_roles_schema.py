@@ -1,5 +1,8 @@
 """Checks data/roles.json, skills.json and sdg_mappings.json are consistent.
 
+Matches the catalogue shape Hussain's matcher expects
+(services/matching/README.md, "Data expected from Jawad").
+
 Run: python services/catalog/tests/test_roles_schema.py
 No external packages needed (standard library only).
 """
@@ -26,7 +29,7 @@ def main():
     errors = []
 
     roles = load("roles.json")
-    skills = load("skills.json")
+    skills = load("skills.json")["skills"]
     sdg = load("sdg_mappings.json")
     source_ids = registered_source_ids()
 
@@ -42,13 +45,20 @@ def main():
         rid = role["role_id"]
         if not role.get("verified"):
             errors.append(f"{rid}: not marked verified")
-        if role.get("source_id") not in source_ids:
-            errors.append(f"{rid}: source_id '{role.get('source_id')}' not in docs/source-register.md")
-        for s in role.get("core_skills", []) + role.get("optional_skills", []):
+        evidence_ids = role.get("evidence_ids") or []
+        if not evidence_ids:
+            errors.append(f"{rid}: no evidence_ids")
+        for eid in evidence_ids:
+            if eid not in source_ids:
+                errors.append(f"{rid}: evidence_id '{eid}' not in docs/source-register.md")
+        required_skills = role.get("required_skills") or []
+        if not required_skills:
+            errors.append(f"{rid}: no required_skills listed")
+        for s in required_skills:
             if s["skill_id"] not in skill_ids:
                 errors.append(f"{rid}: unknown skill_id '{s['skill_id']}'")
-        if not role.get("core_skills"):
-            errors.append(f"{rid}: no core_skills listed")
+            if not (1 <= s.get("importance", 0) <= 5):
+                errors.append(f"{rid}: skill '{s['skill_id']}' importance must be 1-5, got {s.get('importance')}")
 
     role_sdg_ids = {m["role_id"] for m in sdg["role_sdg_mappings"]}
     missing_role_sdg = role_ids - role_sdg_ids
