@@ -1,5 +1,5 @@
 {
-  "_note": "Every URL below was opened on checked_at and its title/content matched the skill. estimated_hours is only ever the provider's own stated duration; null means the provider states none. In that case team_estimate_hours is our own labelled estimate, with team_estimate_basis showing how it was worked out. price.status: free_stated = the provider's page says free; no_charge_observed = no price shown and the page opened without sign-in or payment; not_stated = no price information found.",
+  "_note": "Every URL below was opened on checked_at (checked_by says how) and its title/content matched the skill. estimated_hours is only ever the provider's own stated duration; null means the provider states none. In that case team_estimate_hours is our own labelled estimate, with team_estimate_basis showing how it was worked out. price.status: free_stated = the provider's page says free; no_charge_observed = no price shown and the page opened without sign-in or payment; not_stated = no price information found. rank: lower is preferred when a skill has more than one resource (default 1).",
   "data_mode": "cached",
   "resources": [
     {
@@ -13,7 +13,8 @@
       "estimated_hours": 5.75,
       "hours_source": "Provider-stated: 345 minutes (duration_in_minutes in Microsoft Learn's official catalog API, learn.microsoft.com/api/catalog).",
       "prerequisites": {"text": "Familiarity with working with tables of data, for example in a spreadsheet.", "skill_ids": []},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
     },
     {
       "resource_id": "mslearn_python_part1_fundamentals",
@@ -26,7 +27,8 @@
       "estimated_hours": 3.2,
       "hours_source": "Provider-stated: 192 minutes (duration_in_minutes in Microsoft Learn's official catalog API).",
       "prerequisites": {"text": "None stated (page level: Beginner).", "skill_ids": []},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
     },
     {
       "resource_id": "mslearn_power_bi_prepare_visualize",
@@ -39,7 +41,8 @@
       "estimated_hours": 8.2,
       "hours_source": "Provider-stated: 492 minutes (duration_in_minutes in Microsoft Learn's official catalog API).",
       "prerequisites": {"text": "Before starting this learning path, you should be familiar with data and analytics concepts.", "skill_ids": []},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
     },
     {
       "resource_id": "mslearn_vba_getting_started_office",
@@ -54,7 +57,8 @@
       "team_estimate_hours": 1.5,
       "team_estimate_basis": "Team estimate: 5,106-word article (page metadata word_count) read at ~200 words/min = ~0.5 h, plus ~1 h trying its macro examples.",
       "prerequisites": {"text": "Page says: \"This article is for experienced Office users who want to learn about VBA\".", "skill_ids": ["excel"]},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
     },
     {
       "resource_id": "mathworks_matlab_onramp",
@@ -69,11 +73,32 @@
       "team_estimate_hours": 3,
       "team_estimate_basis": "Team estimate: 35 short interactive lessons in 14 modules (counted on the course page) at ~5 min each = ~3 h.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
+    },
+    {
+      "resource_id": "fcc_statistics_video_monika_wahi",
+      "skill_ids": ["mathematics"],
+      "rank": 1,
+      "title": "Statistics video course by Monika Wahi (freeCodeCamp)",
+      "title_note": "Descriptive title: the exact video title is not recorded yet, because Jawad has only seen the third-party article, not the video page.",
+      "provider": "freeCodeCamp.org (instructor: Monika Wahi)",
+      "url": "https://expertbeacon.com/learn-college-level-statistics-in-this-free-8-hour-course/",
+      "url_note": "Third-party article (expertbeacon.com, updated 2024-08-20) describing the freeCodeCamp video; the direct video link is not added yet. This page blocks automated requests (403), so it was verified only in a browser.",
+      "level": "beginner",
+      "price": {"status": "free_stated", "note": "The article describes it as a free course."},
+      "estimated_hours": null,
+      "hours_source": "Not stated by the provider in any page we have seen (only a third-party article gives a length).",
+      "team_estimate_hours": 8,
+      "team_estimate_basis": "Team estimate: a third-party article (expertbeacon.com, updated 2024-08-20) calls it an \"8-hour course\"; Jawad has not seen the video page itself.",
+      "prerequisites": {"text": "None stated.", "skill_ids": []},
+      "checked_at": "2026-10-22",
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "mit_ocw_18_05_probability_statistics",
       "skill_ids": ["mathematics"],
+      "rank": 2,
       "title": "18.05 Introduction to Probability and Statistics (Spring 2022)",
       "provider": "MIT OpenCourseWare",
       "url": "https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/",
@@ -84,7 +109,8 @@
       "team_estimate_hours": 112,
       "team_estimate_basis": "Team estimate: a full one-semester undergraduate course with problem sets due most weeks (syllabus); assumed ~8 h/week for ~14 weeks = ~112 h.",
       "prerequisites": {"text": "None stated on the course page.", "skill_ids": []},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
     },
     {
       "resource_id": "sas_programming_1_essentials",
@@ -99,14 +125,58 @@
       "team_estimate_hours": 21,
       "team_estimate_basis": "Team estimate: SAS calls it \"a complete how-to in two days\" and lists 21 hours for the live-class format of the same course; we assume the self-paced version takes about the same.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
-      "checked_at": "2026-10-22"
+      "checked_at": "2026-10-22",
+      "checked_by": "automated fetch (Claude Code)"
+    },
+    {
+      "resource_id": "fcc_excel_beginners_full_course",
+      "skill_ids": ["excel"],
+      "title": "Microsoft Excel Tutorial for Beginners - Full Course",
+      "provider": "freeCodeCamp.org",
+      "url": "https://www.kdnuggets.com/2022/09/free-microsoft-excel-beginners-course.html",
+      "url_note": "KDnuggets page that embeds the freeCodeCamp video; the direct YouTube link can be added later.",
+      "level": "beginner",
+      "price": {"status": "free_stated", "note": "Free video course."},
+      "estimated_hours": 2.44,
+      "hours_source": "Provider-stated: video length 2:26:10 shown on the embedded player = 2.44 h.",
+      "prerequisites": {"text": "None stated.", "skill_ids": []},
+      "checked_at": "2026-10-22",
+      "checked_by": "Jawad, manually in browser"
+    },
+    {
+      "resource_id": "alison_thinking_critically",
+      "skill_ids": ["critical_thinking"],
+      "title": "Thinking Critically",
+      "provider": "Alison",
+      "url": "https://alison.com/course/thinking-critically",
+      "level": "beginner",
+      "price": {"status": "free_stated", "note": "Course is free; the certificate is a separate paid option we don't use. A free sign-up may be needed to start."},
+      "estimated_hours": 3.0,
+      "hours_source": "Provider-stated: the page says \"Avg. Duration 1.5-3 Hours\"; we use the upper end of that range.",
+      "prerequisites": {"text": "None stated.", "skill_ids": []},
+      "checked_at": "2026-10-22",
+      "checked_by": "Jawad, manually in browser"
+    },
+    {
+      "resource_id": "onshape_cad_basics_pathway",
+      "skill_ids": ["cad_software"],
+      "title": "CAD Basics (Learning Pathway)",
+      "provider": "Onshape Learning Center",
+      "url": "https://learn.onshape.com/learning-paths/introduction-to-cad",
+      "level": "beginner",
+      "price": {"status": "free_stated", "note": "Available to all Onshape users; built from free self-paced courses (short videos with practice exercises). A free sign-in to the Learning Center is needed. Completion certificate available."},
+      "estimated_hours": null,
+      "hours_source": "Not stated by provider (Onshape publishes no duration).",
+      "team_estimate_hours": 7,
+      "team_estimate_basis": "Team estimate: 7 listed topics at about 1 h each; Onshape publishes no duration.",
+      "topics": ["spatial reasoning", "parametric design", "the interface", "documents and tab types", "part design", "intro to assembly design", "2D drawing basics"],
+      "prerequisites": {"text": "None stated.", "skill_ids": []},
+      "checked_at": "2026-10-22",
+      "checked_by": "Jawad, manually in browser"
     }
   ],
   "skills_without_resource": {
-    "excel": "LearnFree 'Excel: Foundations' loaded but only its title was readable (no lessons or price); Microsoft's Excel video-training URL now redirects to a general help hub; Microsoft Learn's Excel modules teach Copilot/Power Platform add-ons, not Excel basics.",
-    "cad_software": "FreeCAD wiki blocked automated access; Onshape Learning Center is login-gated; Autodesk Fusion self-paced learning returned 403.",
     "financial_analysis_software": "Proprietary enterprise tools (Hyperion, RiskCalc); no free official training page was verified.",
-    "critical_thinking": "Open University OpenLearn (states study hours) refused automated access (403); the Microsoft Learn 'critical thinking' module is for teachers designing lessons, not for learners.",
     "complex_problem_solving": "OpenLearn refused automated access (403); no other verified free course.",
     "systems_analysis": "OpenLearn refused automated access (403); no other verified free course.",
     "attention_to_detail": "A work style, not a course topic; no verified free course."

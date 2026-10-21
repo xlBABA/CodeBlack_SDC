@@ -33,10 +33,11 @@ def get_roadmap(profile: dict, role_id: str, missing_skills: list) -> dict | Non
     if role is None:
         return None
     res_data = _load("resources.json")
-    resource_for: dict[str, dict] = {}
+    resource_for: dict[str, dict] = {}  # skill_id -> preferred resource (lowest rank, then file order)
     for res in res_data["resources"]:
         for sid in res["skill_ids"]:
-            resource_for.setdefault(sid, res)
+            if sid not in resource_for or res.get("rank", 1) < resource_for[sid].get("rank", 1):
+                resource_for[sid] = res
     role_skill = {s["skill_id"]: s for s in role["required_skills"]}
     held = {_skill_id(s) for s in profile.get("skills") or []}
 

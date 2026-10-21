@@ -49,7 +49,7 @@ Every roadmap step has a numeric `estimated_hours` (Rehan's `RoadmapStep` requir
 
 | `hours_basis` | meaning | where it comes from |
 |---|---|---|
-| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths, from `duration_in_minutes` in Microsoft Learn's official catalog API. |
+| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths (`duration_in_minutes` in Microsoft Learn's official catalog API), the freeCodeCamp Excel video (2:26:10 on the player) and Alison "Thinking Critically" (upper end of its stated 1.5-3 h). |
 | `team_estimate` | The provider states **no** duration, so the team estimated one. **Not** a provider figure. | `resources.json` → `team_estimate_hours`, with `team_estimate_basis` showing the arithmetic from facts on the page. |
 
 Current team estimates (checked 2026-10-22):
@@ -60,5 +60,9 @@ Current team estimates (checked 2026-10-22):
 | MathWorks — MATLAB Onramp | 3 h | 35 short lessons in 14 modules (counted on the page) × ~5 min |
 | MIT OCW — 18.05 Probability and Statistics | 112 h | Full one-semester course with weekly problem sets; assumed ~8 h/week × ~14 weeks |
 | SAS — SAS Programming 1: Essentials | 21 h | SAS says "a complete how-to in two days" and lists 21 h for the live-class format; assumed similar for self-paced |
+| Onshape — CAD Basics (Learning Pathway) | 7 h | 7 listed topics at about 1 h each; Onshape publishes no duration |
+| freeCodeCamp — statistics video by Monika Wahi | 8 h | Only a third-party article (expertbeacon.com, updated 2024-08-20) calls it an "8-hour course"; the video page itself has not been seen |
+
+`checked_by` in `data/resources.json` records how each page was verified: `automated fetch (Claude Code)` or `Jawad, manually in browser` (used for pages that block automated requests or need a sign-in). When a skill has more than one resource, `rank` (lower = preferred) decides which one `get_roadmap` uses; mathematics uses the statistics video (rank 1) and keeps MIT 18.05 as rank 2.
 
 Rules: a resource has either `estimated_hours` (provider) or `team_estimate_hours` (team), never both. `total_estimated_hours` includes both kinds, and the roadmap's warnings name every step that uses a team estimate.

@@ -23,6 +23,14 @@ def test_resource_ids_unique_and_skills_real():
         assert set(r["prerequisites"]["skill_ids"]) <= SKILL_IDS, r["resource_id"]
 
 
+def test_manually_checked_resources_are_labelled():
+    manual = {r["resource_id"] for r in RES["resources"] if r["checked_by"] == "Jawad, manually in browser"}
+    assert manual == {
+        "fcc_excel_beginners_full_course", "alison_thinking_critically",
+        "onshape_cad_basics_pathway", "fcc_statistics_video_monika_wahi",
+    }
+
+
 def test_every_skill_has_a_resource_or_a_stated_reason_not_both():
     with_res = {s for r in RES["resources"] for s in r["skill_ids"]}
     without = set(RES["skills_without_resource"])
@@ -36,6 +44,7 @@ def test_each_resource_has_provenance_and_honest_hours():
         assert r["url"].startswith("https://"), r["resource_id"]
         assert r["title"] and r["provider"]
         assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", r["checked_at"])
+        assert r["checked_by"], r["resource_id"]
         assert r["price"]["status"] in {"free_stated", "no_charge_observed", "not_stated", "paid"}
         if r["estimated_hours"] is None:
             assert r["hours_source"].startswith("Not stated"), r["resource_id"]
@@ -55,12 +64,37 @@ def test_shape_matches_contract():
     assert set(plan["steps"][0]) == {"skill_id", "resource_id", "estimated_hours", "reason", "hours_basis"}
 
 
-def test_data_analyst_orders_required_by_importance_and_flags_no_resource():
+def test_data_analyst_orders_required_by_importance_then_optional():
     plan = get_roadmap(PROFILE, "data_analyst", ["sql", "excel", "data_visualization"])
-    # data_visualization (importance 5) before sql (3); excel has no verified resource
-    assert [s["skill_id"] for s in plan["steps"]] == ["data_visualization", "sql"]
-    assert plan["total_estimated_hours"] == 13.95  # 8.2 + 5.75, both provider-stated
-    assert any("excel" in w and "No verified" in w for w in plan["warnings"])
+    # required: data_visualization (importance 5) before sql (3); then optional excel
+    assert [s["skill_id"] for s in plan["steps"]] == ["data_visualization", "sql", "excel"]
+    assert plan["total_estimated_hours"] == 16.39  # 8.2 + 5.75 + 2.44, all provider-stated
+    assert not any("No verified" in w for w in plan["warnings"])
+
+
+def test_skill_without_a_resource_is_warned_not_planned():
+    plan = get_roadmap(PROFILE, "financial_analyst", ["financial_analysis_software", "sql"])
+    assert [s["skill_id"] for s in plan["steps"]] == ["sql"]
+    assert any("financial_analysis_software" in w and "No verified" in w for w in plan["warnings"])
+
+
+def test_new_manual_resources_are_used_for_excel_critical_thinking_and_cad():
+    plan = get_roadmap(PROFILE, "data_analyst", ["excel", "critical_thinking"])
+    by_skill = {s["skill_id"]: s for s in plan["steps"]}
+    assert by_skill["excel"]["resource_id"] == "fcc_excel_beginners_full_course"
+    assert by_skill["critical_thinking"]["resource_id"] == "alison_thinking_critically"
+    assert by_skill["critical_thinking"]["hours_basis"] == "provider_stated"
+    cad = get_roadmap(PROFILE, "mechanical_engineer", ["cad_software"])["steps"][0]
+    assert (cad["resource_id"], cad["estimated_hours"], cad["hours_basis"]) == (
+        "onshape_cad_basics_pathway", 7.0, "team_estimate")
+
+
+def test_mathematics_defaults_to_statistics_video_mit_kept_as_secondary():
+    step = get_roadmap(PROFILE, "data_analyst", ["mathematics"])["steps"][0]
+    assert (step["resource_id"], step["estimated_hours"], step["hours_basis"]) == (
+        "fcc_statistics_video_monika_wahi", 8.0, "team_estimate")
+    math = {r["resource_id"]: r.get("rank", 1) for r in RES["resources"] if "mathematics" in r["skill_ids"]}
+    assert math == {"fcc_statistics_video_monika_wahi": 1, "mit_ocw_18_05_probability_statistics": 2}
 
 
 def test_accepts_skillref_dicts_from_rolematch():
