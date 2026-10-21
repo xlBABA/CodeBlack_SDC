@@ -6,10 +6,16 @@ yet, and is deferred to a future milestone rather than stubbed.
 Each provider is its own Depends() so tests (or a future real integration)
 can override just one — e.g. swap only get_matching_provider for Hussain's
 real matcher without touching the DB or catalog wiring.
+
+get_matching_provider is also imported by scenarios.py, roadmaps.py and
+projects.py, so the ENABLE_FIXTURES gate below applies consistently to
+every route that scores a role, from this one change.
 """
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
+from app.core.integration_errors import provider_unavailable
 from app.core.time import utc_now_iso
 from app.db.session import get_db
 from app.schemas.matching import MatchRequest, MatchResponse
@@ -23,7 +29,16 @@ from app.services.trend_provider import NullTrendProvider
 router = APIRouter()
 
 
-def get_matching_provider() -> MatchingProvider:
+def get_matching_provider(settings: Settings = Depends(get_settings)) -> MatchingProvider:
+    # ENABLE_FIXTURES=False signals "I expect real inference." No real
+    # MatchingProvider implementation exists yet (Hussain's), so that case
+    # must fail loudly rather than silently returning fixture scores
+    # dressed up as something else.
+    if not settings.ENABLE_FIXTURES:
+        raise provider_unavailable(
+            "MatchingProvider",
+            "ENABLE_FIXTURES is false and no real matching provider is implemented yet.",
+        )
     return FixtureMatchingProvider()
 
 

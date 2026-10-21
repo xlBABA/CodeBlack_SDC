@@ -2,6 +2,7 @@
 from functools import lru_cache
 from typing import Optional
 
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,15 +19,27 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: str = "http://localhost:5173"
 
-    # Fixture adapters stand in until real providers (Hussain/Jawad) are integrated.
+    # Fixture adapters stand in until real providers (Hussain/Jawad) are
+    # integrated. False signals "I expect real inference" — Milestone 6A
+    # wires this into get_matching_provider() so that case fails loudly
+    # (PROVIDER_UNAVAILABLE) rather than silently serving fixture output,
+    # since no real MatchingProvider implementation exists yet.
     ENABLE_FIXTURES: bool = True
 
-    # Optional provider credentials — absence must never prevent the app from starting.
+    # Reserved for a future real provider's own HTTP client to apply.
+    # Nothing in this codebase enforces this today — no real provider
+    # makes a blocking network call yet, so there's nothing to time out.
+    PROVIDER_TIMEOUT_SECONDS: float = Field(default=5.0, gt=0)
+
+    # Optional provider credentials — absence must never prevent the app
+    # from starting. SecretStr keeps them out of accidental repr()/str()
+    # logging (e.g. `logger.info(settings)`) — they render as "**********"
+    # instead of the real value. Never log/return .get_secret_value().
     LLM_PROVIDER: Optional[str] = None
-    LLM_API_KEY: Optional[str] = None
-    RUNPOD_API_KEY: Optional[str] = None
-    RUNPOD_ENDPOINT_ID: Optional[str] = None
-    TREND_SOURCE_API_KEY: Optional[str] = None
+    LLM_API_KEY: Optional[SecretStr] = None
+    RUNPOD_API_KEY: Optional[SecretStr] = None
+    RUNPOD_ENDPOINT_ID: Optional[str] = None  # identifier, not a secret
+    TREND_SOURCE_API_KEY: Optional[SecretStr] = None
 
     @property
     def cors_origins_list(self) -> list[str]:
