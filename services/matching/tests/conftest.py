@@ -9,6 +9,13 @@ from services.matching import Matcher, SkillNormalizer
 FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def no_runpod_env(monkeypatch):
+    """Tests never see real RunPod credentials, so none can reach the network."""
+    monkeypatch.delenv("RUNPOD_API_KEY", raising=False)
+    monkeypatch.delenv("RUNPOD_ENDPOINT_ID", raising=False)
+
+
 @pytest.fixture(scope="session")
 def skills_catalogue():
     return json.loads((FIXTURES / "skills_fixture.json").read_text())["skills"]

@@ -16,11 +16,18 @@ Rehan passes his RoleMatch class in:
 from __future__ import annotations
 
 import dataclasses
+import logging
+import time
 from typing import Any, Callable
 
 from . import scoring
 from .matcher import Matcher
 from .normalizer import SkillNormalizer
+from .runpod_client import RunPodEmbeddingProvider, runpod_configured
+
+logger = logging.getLogger(__name__)
+
+DEGRADED_CAVEAT = "Semantic matching unavailable; exact skill matching only (degraded)"
 
 
 def _to_dict(obj: Any) -> dict:
@@ -85,20 +92,59 @@ class HussainMatchingProvider:
         result_model: Callable[..., Any] | None = None,
         skills_catalogue: list[dict] | None = None,
         similarity: scoring.SimilarityFn | None = None,
+        not_equivalent: list[list[str]] | None = None,
+        retry_after_seconds: float = 60.0,
     ):
+        """`similarity` wins if given. Otherwise semantic matching uses RunPod when
+        RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are set. If they are missing or the
+        call fails, matching continues with exact skills only and every match gets
+        DEGRADED_CAVEAT. After a failure RunPod is not tried again for
+        `retry_after_seconds`, so a down endpoint does not slow every request."""
         self.result_model = result_model
         self.skills_catalogue = skills_catalogue
         self.similarity = similarity
+        self.not_equivalent = not_equivalent or []
+        self.retry_after_seconds = retry_after_seconds
+        self._providers: dict[tuple, RunPodEmbeddingProvider] = {}
+        self._down_until = 0.0
+
+    def _semantic_similarity(self, catalogue: list[dict]) -> tuple[scoring.SimilarityFn | None, bool]:
+        """Return (similarity function or None, degraded flag)."""
+        if self.similarity is not None:
+            return self.similarity, False
+        if not runpod_configured() or time.monotonic() < self._down_until:
+            return None, True
+
+        key = tuple((s["skill_id"], s["name"], tuple(s.get("aliases", []))) for s in catalogue)
+        provider = self._providers.get(key)
+        if provider is None:
+            ids = {s["skill_id"] for s in catalogue}
+            pairs = [p for p in self.not_equivalent if len(p) == 2 and set(p) <= ids]
+            provider = RunPodEmbeddingProvider.from_skills(catalogue, not_equivalent=pairs)
+        try:
+            provider.precompute()  # the only network call; later lookups are local
+        except Exception as exc:  # any failure degrades to exact matching
+            self._down_until = time.monotonic() + self.retry_after_seconds
+            self._providers.pop(key, None)
+            logger.warning("Semantic matching unavailable (%s): %s", type(exc).__name__, exc)
+            return None, True
+        self._providers[key] = provider
+        return provider, False
 
     def match(self, profile: Any, roles: list[Any], scenario: Any, signals: Any) -> list[Any]:
         role_dicts = [role_to_matcher_format(r) for r in roles]
-        normalizer = SkillNormalizer(catalogue_from_roles(roles, self.skills_catalogue))
+        catalogue = catalogue_from_roles(roles, self.skills_catalogue)
+        normalizer = SkillNormalizer(catalogue)
+        similarity, degraded = self._semantic_similarity(catalogue)
         signal_dicts = [_to_dict(s) for s in (signals or [])]
         # No limit here: Rehan's MatchingService truncates, and match_role() needs every role.
-        data = Matcher(normalizer, self.similarity).match_roles(
+        data = Matcher(normalizer, similarity).match_roles(
             _to_dict(profile), role_dicts, scenario, signal_dicts, limit=len(role_dicts)
         )
         matches = data["matches"]
+        if degraded:
+            for m in matches:
+                m["caveats"].append(DEGRADED_CAVEAT)
         if self.result_model is not None:
             return [self.result_model(**m) for m in matches]
         return matches

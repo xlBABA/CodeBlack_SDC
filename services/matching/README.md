@@ -11,6 +11,7 @@ dependencies (pytest for tests). Output follows `contracts/API_CONTRACT.md`.
 | `scenarios.py` | Moderate and fast AI adoption scenarios; turns dated trend signals into bounded skill weight changes. |
 | `matcher.py` | `Matcher.match_roles(...)` returns the `/careers/match` response data. `match(...)` is the `MatchingProvider` adapter. |
 | `embeddings.py` | `EmbeddingProvider`: skill name and alias embeddings (all-MiniLM-L6-v2) for the `similarity` hook. Optional; needs `sentence-transformers`. |
+| `runpod_client.py` | `RunPodEmbeddingProvider`: the same provider, with embeddings computed by the RunPod endpoint in `runpod-worker/`. |
 | `calibration_pairs.json`, `calibrate_threshold.py` | 52 labelled skill-name pairs (20 synonyms, 20 unrelated, 12 hard negatives) and a script that scores them with the real model and reports how candidate thresholds perform. |
 | `fixtures/` | 4 FIXTURE roles and a skills catalogue. Illustrative only, not verified data. Replace with Jawad's `data/roles.json` and `data/skills.json`. |
 | `backend_adapter.py` | Plugs this matcher into Rehan's FastAPI backend (see below). |
@@ -86,6 +87,18 @@ Needs `pip install sentence-transformers` (model `all-MiniLM-L6-v2`). Without it
 **How similarity is computed.** The name and each alias of a skill are embedded separately (one batch on first use, cached in memory and in the JSON file; a skill is re-embedded only when its model, name or aliases change). The similarity of two skills is the highest cosine over all their text pairs. Two skills that share an identical alias would score 1.0; the normalizer already rejects that in a catalogue.
 
 **`not_equivalent` (optional catalogue key).** A list of `[skill_id, skill_id]` pairs that are close but different (the fixture has Customer Service/Customer Research, Sales/Marketing, Java/JavaScript). The provider returns 0 for them in both orders. Unknown ids or malformed entries raise `ValueError`.
+
+### RunPod (hosted embeddings)
+Deploy `runpod-worker/` (see its README), then set `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID` (names in `.env.example`; never commit values).
+`RunPodEmbeddingProvider` is an `EmbeddingProvider` whose model calls `POST https://api.runpod.ai/v2/<endpoint>/runsync`
+(timeout 60 s, one retry on timeout, network error, HTTP 429/5xx or job still queued; no retry on bad responses or auth errors).
+The key is only sent in the `Authorization` header and is never logged.
+
+`HussainMatchingProvider` (backend adapter) uses it automatically when both variables are set. If they are missing, or the call
+fails, matching continues with exact skills only and every match gets the caveat
+`Semantic matching unavailable; exact skill matching only (degraded)`. After a failure it does not try RunPod again for 60 s
+(`retry_after_seconds`), so a down endpoint does not slow every request. An explicit `similarity=` argument overrides all of this.
+Pass `not_equivalent=[[id, id], ...]` to the adapter to apply the exclusion list.
 
 ### Threshold calibration
 Method: `python -m services.matching.calibrate_threshold` scores every pair in `calibration_pairs.json` (fictional, skill names only) with the real model. Pairs are labelled `synonyms` (should match), `unrelated` (clearly different) or `hard_negatives` (close but different skills that must not match). It prints each score and how candidate thresholds perform. It only reports; it never edits `scoring.py`. It scores raw similarity, before `not_equivalent` is applied.

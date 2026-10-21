@@ -1,0 +1,6 @@
+# Versions resolved together with `pip install --dry-run` on 2026-10-21 (Python 3.13, Windows).
+# The Docker image uses Python 3.11 on Linux; torch there is the CUDA build from PyPI.
+runpod==1.12.0
+sentence-transformers==6.2.0
+torch==2.14.1
+transformers==5.20.2
