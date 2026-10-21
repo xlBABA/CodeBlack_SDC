@@ -32,11 +32,16 @@
       { "skill_id": "sql", "importance": "medium" },
       { "skill_id": "excel", "importance": "high" },
       { "skill_id": "data_visualization_tools", "importance": "medium" },
-      { "skill_id": "attention_to_detail", "importance": "high" }
+      { "skill_id": "attention_to_detail", "importance": "high" },
+      { "skill_id": "financial_analysis_software", "importance": "high" }
     ],
-    "optional_skills": [],
+    "optional_skills": [
+      { "skill_id": "analytical_scientific_software", "importance": "medium" },
+      { "skill_id": "vba", "importance": "low" }
+    ],
     "prerequisites": [],
-    "notes": "O*NET's Basic/Cross-Functional Skills section for this occupation is still being collected at the source; only verified Software Skills and Work Styles are used here (see docs/source-register.md)."
+    "skills_coverage": "limited",
+    "notes": "O*NET's Knowledge, Abilities, and Basic/Cross-Functional Skills sections are NOT yet populated for this occupation (source page states data collection is 'currently underway') — verified as of retrieval 2026-10-21. Only the Technology/Software Skills and Work Styles sections are populated at the source, so only those are used here. See docs/source-register.md."
   },
   {
     "role_id": "mechanical_engineer",

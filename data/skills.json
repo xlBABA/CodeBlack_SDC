@@ -64,5 +64,23 @@
     "name": "MATLAB",
     "category": "tool",
     "source_ids": ["onet_17_2141_00"]
+  },
+  {
+    "skill_id": "financial_analysis_software",
+    "name": "Financial Analysis Software (e.g. Oracle Hyperion, Moody's RiskCalc)",
+    "category": "tool",
+    "source_ids": ["onet_13_2051_00"]
+  },
+  {
+    "skill_id": "analytical_scientific_software",
+    "name": "Analytical/Statistical Software (SPSS / SAS / Stata)",
+    "category": "tool",
+    "source_ids": ["onet_13_2051_00"]
+  },
+  {
+    "skill_id": "vba",
+    "name": "Visual Basic for Applications (VBA)",
+    "category": "tool",
+    "source_ids": ["onet_13_2051_00"]
   }
 ]

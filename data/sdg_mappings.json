@@ -76,6 +76,21 @@
       "skill_id": "matlab",
       "sdg_id": 9,
       "reason": "MATLAB is used for engineering modeling and simulation that underpins infrastructure and industrial design (SDG 9)."
+    },
+    {
+      "skill_id": "financial_analysis_software",
+      "sdg_id": 8,
+      "reason": "An in-demand finance-sector tool skill directly tied to employability in investment/analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "analytical_scientific_software",
+      "sdg_id": 8,
+      "reason": "A statistical-analysis tool skill tied to employability in quantitative analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "vba",
+      "sdg_id": 8,
+      "reason": "A workplace automation/scripting skill tied to employability in finance and analyst roles (SDG target 8.6)."
     }
   ]
 }
