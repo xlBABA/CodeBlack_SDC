@@ -1,6 +1,12 @@
 # AI usage — Jawad (data, catalog, trends, roadmaps, SDGs)
 
-Disclosure for the SDC Hackathon 2026 submission. Tool: **Claude Code** (Anthropic), run from my own prompts during the hacking window (2026-10-21 to 2026-10-22). Models: Claude Sonnet 5 at first, then Claude Opus 5.5 (the `Co-Authored-By` lines on each commit show which). I gave the instructions and rules, approved each step before files were written, and ran the tests myself with the commands Claude gave me.
+Disclosure for the SDC Hackathon 2026 submission. Tool: **Claude Code** (Anthropic), run from my own prompts during the hacking window (2026-10-21 to 2026-10-22). Models: Claude Sonnet 5 at first, then Claude Opus 5.5 (the `Co-Authored-By` lines on each commit show which). I gave the instructions and rules, and approved each step before files were written. Claude Code ran the tests during development. I re-ran all suites myself with the single command below and saw them pass:
+
+```
+C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.catalog.run_all_tests
+```
+
+(`services/catalog/run_all_tests.py` runs all 8 suites in order and prints one PASS/FAIL summary.)
 
 ## What Claude helped me build
 
@@ -13,11 +19,21 @@ Disclosure for the SDC Hackathon 2026 submission. Tool: **Claude Code** (Anthrop
 | e21eb20 | `get_roles()`, `get_role()`, `get_sdg_impact()` | `services/catalog/catalog.py`, `services/sdg/**` |
 | 1f3611d, 675d938, eecd84c | Learning resources and `get_roadmap()`, with hours labelled provider-stated or team estimate | `data/resources.json`, `services/roadmaps/roadmap.py` |
 | 9e782c1 | Portfolio projects and `get_projects()` | `data/projects.json`, `services/roadmaps/projects.py` |
-| this commit | Link checker and report, provenance test, scenario assumptions, this file | `services/catalog/check_links.py`, `docs/link-check-report.md`, `services/catalog/tests/test_provenance.py`, `services/catalog/tests/test_check_links.py`, `docs/jawad-ai-usage.md` |
+| d8152b4 | Link checker and report, provenance test, scenario assumptions, this file | `services/catalog/check_links.py`, `docs/link-check-report.md`, `services/catalog/tests/test_provenance.py`, `services/catalog/tests/test_check_links.py`, `docs/jawad-ai-usage.md` |
+| this commit | One command that runs all test suites; corrections to this file | `services/catalog/run_all_tests.py`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
 Claude also wrote the tests in each `tests/` folder and ran them. It fetched public pages (O*NET, GitHub API, Microsoft Learn's catalog API, UCI, World Bank, SAS, MIT OCW, MathWorks) to verify sources, and recorded what it could not verify instead of guessing.
+
+## Other Claude use
+I also used a separate Claude chat (claude.ai, project "SDC Hackathon") for:
+- planning
+- reviewing pushed code on GitHub
+- web searches for course leads
+- drafting the prompts I gave Claude Code
+
+It did not write any files in the repo.
 
 ## Decisions I made (not Claude)
 - Picked the 4 starter roles (Data Analyst, Financial Analyst, Mechanical Engineer, Public Health Analyst).
