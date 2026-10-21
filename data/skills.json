@@ -1,0 +1,68 @@
+[
+  {
+    "skill_id": "critical_thinking",
+    "name": "Critical Thinking",
+    "category": "cognitive",
+    "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "mathematics",
+    "name": "Mathematics",
+    "category": "cognitive",
+    "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "complex_problem_solving",
+    "name": "Complex Problem Solving",
+    "category": "cognitive",
+    "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "systems_analysis",
+    "name": "Systems Analysis",
+    "category": "cognitive",
+    "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "attention_to_detail",
+    "name": "Attention to Detail",
+    "category": "cognitive",
+    "source_ids": ["onet_13_2051_00"]
+  },
+  {
+    "skill_id": "excel",
+    "name": "Microsoft Excel",
+    "category": "tool",
+    "source_ids": ["onet_15_2051_01", "onet_13_2051_00", "onet_17_2141_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "sql",
+    "name": "SQL",
+    "category": "tool",
+    "source_ids": ["onet_13_2051_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "python",
+    "name": "Python",
+    "category": "tool",
+    "source_ids": ["onet_17_2141_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "data_visualization_tools",
+    "name": "Data Visualization Tools (Power BI / Tableau)",
+    "category": "tool",
+    "source_ids": ["onet_15_2051_01", "onet_13_2051_00", "onet_19_1041_00"]
+  },
+  {
+    "skill_id": "cad_software",
+    "name": "CAD Software (SolidWorks / AutoCAD / Revit)",
+    "category": "tool",
+    "source_ids": ["onet_17_2141_00"]
+  },
+  {
+    "skill_id": "matlab",
+    "name": "MATLAB",
+    "category": "tool",
+    "source_ids": ["onet_17_2141_00"]
+  }
+]

@@ -1,0 +1,84 @@
+[
+  {
+    "role_id": "data_analyst",
+    "title": "Data Analyst",
+    "industry_category": "Technology & AI",
+    "onet_soc_code": "15-2051.01",
+    "onet_title": "Business Intelligence Analysts",
+    "source_id": "onet_15_2051_01",
+    "verified": true,
+    "core_skills": [
+      { "skill_id": "critical_thinking", "importance": "high" },
+      { "skill_id": "mathematics", "importance": "high" },
+      { "skill_id": "complex_problem_solving", "importance": "high" },
+      { "skill_id": "systems_analysis", "importance": "medium" },
+      { "skill_id": "data_visualization_tools", "importance": "high" }
+    ],
+    "optional_skills": [
+      { "skill_id": "excel", "importance": "medium" }
+    ],
+    "prerequisites": [],
+    "notes": "O*NET has no exact 'Data Analyst' code; closest verified match is Business Intelligence Analysts (15-2051.01)."
+  },
+  {
+    "role_id": "financial_analyst",
+    "title": "Financial Analyst",
+    "industry_category": "Business & Finance",
+    "onet_soc_code": "13-2051.00",
+    "onet_title": "Financial and Investment Analysts",
+    "source_id": "onet_13_2051_00",
+    "verified": true,
+    "core_skills": [
+      { "skill_id": "sql", "importance": "medium" },
+      { "skill_id": "excel", "importance": "high" },
+      { "skill_id": "data_visualization_tools", "importance": "medium" },
+      { "skill_id": "attention_to_detail", "importance": "high" }
+    ],
+    "optional_skills": [],
+    "prerequisites": [],
+    "notes": "O*NET's Basic/Cross-Functional Skills section for this occupation is still being collected at the source; only verified Software Skills and Work Styles are used here (see docs/source-register.md)."
+  },
+  {
+    "role_id": "mechanical_engineer",
+    "title": "Mechanical Engineer",
+    "industry_category": "Engineering & Manufacturing",
+    "onet_soc_code": "17-2141.00",
+    "onet_title": "Mechanical Engineers",
+    "source_id": "onet_17_2141_00",
+    "verified": true,
+    "core_skills": [
+      { "skill_id": "mathematics", "importance": "high" },
+      { "skill_id": "critical_thinking", "importance": "high" },
+      { "skill_id": "complex_problem_solving", "importance": "high" },
+      { "skill_id": "cad_software", "importance": "high" },
+      { "skill_id": "matlab", "importance": "medium" }
+    ],
+    "optional_skills": [
+      { "skill_id": "python", "importance": "low" },
+      { "skill_id": "excel", "importance": "medium" }
+    ],
+    "prerequisites": [],
+    "notes": ""
+  },
+  {
+    "role_id": "public_health_analyst",
+    "title": "Public Health Analyst",
+    "industry_category": "Healthcare & Sustainability",
+    "onet_soc_code": "19-1041.00",
+    "onet_title": "Epidemiologists",
+    "source_id": "onet_19_1041_00",
+    "verified": true,
+    "core_skills": [
+      { "skill_id": "critical_thinking", "importance": "high" },
+      { "skill_id": "mathematics", "importance": "high" },
+      { "skill_id": "sql", "importance": "medium" },
+      { "skill_id": "python", "importance": "medium" }
+    ],
+    "optional_skills": [
+      { "skill_id": "excel", "importance": "medium" },
+      { "skill_id": "data_visualization_tools", "importance": "low" }
+    ],
+    "prerequisites": [],
+    "notes": "O*NET has no exact 'Public Health Analyst' code; closest verified match is Epidemiologists (19-1041.00), which analyzes public health data."
+  }
+]
