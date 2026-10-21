@@ -13,3 +13,31 @@ One real, public, dated source per row. `source_id` is referenced from `data/rol
 - All four sources are **occupation/skill-requirement descriptions**, not live job-posting or vacancy-demand data. They answer "what skills does this job typically need," not "how many jobs are open right now."
 - "observed_at" = the date O*NET's own page says it was last updated. "retrieved_at" = the date we looked at the page (today).
 - A real **updatable trend feed** (job-posting counts, research signals, etc.) is a separate, later task — not covered by this table.
+- `data_mode` for this catalog is **`cached`**, not `live`: it's a one-time retrieved snapshot (2026-10-21), not an automatically-refreshing feed. Contract enum (`contracts/API_CONTRACT.md`): `live | cached | fixture`.
+
+## Importance score methodology (the 1-5 numbers in `data/roles.json`)
+
+`required_skills[].importance` is a 1-5 number (Hussain's matcher scale). Two different kinds of skill get it two different ways:
+
+**1. Cognitive skills (critical_thinking, mathematics, complex_problem_solving, systems_analysis, attention_to_detail).**
+O*NET publishes a real 0-100 "Importance" score per skill/work-style, per occupation (its Details report, not the Summary report). We bucket that score: **≥70 → 5, 60-69 → 4, 50-59 → 3, 40-49 → 2, <40 → 1.** Where our roles.json number matches the bucket, it's **derived**. Where it doesn't, it's a **team estimate** with a stated reason.
+
+| role | skill | O*NET importance (0-100) | bucket value | roles.json value | basis |
+|---|---|---|---|---|---|
+| data_analyst | critical_thinking | 72 | 5 | 5 | derived |
+| data_analyst | mathematics | 63 | 4 | 5 | **team estimate** — we weight quantitative ability higher for a data role than O*NET's general score |
+| data_analyst | complex_problem_solving | 60 | 4 | 4 | derived |
+| data_analyst | systems_analysis | 53 | 3 | 3 | derived |
+| mechanical_engineer | critical_thinking | 72 | 5 | 5 | derived |
+| mechanical_engineer | mathematics | 69 | 4 | 5 | **team estimate** — core to engineering calculation work, weighted above O*NET's score |
+| mechanical_engineer | complex_problem_solving | 69 | 4 | 5 | **team estimate** — central to engineering design, weighted above O*NET's score |
+| public_health_analyst | critical_thinking | 81 | 5 | 5 | derived |
+| public_health_analyst | mathematics | 69 | 4 | 5 | **team estimate** — same reasoning as above |
+| financial_analyst | attention_to_detail | 100 (Work Style importance) | 5 | 5 | derived |
+
+Source for each number: the occupation's own O*NET Details page (`https://www.onetonline.org/link/details/<code>`), retrieved 2026-10-21.
+
+**2. Technology/tool skills (excel, sql, python, data_visualization, cad_software, matlab, financial_analysis_software, analytical_scientific_software, vba).**
+O*NET does **not** publish a 0-100 importance number for individual technology/software skills — only whether a tool appears in the occupation's Technology Skills list, and sometimes a "Hot Technology" / "In Demand" badge. Our retrieval (an AI-summarized read of the rendered page) returned that badge inconsistently across repeated fetches for the same tool, so **every tool-skill importance number in `data/roles.json` is a team estimate**, informed by (a) whether the tool is confirmed present at all for that occupation [verified — see `data/skills.json` `source_ids`], and (b) the team's judgment of how central that tool is to the role. None should be read as an O*NET-derived score.
+
+**3. The `required: true/false` flag itself.** O*NET has no "required vs optional" field — this split is our own product design choice (to keep each role's core list short). It is a **team estimate** for every skill in every role.
