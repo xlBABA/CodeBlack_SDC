@@ -1,0 +1,23 @@
+{
+  "_note": "FIXTURE for matcher tests only. Replace with Jawad's sourced data/skills.json.",
+  "data_mode": "fixture",
+  "skills": [
+    {"skill_id": "sql", "name": "SQL", "aliases": ["Structured Query Language"]},
+    {"skill_id": "python", "name": "Python", "aliases": ["Python3", "Python 3"]},
+    {"skill_id": "data_visualization", "name": "Data Visualization", "aliases": ["Data Visualisation", "Data Viz", "Dashboards"]},
+    {"skill_id": "statistics", "name": "Statistics", "aliases": ["Statistical Analysis", "Stats"]},
+    {"skill_id": "excel", "name": "Excel", "aliases": ["Microsoft Excel", "MS Excel", "Spreadsheets"]},
+    {"skill_id": "communication", "name": "Communication", "aliases": ["Communication Skills"]},
+    {"skill_id": "javascript", "name": "JavaScript", "aliases": ["JS", "ECMAScript"]},
+    {"skill_id": "git", "name": "Git", "aliases": ["Version Control"]},
+    {"skill_id": "react", "name": "React", "aliases": ["React.js", "ReactJS"]},
+    {"skill_id": "software_testing", "name": "Software Testing", "aliases": ["Unit Testing"]},
+    {"skill_id": "requirements_analysis", "name": "Requirements Analysis", "aliases": ["Requirements Gathering", "Business Requirements"]},
+    {"skill_id": "stakeholder_management", "name": "Stakeholder Management", "aliases": []},
+    {"skill_id": "sustainability_reporting", "name": "Sustainability Reporting", "aliases": ["ESG Reporting"]},
+    {"skill_id": "environmental_science", "name": "Environmental Science", "aliases": []},
+    {"skill_id": "problem_solving", "name": "Problem Solving", "aliases": ["Problem-Solving"]},
+    {"skill_id": "teamwork", "name": "Teamwork", "aliases": ["Collaboration"]},
+    {"skill_id": "critical_thinking", "name": "Critical Thinking", "aliases": []}
+  ]
+}
