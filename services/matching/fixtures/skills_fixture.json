@@ -1,6 +1,7 @@
 {
   "_note": "FIXTURE for matcher tests only. Replace with Jawad's sourced data/skills.json.",
   "data_mode": "fixture",
+  "_not_equivalent_note": "Optional. Skill_id pairs that are close but different; the embedding similarity returns 0 for them.",
   "skills": [
     {"skill_id": "sql", "name": "SQL", "aliases": ["Structured Query Language"]},
     {"skill_id": "python", "name": "Python", "aliases": ["Python3", "Python 3"]},
@@ -18,6 +19,16 @@
     {"skill_id": "environmental_science", "name": "Environmental Science", "aliases": []},
     {"skill_id": "problem_solving", "name": "Problem Solving", "aliases": ["Problem-Solving"]},
     {"skill_id": "teamwork", "name": "Teamwork", "aliases": ["Collaboration"]},
-    {"skill_id": "critical_thinking", "name": "Critical Thinking", "aliases": []}
+    {"skill_id": "critical_thinking", "name": "Critical Thinking", "aliases": []},
+    {"skill_id": "java", "name": "Java", "aliases": []},
+    {"skill_id": "customer_service", "name": "Customer Service", "aliases": ["Client Support"]},
+    {"skill_id": "customer_research", "name": "Customer Research", "aliases": []},
+    {"skill_id": "sales", "name": "Sales", "aliases": []},
+    {"skill_id": "marketing", "name": "Marketing", "aliases": []}
+  ],
+  "not_equivalent": [
+    ["customer_service", "customer_research"],
+    ["sales", "marketing"],
+    ["java", "javascript"]
   ]
 }

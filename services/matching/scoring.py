@@ -20,7 +20,11 @@ PROFICIENCY_FACTOR = {"beginner": 0.60, "intermediate": 0.85, "advanced": 1.00, 
 OPTIONAL_SKILL_FACTOR = 0.5  # optional skills count half as much as required ones
 
 # Semantic similarity (embedding model) gives partial credit only.
-SIMILARITY_THRESHOLD = 0.75
+# 0.60 chosen from calibration_pairs.json (40+12 labelled pairs, all-MiniLM-L6-v2): it keeps
+# 12/20 synonyms, rejects 20/20 unrelated and 10/12 hard negatives. Known close-but-different
+# pairs that still pass are blocked via the catalogue "not_equivalent" list. See README.
+# Re-run: python -m services.matching.calibrate_threshold
+SIMILARITY_THRESHOLD = 0.60
 RELATED_CREDIT = 0.5
 
 # Experience: relevant projects and a relevant experience summary.
