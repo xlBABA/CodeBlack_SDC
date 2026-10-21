@@ -39,9 +39,12 @@ def test_each_resource_has_provenance_and_honest_hours():
         assert r["price"]["status"] in {"free_stated", "no_charge_observed", "not_stated", "paid"}
         if r["estimated_hours"] is None:
             assert r["hours_source"].startswith("Not stated"), r["resource_id"]
+            assert r["team_estimate_hours"] > 0, r["resource_id"]
+            assert r["team_estimate_basis"].startswith("Team estimate:"), r["resource_id"]
         else:
             assert r["estimated_hours"] > 0
             assert r["hours_source"].startswith("Provider-stated"), r["resource_id"]
+            assert "team_estimate_hours" not in r, r["resource_id"]  # never mix the two
 
 
 # --- get_roadmap -----------------------------------------------------------
@@ -49,7 +52,7 @@ def test_each_resource_has_provenance_and_honest_hours():
 def test_shape_matches_contract():
     plan = get_roadmap(PROFILE, "data_analyst", ["sql"])
     assert set(plan) == {"steps", "total_estimated_hours", "warnings"}
-    assert set(plan["steps"][0]) == {"skill_id", "resource_id", "estimated_hours", "reason"}
+    assert set(plan["steps"][0]) == {"skill_id", "resource_id", "estimated_hours", "reason", "hours_basis"}
 
 
 def test_data_analyst_orders_required_by_importance_and_flags_no_resource():
@@ -65,11 +68,57 @@ def test_accepts_skillref_dicts_from_rolematch():
     assert [s["skill_id"] for s in plan["steps"]] == ["sql"]
 
 
-def test_unknown_hours_are_excluded_from_total_and_warned():
+def test_team_estimate_used_when_provider_states_none_and_labelled():
     plan = get_roadmap(PROFILE, "mechanical_engineer", ["matlab", "python"])
-    assert {s["skill_id"]: s["estimated_hours"] for s in plan["steps"]} == {"matlab": None, "python": 3.2}
-    assert plan["total_estimated_hours"] == 3.2
-    assert any("matlab" in w and "no duration" in w for w in plan["warnings"])
+    steps = {s["skill_id"]: s for s in plan["steps"]}
+    assert (steps["matlab"]["estimated_hours"], steps["matlab"]["hours_basis"]) == (3.0, "team_estimate")
+    assert (steps["python"]["estimated_hours"], steps["python"]["hours_basis"]) == (3.2, "provider_stated")
+    assert plan["total_estimated_hours"] == 6.2  # both kinds included
+    team_warnings = [w for w in plan["warnings"] if "team estimates" in w]
+    assert len(team_warnings) == 1 and "matlab" in team_warnings[0] and "python" not in team_warnings[0]
+
+
+def test_no_team_estimate_warning_when_all_hours_are_provider_stated():
+    plan = get_roadmap(PROFILE, "data_analyst", ["sql", "data_visualization"])
+    assert all(s["hours_basis"] == "provider_stated" for s in plan["steps"])
+    assert not any("team estimates" in w for w in plan["warnings"])
+
+
+def _every_full_plan():
+    """One plan per role with ALL of that role's skills missing (widest case)."""
+    roles = json.loads((DATA / "roles.json").read_text(encoding="utf-8"))
+    for role in roles:
+        yield get_roadmap(PROFILE, role["role_id"], [s["skill_id"] for s in role["required_skills"]])
+
+
+def test_every_step_has_numeric_hours_ge_0():
+    for plan in _every_full_plan():
+        assert plan["total_estimated_hours"] >= 0
+        for s in plan["steps"]:
+            assert isinstance(s["estimated_hours"], float) and s["estimated_hours"] >= 0, s
+            assert s["hours_basis"] in {"provider_stated", "team_estimate"}
+
+
+def test_output_validates_against_rehans_roadmap_schema():
+    # Field-for-field copy of RoadmapStep / RoadmapPayload from
+    # origin/feature/rehan-backend-foundation:backend/app/schemas/roadmaps.py (commit 66614f2).
+    # Re-copy if that file changes.
+    from pydantic import BaseModel, Field
+
+    class RoadmapStep(BaseModel):
+        skill_id: str
+        resource_id: str
+        estimated_hours: float = Field(ge=0)
+        reason: str
+
+    class RoadmapPayload(BaseModel):
+        steps: list[RoadmapStep]
+        total_estimated_hours: float = Field(ge=0)
+
+    for plan in _every_full_plan():
+        validated = RoadmapPayload.model_validate(plan)  # raises on any mismatch
+        assert len(validated.steps) == len(plan["steps"])
+        assert validated.total_estimated_hours == plan["total_estimated_hours"]
 
 
 def test_unmet_prerequisite_is_warned_unless_student_has_it():

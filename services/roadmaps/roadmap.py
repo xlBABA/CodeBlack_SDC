@@ -3,7 +3,9 @@
 get_roadmap returns the POST /roadmaps/generate data shape from
 contracts/API_CONTRACT.md:
 {steps: [{skill_id, resource_id, estimated_hours, reason}], total_estimated_hours}
-plus `warnings` (for the backend to put in the response envelope).
+plus `warnings` (for the backend to put in the response envelope) and, per
+step, `hours_basis`: "provider_stated" or "team_estimate". estimated_hours is
+always a number >= 0 (Rehan's RoadmapStep requires it).
 
 Order: a skill that another step's resource lists as a prerequisite comes
 first; otherwise required before optional, then higher importance first.
@@ -71,31 +73,35 @@ def get_roadmap(profile: dict, role_id: str, missing_skills: list) -> dict | Non
         visit(sid)
 
     steps = []
-    unknown_hours = []
+    team_estimated = []
     for sid in ordered:
         res = resource_for[sid]
         rs = role_skill.get(sid)
         kind = ("required" if rs.get("required", True) else "optional") if rs else "extra"
         importance = f", importance {rs['importance']}/5" if rs else ""
+        if res["estimated_hours"] is not None:
+            hours, basis = res["estimated_hours"], "provider_stated"
+        else:
+            hours, basis = res["team_estimate_hours"], "team_estimate"
+            team_estimated.append(f"{sid} ({hours} h)")
         steps.append({
             "skill_id": sid,
             "resource_id": res["resource_id"],
-            "estimated_hours": res["estimated_hours"],
+            "estimated_hours": float(hours),
             "reason": (
                 f"Missing {kind} skill for {role['role_title']}{importance}. "
                 f"Resource: {res['title']} ({res['provider']})."
             ),
+            "hours_basis": basis,
         })
-        if res["estimated_hours"] is None:
-            unknown_hours.append(sid)
-    if unknown_hours:
+    if team_estimated:
         warnings.append(
-            "The provider states no duration for: " + ", ".join(unknown_hours)
-            + "; total_estimated_hours excludes them."
+            "Hours for these steps are team estimates, not provider-stated: "
+            + ", ".join(team_estimated) + ". They are included in total_estimated_hours."
         )
 
     return {
         "steps": steps,
-        "total_estimated_hours": round(sum(s["estimated_hours"] or 0 for s in steps), 2),
+        "total_estimated_hours": round(sum(s["estimated_hours"] for s in steps), 2),
         "warnings": warnings,
     }

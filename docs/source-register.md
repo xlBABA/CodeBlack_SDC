@@ -42,3 +42,23 @@ Source for each number: the occupation's own O*NET Details page (`https://www.on
 O*NET does **not** publish a 0-100 importance number for individual technology/software skills — only whether a tool appears in the occupation's Technology Skills list, and sometimes a "Hot Technology" / "In Demand" badge. Our retrieval (an AI-summarized read of the rendered page) returned that badge inconsistently across repeated fetches for the same tool, so **every tool-skill importance number in `data/roles.json` is a team estimate**, informed by (a) whether the tool is confirmed present at all for that occupation [verified — see `data/skills.json` `source_ids`], and (b) the team's judgment of how central that tool is to the role. None should be read as an O*NET-derived score.
 
 **3. The `required: true/false` flag itself.** O*NET has no "required vs optional" field — this split is our own product design choice (to keep each role's core list short). It is a **team estimate** for every skill in every role.
+
+## Learning-resource hours (`data/resources.json` and roadmap steps)
+
+Every roadmap step has a numeric `estimated_hours` (Rehan's `RoadmapStep` requires a number >= 0) and an `hours_basis` label saying where the number came from:
+
+| `hours_basis` | meaning | where it comes from |
+|---|---|---|
+| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths, from `duration_in_minutes` in Microsoft Learn's official catalog API. |
+| `team_estimate` | The provider states **no** duration, so the team estimated one. **Not** a provider figure. | `resources.json` → `team_estimate_hours`, with `team_estimate_basis` showing the arithmetic from facts on the page. |
+
+Current team estimates (checked 2026-10-22):
+
+| resource | team estimate | basis |
+|---|---|---|
+| Microsoft Learn — Getting started with VBA in Office | 1.5 h | 5,106-word article (page metadata) at ~200 words/min ≈ 0.5 h + ~1 h trying the examples |
+| MathWorks — MATLAB Onramp | 3 h | 35 short lessons in 14 modules (counted on the page) × ~5 min |
+| MIT OCW — 18.05 Probability and Statistics | 112 h | Full one-semester course with weekly problem sets; assumed ~8 h/week × ~14 weeks |
+| SAS — SAS Programming 1: Essentials | 21 h | SAS says "a complete how-to in two days" and lists 21 h for the live-class format; assumed similar for self-paced |
+
+Rules: a resource has either `estimated_hours` (provider) or `team_estimate_hours` (team), never both. `total_estimated_hours` includes both kinds, and the roadmap's warnings name every step that uses a team estimate.

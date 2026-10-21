@@ -1,5 +1,5 @@
 {
-  "_note": "Every URL below was opened on checked_at and its title/content matched the skill. estimated_hours is only ever the provider's own stated duration; null means the provider states none (never estimated by us). price.status: free_stated = the provider's page says free; no_charge_observed = no price shown and the page opened without sign-in or payment; not_stated = no price information found.",
+  "_note": "Every URL below was opened on checked_at and its title/content matched the skill. estimated_hours is only ever the provider's own stated duration; null means the provider states none. In that case team_estimate_hours is our own labelled estimate, with team_estimate_basis showing how it was worked out. price.status: free_stated = the provider's page says free; no_charge_observed = no price shown and the page opened without sign-in or payment; not_stated = no price information found.",
   "data_mode": "cached",
   "resources": [
     {
@@ -51,6 +51,8 @@
       "price": {"status": "no_charge_observed", "note": "Public documentation; opened without sign-in or payment."},
       "estimated_hours": null,
       "hours_source": "Not stated by provider (the page has a word count, not a duration).",
+      "team_estimate_hours": 1.5,
+      "team_estimate_basis": "Team estimate: 5,106-word article (page metadata word_count) read at ~200 words/min = ~0.5 h, plus ~1 h trying its macro examples.",
       "prerequisites": {"text": "Page says: \"This article is for experienced Office users who want to learn about VBA\".", "skill_ids": ["excel"]},
       "checked_at": "2026-10-22"
     },
@@ -64,6 +66,8 @@
       "price": {"status": "not_stated", "note": "The page did not state a price in the text we could read."},
       "estimated_hours": null,
       "hours_source": "Not stated in the page text we could read (format: self-paced).",
+      "team_estimate_hours": 3,
+      "team_estimate_basis": "Team estimate: 35 short interactive lessons in 14 modules (counted on the course page) at ~5 min each = ~3 h.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
       "checked_at": "2026-10-22"
     },
@@ -77,6 +81,8 @@
       "price": {"status": "free_stated", "note": "Page links the same materials on MIT Open Learning Library, \"which is free to use\"."},
       "estimated_hours": null,
       "hours_source": "Not stated by provider.",
+      "team_estimate_hours": 112,
+      "team_estimate_basis": "Team estimate: a full one-semester undergraduate course with problem sets due most weeks (syllabus); assumed ~8 h/week for ~14 weeks = ~112 h.",
       "prerequisites": {"text": "None stated on the course page.", "skill_ids": []},
       "checked_at": "2026-10-22"
     },
@@ -90,6 +96,8 @@
       "price": {"status": "free_stated", "note": "Labelled \"FREE COURSE\" on https://www.sas.com/en_us/training/offers/free-training.html."},
       "estimated_hours": null,
       "hours_source": "Not stated for the free self-paced version. The course page shows \"Duration: 21 hours\" only under its Live Class Schedule, a different format, so it is not used.",
+      "team_estimate_hours": 21,
+      "team_estimate_basis": "Team estimate: SAS calls it \"a complete how-to in two days\" and lists 21 hours for the live-class format of the same course; we assume the self-paced version takes about the same.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
       "checked_at": "2026-10-22"
     }
