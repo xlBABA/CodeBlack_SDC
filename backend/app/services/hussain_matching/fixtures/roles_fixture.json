@@ -1,0 +1,85 @@
+{
+  "_note": "FIXTURE roles for matcher tests only. Skills and importances are illustrative, NOT verified occupational data. Replace with Jawad's sourced data/roles.json.",
+  "data_mode": "fixture",
+  "roles": [
+    {
+      "role_id": "data_analyst",
+      "role_title": "Data Analyst",
+      "verified": true,
+      "data_mode": "fixture",
+      "required_skills": [
+        {"skill_id": "sql", "importance": 5, "required": true},
+        {"skill_id": "python", "importance": 4, "required": true},
+        {"skill_id": "data_visualization", "importance": 4, "required": true},
+        {"skill_id": "statistics", "importance": 3, "required": true},
+        {"skill_id": "excel", "importance": 2, "required": false}
+      ],
+      "transferable_skills": ["communication", "problem_solving", "critical_thinking"],
+      "prerequisites": [
+        {"prereq_id": "edu_degree", "type": "education_level", "allowed": ["undergraduate", "graduate", "diploma"], "hard": false, "description": "Diploma or degree level study"},
+        {"prereq_id": "quant_field", "type": "degree_field", "allowed": ["computer science", "statistics", "mathematics", "economics", "business", "engineering"], "hard": false, "description": "A quantitative or business field of study"}
+      ],
+      "evidence_ids": ["fixture_role_data_analyst"]
+    },
+    {
+      "role_id": "junior_software_developer",
+      "role_title": "Junior Software Developer",
+      "verified": true,
+      "data_mode": "fixture",
+      "required_skills": [
+        {"skill_id": "javascript", "importance": 5, "required": true},
+        {"skill_id": "git", "importance": 4, "required": true},
+        {"skill_id": "react", "importance": 3, "required": true},
+        {"skill_id": "sql", "importance": 3, "required": true},
+        {"skill_id": "python", "importance": 2, "required": false},
+        {"skill_id": "software_testing", "importance": 2, "required": false}
+      ],
+      "transferable_skills": ["problem_solving", "teamwork"],
+      "prerequisites": [
+        {"prereq_id": "edu_degree", "type": "education_level", "allowed": ["undergraduate", "graduate", "diploma"], "hard": false, "description": "Diploma or degree level study"},
+        {"prereq_id": "computing_field", "type": "degree_field", "allowed": ["computer science", "software engineering", "information technology"], "hard": false, "description": "A computing field of study"}
+      ],
+      "evidence_ids": ["fixture_role_junior_software_developer"]
+    },
+    {
+      "role_id": "business_analyst",
+      "role_title": "Business Analyst",
+      "verified": true,
+      "data_mode": "fixture",
+      "required_skills": [
+        {"skill_id": "requirements_analysis", "importance": 5, "required": true},
+        {"skill_id": "excel", "importance": 4, "required": true},
+        {"skill_id": "communication", "importance": 4, "required": true},
+        {"skill_id": "sql", "importance": 3, "required": true},
+        {"skill_id": "stakeholder_management", "importance": 3, "required": false},
+        {"skill_id": "data_visualization", "importance": 2, "required": false}
+      ],
+      "transferable_skills": ["problem_solving", "teamwork", "critical_thinking"],
+      "prerequisites": [
+        {"prereq_id": "edu_degree", "type": "education_level", "allowed": ["undergraduate", "graduate", "diploma"], "hard": false, "description": "Diploma or degree level study"},
+        {"prereq_id": "business_field", "type": "degree_field", "allowed": ["business", "economics", "management", "finance", "computer science", "information systems"], "hard": false, "description": "A business or information systems field of study"}
+      ],
+      "evidence_ids": ["fixture_role_business_analyst"]
+    },
+    {
+      "role_id": "sustainability_analyst",
+      "role_title": "Sustainability Analyst",
+      "verified": true,
+      "data_mode": "fixture",
+      "required_skills": [
+        {"skill_id": "sustainability_reporting", "importance": 5, "required": true},
+        {"skill_id": "environmental_science", "importance": 4, "required": true},
+        {"skill_id": "excel", "importance": 4, "required": true},
+        {"skill_id": "communication", "importance": 3, "required": true},
+        {"skill_id": "data_visualization", "importance": 2, "required": false},
+        {"skill_id": "python", "importance": 2, "required": false}
+      ],
+      "transferable_skills": ["critical_thinking", "teamwork"],
+      "prerequisites": [
+        {"prereq_id": "edu_degree", "type": "education_level", "allowed": ["undergraduate", "graduate", "diploma"], "hard": false, "description": "Diploma or degree level study"},
+        {"prereq_id": "env_field", "type": "degree_field", "allowed": ["environmental science", "engineering", "business", "economics"], "hard": false, "description": "An environmental, engineering or business field of study"}
+      ],
+      "evidence_ids": ["fixture_role_sustainability_analyst"]
+    }
+  ]
+}
