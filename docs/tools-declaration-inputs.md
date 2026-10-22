@@ -25,7 +25,7 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 | O*NET OnLine (US Dept. of Labor), 8 occupation pages plus 1 Software Skills CSV export | Role skills, 0-100 importance scores and technology tools | Public domain, with attribution |
 | GitHub REST API — Search Repositories | Trend signal: new repositories per skill topic, 30 days vs the previous 30 | GitHub Terms of Service; optional personal token kept in a git-ignored `.env`, never committed |
 | Microsoft Learn: catalog API, 4 learning paths and modules, and 1 VBA documentation page | Learning resources; provider-stated hours from the catalog API's `duration_in_minutes` | Free to access |
-| MathWorks MATLAB Onramp, MIT OpenCourseWare 18.05, SAS Programming 1, Alison, Onshape, MDN, Harvard CS50x, GnuCash guide, QGIS Training Manual, freeCodeCamp videos (via KDnuggets and ExpertBeacon pages) | Learning resources | Free to access (see `docs/source-register.md`) |
+| MathWorks MATLAB Onramp, MIT OpenCourseWare 18.05, SAS Programming 1, Alison, Onshape, MDN, Harvard CS50x, GnuCash guide, QGIS Training Manual, 2 freeCodeCamp.org videos on YouTube | Learning resources | Free to access (see `docs/source-register.md`) |
 | UCI Machine Learning Repository: 8 datasets | Portfolio projects (linked, not copied) | CC BY 4.0 |
 | World Bank — World Development Indicators | Portfolio projects (linked, not copied) | Creative Commons Attribution 4.0 |
 | UN Sustainable Development Goals (17 goals and their targets) | SDG mapping for every role and skill (team judgment) | Public UN framework |

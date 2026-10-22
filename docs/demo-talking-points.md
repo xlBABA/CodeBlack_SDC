@@ -1,6 +1,6 @@
 # Demo talking points — Jawad (about 2.5 minutes)
 
-My part of the 5-7 minute Mustaqbal AI video. Short sentences to say out loud. *[Brackets]* say what to show on screen. Every number below is the real output of my code on 2026-10-22 for the Data Analyst role. If the data changes, re-check the numbers before recording.
+My part of the 5-7 minute Mustaqbal AI video. Short sentences to say out loud. *[Brackets]* say what to show on screen. Every number below is the real output of my code on 2026-10-22, using the data on branch `feat/jawad-video-links`. Most numbers are for the Data Analyst role; part 5 also uses the Mechanical Engineer role. If the data changes, re-check the numbers before recording.
 
 If a screen in the app isn't ready yet, show the same result from the terminal instead.
 
@@ -32,12 +32,17 @@ If a screen in the app isn't ready yet, show the same result from the terminal i
 - "Data Analyst links to SDG 8, decent work and economic growth, because it helps organisations make evidence-based decisions."
 - "Skills like critical thinking link to SDG 4, quality education. These links are our team's judgment."
 
-**5. Learning roadmap (about 30 s)**
+**5. Learning roadmap (about 40 s)**
 *[Show a roadmap for a student missing data visualization, mathematics, SQL and Excel.]*
 - "If the student is missing skills, they get an ordered plan of free resources."
 - "Required skills come first, most important first. Here that's data visualization with Microsoft Learn's Power BI path: 8.2 hours."
-- "The total is about 24 hours."
-- "Each step says where its hours come from. Microsoft Learn states its own hours. The statistics video doesn't, so its 8 hours are our estimate, and the app shows a warning saying so."
+- "The total is about 24 and a half hours." (exact: 24.64 h)
+- "Each step says where its hours come from. Here every number comes from the provider. For example, the statistics video is 8.25 hours, which is its length on YouTube."
+
+*[Now show a Mechanical Engineer roadmap for a student missing CAD, MATLAB and Python.]*
+- "Some providers don't say how long their course takes. For a Mechanical Engineer, Onshape's CAD course and MathWorks' MATLAB Onramp give no hours."
+- "So we estimate them, 7 hours and 3 hours, and label them team estimate. The app shows a warning saying so."
+- "The Python course gives its own number, 3.2 hours. The total is 13.2 hours."
 
 **6. A portfolio project (about 20 s)**
 *[Show the "Online retail sales dashboard" project.]*
