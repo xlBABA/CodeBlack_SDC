@@ -188,9 +188,12 @@ def test_cached_mode_provenance_warning_propagates_to_roadmap_and_projects(clien
 def test_cached_mode_all_five_matching_dependent_endpoints_stay_fixture_labeled(client: TestClient):
     """Scenarios and project-simulate too — every route that depends on
     get_role_catalog() must stay data_mode="fixture" regardless of
-    CATALOG_MODE, since all five still generate their headline output
-    (scores, roadmap resources, recommended/simulated projects) via
-    fixture providers."""
+    CATALOG_MODE, since the HEADLINE output (scores) is still always
+    fixture/heuristic — even though, as of Milestone 6D-2D, roadmap
+    resources and recommended/simulated projects are now genuinely
+    cached content when CATALOG_MODE=cached (see
+    test_resource_catalog_cached_provider.py / test_project_catalog_cached_provider.py's
+    now-activated-route tests for that distinction)."""
     _override_settings(CATALOG_MODE="cached")
     try:
         careers = client.post("/api/v1/careers/match", json={"profile": EMPTY_PROFILE, "limit": 4})
@@ -208,7 +211,7 @@ def test_cached_mode_all_five_matching_dependent_endpoints_stay_fixture_labeled(
             json={
                 "profile": EMPTY_PROFILE,
                 "role_id": "data_analyst",
-                "project_id": "project_data_dashboard_001",
+                "project_id": "da_online_retail_dashboard",  # a real cached project_id
             },
         )
     finally:
@@ -219,13 +222,15 @@ def test_cached_mode_all_five_matching_dependent_endpoints_stay_fixture_labeled(
         assert response.json()["data_mode"] == "fixture"
 
 
-def test_cached_mode_projects_recommend_synthetic_ids_cannot_be_labeled_cached(client: TestClient):
-    """Regression guard for the exact finding from the mixed-provenance
-    review: /projects/recommend's project_id/source_ids (e.g.
-    "project_data_dashboard_001" / "source_project_data_dashboard_001")
-    are FixtureProjectCatalog placeholders, never a real pre-registered
-    source — the response must stay data_mode="fixture", not "cached",
-    even in CATALOG_MODE=cached."""
+def test_cached_mode_projects_recommend_stays_fixture_labeled_even_with_real_cached_ids(client: TestClient):
+    """As of Milestone 6D-2D, /projects/recommend under CATALOG_MODE=
+    cached returns genuinely real project_ids/source_ids from
+    CachedProjectCatalog (no longer FixtureProjectCatalog's synthetic
+    "project_data_dashboard_001" style placeholders) — yet data_mode
+    must still stay "fixture", conservatively, because which projects
+    get selected/ranked is still driven by a fixture-or-heuristic
+    matching score. The real-vs-placeholder distinction is disclosed via
+    project_provenance_warnings() instead of this enum value."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.post(
@@ -237,11 +242,15 @@ def test_cached_mode_projects_recommend_synthetic_ids_cannot_be_labeled_cached(c
     assert response.status_code == 200
     body = response.json()
     assert body["data_mode"] == "fixture"
+    project_ids = {p["project_id"] for p in body["data"]["projects"]}
+    assert project_ids  # at least one recommendation
+    assert not any(pid.startswith("project_") for pid in project_ids)  # no fixture-style id
+    assert any("cached" in w.lower() for w in body["warnings"])
+    # Sanity check: source_ids are now real registered sources
+    # (uci_*/worldbank_wdi/etc.), never the old fixture's invented
+    # "source_project_xxx_001" placeholder style.
     project = body["data"]["projects"][0]
-    # Sanity check this test is exercising real synthetic placeholder
-    # content, not accidentally real data.
-    assert project["source_ids"] == ["source_project_data_dashboard_001"]
-    assert any("not verified" in w.lower() or "fixture" in w.lower() for w in body["warnings"])
+    assert not any(sid.startswith("source_project_") for sid in project["source_ids"])
 
 
 # --- Downstream compatibility: overlap vs. cached-only roles -------------
@@ -263,6 +272,9 @@ def test_cached_mode_roadmap_works_for_an_overlapping_role(client: TestClient):
 
 
 def test_cached_mode_projects_simulate_works_for_an_overlapping_role(client: TestClient):
+    """As of Milestone 6D-2D, CATALOG_MODE=cached also activates
+    CachedProjectCatalog — the old fixture project_id no longer resolves
+    here, so this uses a real cached project_id instead."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.post(
@@ -270,7 +282,7 @@ def test_cached_mode_projects_simulate_works_for_an_overlapping_role(client: Tes
             json={
                 "profile": EMPTY_PROFILE,
                 "role_id": "data_analyst",
-                "project_id": "project_data_dashboard_001",
+                "project_id": "da_online_retail_dashboard",
             },
         )
     finally:
@@ -282,12 +294,33 @@ def test_cached_mode_projects_simulate_works_for_an_overlapping_role(client: Tes
     assert 0 <= data["simulated_score"] <= 100
 
 
-def test_cached_mode_projects_recommend_is_honest_empty_for_a_cached_only_role(client: TestClient):
-    """mechanical_engineer and public_health_analyst exist in Jawad's
-    cached catalog but have no project_catalog.py entry (that catalog is
-    still keyed to our fixture role_ids: mechanical_design_engineer,
-    sustainability_coordinator) — must return an honest empty result, not
-    a fabricated project borrowed from an unrelated role."""
+def test_cached_mode_projects_recommend_is_honest_empty_for_a_fixture_only_role(client: TestClient):
+    """As of Milestone 6D-2D, CachedProjectCatalog is active under
+    CATALOG_MODE=cached, so mechanical_engineer now DOES have real cached
+    projects (see test_project_catalog_cached_provider.py). The genuinely
+    unsupported case now is a role_id outside Jawad's canonical set
+    entirely — e.g. our fixture-only mechanical_design_engineer — which
+    must still return an honest empty result, not a fabricated project
+    borrowed from an unrelated role."""
+    _override_settings(CATALOG_MODE="cached")
+    try:
+        response = client.post(
+            "/api/v1/projects/recommend",
+            json={"profile": EMPTY_PROFILE, "role_id": "mechanical_design_engineer"},
+        )
+    finally:
+        _clear_override()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["projects"] == []
+    assert any("mechanical_design_engineer" in w for w in body["warnings"])
+
+
+def test_cached_mode_projects_recommend_now_finds_real_projects_for_previously_empty_role(client: TestClient):
+    """The flip side of the above: mechanical_engineer, which had no
+    project under the old (pre-6D-2D) FixtureProjectCatalog-only wiring,
+    now correctly returns real cached projects."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.post(
@@ -299,17 +332,37 @@ def test_cached_mode_projects_recommend_is_honest_empty_for_a_cached_only_role(c
 
     assert response.status_code == 200
     body = response.json()
-    assert body["data"]["projects"] == []
-    assert any("mechanical_engineer" in w for w in body["warnings"])
+    assert body["data"]["projects"]  # no longer empty
+    assert body["data_mode"] == "fixture"  # still conservative (score/selection still heuristic)
+    assert any("cached" in w.lower() for w in body["warnings"])
 
 
-def test_cached_mode_sdgs_endpoint_is_honest_empty_for_a_cached_only_role(client: TestClient):
-    """GET /sdgs/{role_id} has no dependency on CATALOG_MODE at all (it
-    never calls get_role_catalog) — a cached-only role_id simply isn't in
-    the fixture SDG catalog's 4 hardcoded role_ids either way."""
+def test_cached_mode_sdgs_endpoint_now_returns_real_mappings_for_a_cached_only_role(client: TestClient):
+    """As of Milestone 6D-2D, GET /sdgs/{role_id} IS gated by
+    CATALOG_MODE — public_health_analyst (outside the fixture SDG
+    catalog's 4 hardcoded role_ids) now correctly resolves against
+    CachedSdgCatalog, with data_mode="cached" (SDG has no scoring layer
+    riding on top, so this is accurate, unlike the other endpoints)."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.get("/api/v1/sdgs/public_health_analyst")
+    finally:
+        _clear_override()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data_mode"] == "cached"
+    assert body["data"]["role_sdg_mappings"]  # real mapping found
+    assert any("united nations" in w.lower() for w in body["warnings"])
+
+
+def test_cached_mode_sdgs_endpoint_is_honest_empty_for_a_fixture_only_role(client: TestClient):
+    """mechanical_design_engineer is outside Jawad's canonical role set
+    entirely (not just absent from the fixture SDG catalog) — must stay
+    honest-empty even under CATALOG_MODE=cached."""
+    _override_settings(CATALOG_MODE="cached")
+    try:
+        response = client.get("/api/v1/sdgs/mechanical_design_engineer")
     finally:
         _clear_override()
 
@@ -319,12 +372,11 @@ def test_cached_mode_sdgs_endpoint_is_honest_empty_for_a_cached_only_role(client
 
 
 def test_cached_mode_resource_catalog_matches_by_skill_id_not_role_id(client: TestClient):
-    """public_health_analyst (cached-only, no project_catalog entry) still
-    required: critical_thinking, mathematics, sql, python — sql/python
-    DO have fixture resources (keyed by skill_id, not role_id), so a
-    roadmap step is produced for them precisely because resource lookup
-    is never role-scoped, never because a resource was reassigned
-    between roles."""
+    """public_health_analyst requires critical_thinking, mathematics,
+    sql, python — as of Milestone 6D-2D, CachedResourceCatalog covers
+    all four, so all four now produce a real roadmap step, keyed by
+    skill_id (never role-scoped, never a resource reassigned between
+    roles)."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.post(
@@ -335,9 +387,17 @@ def test_cached_mode_resource_catalog_matches_by_skill_id_not_role_id(client: Te
         _clear_override()
 
     assert response.status_code == 200
-    step_skill_ids = {s["skill_id"] for s in response.json()["data"]["steps"]}
-    assert step_skill_ids <= {"sql", "python"}
-    assert step_skill_ids  # at least one real resource actually matched
+    body = response.json()
+    step_skill_ids = {s["skill_id"] for s in body["data"]["steps"]}
+    assert step_skill_ids == {"critical_thinking", "mathematics", "sql", "python"}
+    fixture_resource_ids = {
+        "resource_sql_basics_001", "resource_python_basics_001", "resource_dataviz_basics_001",
+        "resource_excel_basics_001", "resource_finmodel_basics_001", "resource_cad_basics_001",
+        "resource_sustainability_reporting_001",
+    }
+    for step in body["data"]["steps"]:
+        assert step["resource_id"] not in fixture_resource_ids
+    assert any("cached" in w.lower() for w in body["warnings"])
 
 
 def test_cached_mode_unknown_role_behaves_consistently(client: TestClient):
@@ -400,6 +460,106 @@ def test_invalid_cached_data_does_not_silently_fall_back_to_fixture(client: Test
     assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
     role_ids = response.json()  # no "data" key on an error response
     assert "data" not in role_ids
+
+
+def test_invalid_cached_resource_data_fails_loud_on_roadmap_generate(client: TestClient, monkeypatch):
+    """Milestone 6D-2D: corrupt cached resources.json must 503 the newly
+    activated /roadmaps/generate route, never silently serve
+    FixtureResourceCatalog instead."""
+    import app.services.resource_catalog_cached as cached_module
+
+    def _broken_load():
+        raise cached_module.CachedCatalogError("simulated corrupt cached resources file")
+
+    monkeypatch.setattr(cached_module, "load_cached_resources", _broken_load)
+    _override_settings(CATALOG_MODE="cached")
+    try:
+        response = client.post(
+            "/api/v1/roadmaps/generate", json={"profile": EMPTY_PROFILE, "role_id": "data_analyst"}
+        )
+    finally:
+        _clear_override()
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
+    assert "data" not in response.json()
+
+
+def test_invalid_cached_project_data_fails_loud_on_projects_recommend_and_simulate(
+    client: TestClient, monkeypatch
+):
+    """Milestone 6D-2D: corrupt cached projects.json must 503 both
+    newly activated project routes, never silently serve
+    FixtureProjectCatalog instead."""
+    import app.services.project_catalog_cached as cached_module
+
+    def _broken_load():
+        raise cached_module.CachedCatalogError("simulated corrupt cached projects file")
+
+    monkeypatch.setattr(cached_module, "load_cached_projects", _broken_load)
+    _override_settings(CATALOG_MODE="cached")
+    try:
+        recommend = client.post(
+            "/api/v1/projects/recommend", json={"profile": EMPTY_PROFILE, "role_id": "data_analyst"}
+        )
+        simulate = client.post(
+            "/api/v1/projects/simulate",
+            json={
+                "profile": EMPTY_PROFILE,
+                "role_id": "data_analyst",
+                "project_id": "da_online_retail_dashboard",
+            },
+        )
+    finally:
+        _clear_override()
+
+    for response in (recommend, simulate):
+        assert response.status_code == 503
+        assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
+        assert "data" not in response.json()
+
+
+def test_invalid_cached_sdg_data_fails_loud_on_sdgs_endpoint(client: TestClient, monkeypatch):
+    """Milestone 6D-2D: corrupt cached sdg_mappings.json must 503
+    GET /sdgs/{role_id} in cached mode, never silently serve
+    FixtureSdgCatalog instead."""
+    import app.api.v1.endpoints.sdgs as sdgs_endpoint
+    import app.services.sdg_catalog_cached as cached_module
+
+    def _broken_load():
+        raise cached_module.CachedCatalogError("simulated corrupt cached sdg mappings file")
+
+    # sdgs.py's eager validation calls its own `from ... import
+    # load_cached_sdg_mappings`-bound name, not a module-qualified
+    # lookup — patch that name directly (patching the source module's
+    # attribute alone would not affect the already-bound import).
+    monkeypatch.setattr(sdgs_endpoint, "load_cached_sdg_mappings", _broken_load)
+    _override_settings(CATALOG_MODE="cached")
+    try:
+        response = client.get("/api/v1/sdgs/data_analyst")
+    finally:
+        _clear_override()
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
+    assert "data" not in response.json()
+
+
+def test_cached_mode_sdgs_endpoint_preserves_multiple_sdgs_per_role_end_to_end(client: TestClient):
+    """Milestone 6D-2D: hitting the real, activated route (not just the
+    service/catalog unit tests from 6D-2C) for a role with 2 SDGs."""
+    _override_settings(CATALOG_MODE="cached")
+    try:
+        response = client.get("/api/v1/sdgs/civil_engineer")
+    finally:
+        _clear_override()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data_mode"] == "cached"
+    sdg_ids = {m["sdg_id"] for m in body["data"]["role_sdg_mappings"]}
+    assert sdg_ids == {9, 11}
+    assert any("united nations" in w.lower() for w in body["warnings"])
 
 
 # --- DI overrides remain functional ---------------------------------------

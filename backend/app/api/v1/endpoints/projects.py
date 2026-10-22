@@ -31,21 +31,45 @@ from app.services.interfaces import MatchingProvider, TrendProvider
 from app.services.matching_service import MatchingService
 from app.services.profile_service import ProfileService
 from app.services.project_catalog import FixtureProjectCatalog, ProjectCatalogProvider
+from app.services.project_catalog_cached import CachedProjectCatalog
 from app.services.project_service import ProjectRecommendationService, ProjectSimulationService
 from app.services.role_catalog import RoleCatalogProvider
+from app.services.role_catalog_cached import CachedCatalogError
 
 router = APIRouter()
 
 
+def project_provenance_warnings(settings: Settings) -> list[str]:
+    """See roadmaps.py's resource_provenance_warnings() for the identical
+    reasoning: project *content* (title, source_ids, hours) is genuinely
+    cached real data when CATALOG_MODE=cached, independent of
+    careers.py's more conservative role/score-only message."""
+    if settings.CATALOG_MODE != "cached":
+        return []
+    return [
+        "CATALOG_MODE=cached: the projects in this response come from "
+        "Jawad's verified, cached project dataset — real datasets/"
+        "tutorials and team-estimated hours, not fixture placeholders."
+    ]
+
+
 def get_project_catalog(settings: Settings = Depends(get_settings)) -> ProjectCatalogProvider:
-    # No non-fixture project catalog exists at all — always fixture-
-    # sourced, so ENABLE_FIXTURES=False fails closed here regardless of
-    # MATCHING_MODE/CATALOG_MODE. See get_resource_catalog() in
-    # roadmaps.py for the identical reasoning.
+    if settings.CATALOG_MODE == "cached":
+        catalog = CachedProjectCatalog()
+        try:
+            catalog.list_projects()  # validate now; never silently fall back to fixture
+        except CachedCatalogError as exc:
+            raise provider_unavailable("ProjectCatalogProvider (cached)", str(exc)) from exc
+        return catalog
+
+    # CATALOG_MODE=fixture: the only project catalog here is Fixture's —
+    # ENABLE_FIXTURES=False must still fail closed, exactly as before.
     if not settings.ENABLE_FIXTURES:
         raise provider_unavailable(
             "ProjectCatalogProvider",
-            "ENABLE_FIXTURES is false; no non-fixture project catalog exists yet.",
+            "ENABLE_FIXTURES is false and CATALOG_MODE is 'fixture'; no "
+            "non-fixture project catalog is selected. Set CATALOG_MODE="
+            "cached to use real cached projects, or leave ENABLE_FIXTURES=true.",
         )
     return FixtureProjectCatalog()
 
@@ -98,7 +122,7 @@ def recommend_projects(
         data=ProjectRecommendationPayload(projects=outcome.projects),
         data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings + catalog_provenance_warnings(settings),
+        warnings=outcome.warnings + catalog_provenance_warnings(settings) + project_provenance_warnings(settings),
     )
 
 
@@ -114,5 +138,5 @@ def simulate_project(
         data=outcome.payload,
         data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings + catalog_provenance_warnings(settings),
+        warnings=outcome.warnings + catalog_provenance_warnings(settings) + project_provenance_warnings(settings),
     )

@@ -274,11 +274,16 @@ def test_required_optional_skill_distinction_still_excludes_optional_from_missin
 # --- 12/13. No activation, no new deps --------------------------------------
 
 
-def test_cached_project_catalog_not_referenced_by_any_route(db_session):
+def test_cached_project_catalog_is_referenced_only_behind_catalog_mode_gating():
+    """As of Milestone 6D-2D, CachedProjectCatalog IS referenced by
+    projects.py — but only inside get_project_catalog()'s CATALOG_MODE=
+    'cached' branch, never unconditionally. See test_catalog_mode.py /
+    test_matching_mode.py for the full activation-matrix behavior."""
     import app.api.v1.endpoints.projects as projects_endpoint
 
     source = open(projects_endpoint.__file__, encoding="utf-8").read()
-    assert "CachedProjectCatalog" not in source
+    assert "CachedProjectCatalog" in source
+    assert 'settings.CATALOG_MODE == "cached"' in source
 
 
 def test_no_heavy_or_network_dependency_imported():

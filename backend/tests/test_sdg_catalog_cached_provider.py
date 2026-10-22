@@ -168,8 +168,13 @@ def test_default_sdg_route_still_uses_fixture_catalog_only(client):
     assert "Illustrative demonstration mapping" in body["data"]["role_sdg_mappings"][0]["reason"]
 
 
-def test_cached_sdg_catalog_not_referenced_by_any_route():
+def test_cached_sdg_catalog_is_referenced_only_behind_catalog_mode_gating():
+    """As of Milestone 6D-2D, CachedSdgCatalog IS referenced by sdgs.py —
+    but only inside get_sdg_catalog()'s CATALOG_MODE='cached' branch,
+    never unconditionally. See test_catalog_mode.py's SDG matrix tests
+    for the full activation behavior."""
     import app.api.v1.endpoints.sdgs as sdgs_endpoint
 
     source = open(sdgs_endpoint.__file__, encoding="utf-8").read()
-    assert "CachedSdgCatalog" not in source
+    assert "CachedSdgCatalog" in source
+    assert 'settings.CATALOG_MODE == "cached"' in source

@@ -122,6 +122,14 @@ def catalog_data_mode(settings: Settings) -> DataMode:
 
 
 def catalog_provenance_warnings(settings: Settings) -> list[str]:
+    """Scoped to role/skill catalog + scoring provenance only — always
+    accurate for careers/scenarios (which have no resources/projects of
+    their own). roadmaps.py/projects.py layer their own, separate
+    resource_provenance_warnings()/project_provenance_warnings() instead
+    of this function claiming anything about content it doesn't return,
+    since that content is no longer always a fixture placeholder once
+    CachedResourceCatalog/CachedProjectCatalog are selected (Milestone
+    6D-2D)."""
     if settings.CATALOG_MODE != "cached":
         return []
     scoring_description = (
@@ -133,11 +141,8 @@ def catalog_provenance_warnings(settings: Settings) -> list[str]:
         "CATALOG_MODE=cached: the role and skill catalog inputs for this "
         "response come from Jawad's cached, real O*NET-derived dataset — "
         "those role/skill identifiers are not fictional. Matching scores "
-        f"are still calculated by {scoring_description}, and any "
-        "placeholder projects/resources/roadmap steps in this response are "
-        "not verified real-world recommendations. data_mode remains "
-        "'fixture' because the generated output — scores, roadmap "
-        "resources, project recommendations — is still fixture-based, "
+        f"are still calculated by {scoring_description}. data_mode remains "
+        "'fixture' because the generated score is still fixture-based, "
         "even though the underlying sourced roles themselves are real."
     ]
 

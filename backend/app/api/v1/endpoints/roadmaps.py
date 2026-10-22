@@ -24,23 +24,49 @@ from app.services.interfaces import MatchingProvider, TrendProvider
 from app.services.matching_service import MatchingService
 from app.services.profile_service import ProfileService
 from app.services.resource_catalog import FixtureResourceCatalog, ResourceCatalogProvider
+from app.services.resource_catalog_cached import CachedResourceCatalog
 from app.services.roadmap_service import RoadmapService
 from app.services.role_catalog import RoleCatalogProvider
+from app.services.role_catalog_cached import CachedCatalogError
 
 router = APIRouter()
 
 
+def resource_provenance_warnings(settings: Settings) -> list[str]:
+    """Separate from careers.py's catalog_provenance_warnings(): that one
+    only speaks to role/skill/score provenance (always accurate for
+    careers/scenarios). Roadmap *resource content* (title, url, hours) is
+    genuinely cached real data when CATALOG_MODE=cached — this says so
+    explicitly rather than letting the shared, more conservative message
+    imply resources are still placeholders once they aren't."""
+    if settings.CATALOG_MODE != "cached":
+        return []
+    return [
+        "CATALOG_MODE=cached: the learning resources in this roadmap come "
+        "from Jawad's verified, cached resource dataset — real course "
+        "titles, URLs and provider-stated or team-estimated hours, not "
+        "fixture placeholders. Which skills are selected for this roadmap "
+        "is still driven by the matching score above."
+    ]
+
+
 def get_resource_catalog(settings: Settings = Depends(get_settings)) -> ResourceCatalogProvider:
-    # No non-fixture resource catalog exists at all (unlike roles, which
-    # CATALOG_MODE can point at real cached data) — this dependency is
-    # always fixture-sourced. ENABLE_FIXTURES=False must fail closed here
-    # regardless of MATCHING_MODE/CATALOG_MODE, per Milestone 6C-2B Step
-    # 3: a real matching algorithm must not silently unlock fixture
-    # roadmap resources it doesn't actually make real.
+    if settings.CATALOG_MODE == "cached":
+        catalog = CachedResourceCatalog()
+        try:
+            catalog.list_resources()  # validate now; never silently fall back to fixture
+        except CachedCatalogError as exc:
+            raise provider_unavailable("ResourceCatalogProvider (cached)", str(exc)) from exc
+        return catalog
+
+    # CATALOG_MODE=fixture: the only resource catalog here is Fixture's —
+    # ENABLE_FIXTURES=False must still fail closed, exactly as before.
     if not settings.ENABLE_FIXTURES:
         raise provider_unavailable(
             "ResourceCatalogProvider",
-            "ENABLE_FIXTURES is false; no non-fixture resource catalog exists yet.",
+            "ENABLE_FIXTURES is false and CATALOG_MODE is 'fixture'; no "
+            "non-fixture resource catalog is selected. Set CATALOG_MODE="
+            "cached to use real cached resources, or leave ENABLE_FIXTURES=true.",
         )
     return FixtureResourceCatalog()
 
@@ -75,5 +101,5 @@ def generate_roadmap(
         data=outcome.payload,
         data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings + catalog_provenance_warnings(settings),
+        warnings=outcome.warnings + catalog_provenance_warnings(settings) + resource_provenance_warnings(settings),
     )

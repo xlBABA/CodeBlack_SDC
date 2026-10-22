@@ -88,15 +88,19 @@ def test_scenarios_simulate_full_matrix(client: TestClient, catalog_mode, matchi
 # --- Fail-closed: roadmaps/projects always depend on fixture data ------
 
 
-@pytest.mark.parametrize("catalog_mode,matching_mode", list(itertools.product(["fixture", "cached"], ["fixture", "hussain"])))
-def test_roadmaps_and_projects_fail_closed_when_fixtures_disabled_regardless_of_mode(
+@pytest.mark.parametrize(
+    "catalog_mode,matching_mode",
+    [("fixture", "fixture"), ("fixture", "hussain"), ("cached", "fixture")],
+)
+def test_roadmaps_and_projects_fail_closed_when_fixtures_disabled_and_catalog_mode_is_not_fully_cached(
     client: TestClient, catalog_mode, matching_mode
 ):
-    """Unlike careers/match, roadmaps/generate and projects/recommend+
-    simulate always depend on FixtureResourceCatalog/FixtureProjectCatalog
-    (no cached alternative exists) — ENABLE_FIXTURES=False must 503 them
-    in every CATALOG_MODE/MATCHING_MODE combination, including the one
-    combination (cached + hussain) where careers/match itself succeeds."""
+    """roadmaps/generate and projects/recommend+simulate must 503 under
+    ENABLE_FIXTURES=False whenever at least one required provider
+    (matching, resources or projects) would still be fixture-sourced.
+    The one combination NOT covered here — cached + hussain — is now
+    (Milestone 6D-2D) fully non-fixture and succeeds instead; see
+    test_roadmaps_and_projects_succeed_with_fixtures_disabled_when_fully_cached below."""
     _override_settings(CATALOG_MODE=catalog_mode, MATCHING_MODE=matching_mode, ENABLE_FIXTURES=False)
     try:
         roadmap = client.post(
@@ -107,7 +111,7 @@ def test_roadmaps_and_projects_fail_closed_when_fixtures_disabled_regardless_of_
         )
         simulate = client.post(
             "/api/v1/projects/simulate",
-            json={"profile": EMPTY_PROFILE, "role_id": "data_analyst", "project_id": "project_data_dashboard_001"},
+            json={"profile": EMPTY_PROFILE, "role_id": "data_analyst", "project_id": "da_online_retail_dashboard"},
         )
     finally:
         _clear_override()
@@ -115,6 +119,31 @@ def test_roadmaps_and_projects_fail_closed_when_fixtures_disabled_regardless_of_
     for response in (roadmap, recommend, simulate):
         assert response.status_code == 503, (catalog_mode, matching_mode, response.json())
         assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
+
+
+def test_roadmaps_and_projects_succeed_with_fixtures_disabled_when_fully_cached(client: TestClient):
+    """Milestone 6D-2D: CATALOG_MODE=cached + MATCHING_MODE=hussain means
+    every required provider (matcher, role catalog, resource catalog,
+    project catalog) is genuinely non-fixture — ENABLE_FIXTURES=False
+    must NOT 503 this combination, unlike every other one above."""
+    _override_settings(CATALOG_MODE="cached", MATCHING_MODE="hussain", ENABLE_FIXTURES=False)
+    try:
+        roadmap = client.post(
+            "/api/v1/roadmaps/generate", json={"profile": EMPTY_PROFILE, "role_id": "data_analyst"}
+        )
+        recommend = client.post(
+            "/api/v1/projects/recommend", json={"profile": EMPTY_PROFILE, "role_id": "data_analyst"}
+        )
+        simulate = client.post(
+            "/api/v1/projects/simulate",
+            json={"profile": EMPTY_PROFILE, "role_id": "data_analyst", "project_id": "da_online_retail_dashboard"},
+        )
+    finally:
+        _clear_override()
+
+    assert roadmap.status_code == 200
+    assert recommend.status_code == 200
+    assert simulate.status_code == 200
 
 
 def test_roadmaps_and_projects_succeed_when_fixtures_enabled_in_hussain_mode(client: TestClient):
@@ -305,12 +334,15 @@ def test_unknown_role_returns_established_errors_in_hussain_mode(client: TestCli
 
 
 def test_unsupported_role_projects_are_not_invented_in_hussain_mode(client: TestClient):
-    """mechanical_engineer (cached-only, no project_catalog entry) must
-    get an honest empty result, never a fabricated project."""
+    """mechanical_design_engineer (our fixture-only role_id, outside
+    Jawad's canonical set entirely — unlike mechanical_engineer, which
+    now has real cached projects as of Milestone 6D-2D) must get an
+    honest empty result, never a fabricated project."""
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
         response = client.post(
-            "/api/v1/projects/recommend", json={"profile": EMPTY_PROFILE, "role_id": "mechanical_engineer"}
+            "/api/v1/projects/recommend",
+            json={"profile": EMPTY_PROFILE, "role_id": "mechanical_design_engineer"},
         )
     finally:
         _clear_override()

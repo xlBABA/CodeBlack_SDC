@@ -350,9 +350,16 @@ def test_enable_fixtures_false_blocks_matching_routes_but_not_role_or_profile_in
             assert response.status_code == 503, f"{path} should be 503 under ENABLE_FIXTURES=False"
             assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
 
-        # These never go through get_matching_provider — unaffected.
+        # As of Milestone 6D-2D, GET /sdgs/{role_id} is also gated by
+        # ENABLE_FIXTURES when CATALOG_MODE=fixture (the default here) —
+        # it has no matching provider, but it does have its own fixture-
+        # backed SdgCatalogProvider that must fail closed the same way.
+        sdg_response = client.get(f"/api/v1/sdgs/{ROLE_ID}")
+        assert sdg_response.status_code == 503
+        assert sdg_response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
+
+        # These never depend on any fixture-backed provider — unaffected.
         assert client.get("/api/v1/trends", params={"role_id": ROLE_ID}).status_code == 200
-        assert client.get(f"/api/v1/sdgs/{ROLE_ID}").status_code == 200
         assert client.post("/api/v1/profile/analyze", json=SYNTHETIC_PROFILE).status_code == 200
     finally:
         del app.dependency_overrides[get_settings]
