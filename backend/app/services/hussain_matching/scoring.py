@@ -1,5 +1,3 @@
-# Vendored verbatim from origin/feature/hussain-matching @ 61373a5 (owner: Hussain).
-# Source: services/matching/scoring.py on that branch. Not modified from the original.
 """Deterministic profile-alignment scoring (methodology v1).
 
 R = 0.50*S + 0.20*E + 0.15*Q + 0.15*T, every component 0..100.
@@ -10,7 +8,7 @@ The score is an estimate of profile alignment, never a hiring probability.
 """
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, Collection
 
 METHODOLOGY_VERSION = "v1"
 SCORE_TYPE = "profile_alignment_estimate"
@@ -45,8 +43,12 @@ def skills_component(
     weight_multipliers: dict[str, float],
     name_of: Callable[[str], str],
     similarity: SimilarityFn | None = None,
+    interpreted: Collection[str] = (),
 ) -> tuple[float, list[dict], list[dict], list[str]]:
-    """Weighted skill coverage S. Returns (S, matched, missing, notes)."""
+    """Weighted skill coverage S. Returns (S, matched, missing, notes).
+
+    `interpreted` holds skill_ids in profile_skills that were inferred from free text,
+    not confirmed by the student: they count as held at RELATED_CREDIT."""
     total_weight = 0.0
     earned = 0.0
     matched: list[dict] = []
@@ -63,7 +65,8 @@ def skills_component(
 
         if sid in profile_skills:
             prof = profile_skills[sid]
-            earned += weight * PROFICIENCY_FACTOR[prof]
+            credit = RELATED_CREDIT if sid in interpreted else 1.0
+            earned += weight * PROFICIENCY_FACTOR[prof] * credit
             ref = {"skill_id": sid, "name": name_of(sid)}
             if prof:
                 ref["proficiency"] = prof
@@ -73,6 +76,8 @@ def skills_component(
         best = None
         if similarity is not None:
             for held in profile_skills:
+                if held in interpreted:  # an interpretation must not chain into another
+                    continue
                 sim = similarity(held, sid)
                 if sim >= SIMILARITY_THRESHOLD and (best is None or sim > best[1]):
                     best = (held, sim)
@@ -105,10 +110,11 @@ def experience_component(
     return float(min(100, points)), notes
 
 
-def prerequisites_component(profile: dict, role: dict) -> tuple[float, list[str]]:
+def prerequisites_component(profile: dict, role: dict) -> tuple[float | None, list[str]]:
+    """Q, or None when the role lists no prerequisites (nothing to assess; weight is redistributed)."""
     prereqs = role.get("prerequisites") or []
     if not prereqs:
-        return 100.0, []
+        return None, []
     caveats: list[str] = []
     credit = 0.0
     for pre in prereqs:
@@ -140,7 +146,8 @@ def prerequisites_component(profile: dict, role: dict) -> tuple[float, list[str]
 
 
 def transferable_component(
-    profile_skills: dict[str, str | None], role: dict, interests: list[str] | None = None
+    profile_skills: dict[str, str | None], role: dict, interests: list[str] | None = None,
+    interpreted: Collection[str] = (),
 ) -> float | None:
     """Share of the role's transferable items the student shows: transferable
     skills they hold plus interest keywords found in their stated interests."""
@@ -149,7 +156,8 @@ def transferable_component(
     if not skills and not keywords:
         return None  # weight is redistributed
     lowered = [i.lower() for i in interests or []]
-    held = sum(1 for sid in skills if sid in profile_skills)
+    held = sum((RELATED_CREDIT if sid in interpreted else 1.0)
+               for sid in skills if sid in profile_skills)
     held += sum(1 for kw in keywords if any(kw.lower() in i for i in lowered))
     return 100.0 * held / (len(skills) + len(keywords))
 

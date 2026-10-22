@@ -14,6 +14,7 @@ from app.api.v1.endpoints.careers import (
     get_role_catalog,
     get_trend_provider,
     matching_mode_warning,
+    trend_signal_provenance_warnings,
 )
 from app.core.config import Settings, get_settings
 from app.core.time import utc_now_iso
@@ -66,5 +67,5 @@ def simulate_scenario(
         data=outcome.payload,
         data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings + catalog_provenance_warnings(settings),
+        warnings=outcome.warnings + catalog_provenance_warnings(settings) + trend_signal_provenance_warnings(settings),
     )

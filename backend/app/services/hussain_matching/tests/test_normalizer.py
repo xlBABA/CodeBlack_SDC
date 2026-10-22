@@ -1,5 +1,3 @@
-# Vendored from origin/feature/hussain-matching @ 61373a5 (owner: Hussain), source
-# services/matching/tests/test_normalizer.py, with import paths rewritten to this package location.
 import pytest
 
 from app.services.hussain_matching import SkillNormalizer

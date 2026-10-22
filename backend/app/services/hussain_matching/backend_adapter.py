@@ -1,10 +1,16 @@
-# Imported from origin/feature/hussain-matching @ 61373a5 (owner: Hussain),
-# source services/matching/backend_adapter.py, with two Milestone 6C-2A
-# compatibility fixes applied (see inline comments below): preserving
-# RoleRequirement.required instead of hardcoding True, and excluding
-# unmatched optional skills from missing_skills. Everything else
-# (scoring.py, matcher.py, normalizer.py, scenarios.py, runpod_client.py,
-# embeddings.py) is vendored verbatim and unmodified.
+# Milestone 10C: re-vendored verbatim from origin/feature/hussain-matching
+# @ 07b4e3f (owner: Hussain) — "Option B" in his docs/integration-notes-
+# for-rehan.md, chosen for Replit deployment self-containment. The whole
+# services/matching/ folder was replaced as one snapshot, not hand-edited
+# or partially merged; do not hand-edit this file — tell Hussain and he
+# will make the fix upstream, then re-vendor. Next sync: re-run this same
+# replacement from whatever commit he names as approved.
+#
+# Our actual import path differs from the example below (kept verbatim
+# from his file): we import this package as app.services.hussain_matching
+# (not services.matching), since our backend keeps the matcher inside
+# backend/ for a self-contained Replit deployment — see
+# app/api/v1/endpoints/careers.py's actual get_matching_provider().
 """Adapter so Rehan's FastAPI backend can use this matcher unchanged.
 
 Rehan's MatchingService calls  provider.match(profile, roles, scenario, signals)
@@ -28,13 +34,11 @@ import time
 from typing import Any, Callable
 
 from . import scoring
-from .matcher import Matcher
+from .matcher import DEGRADED_CAVEAT, Matcher
 from .normalizer import SkillNormalizer
 from .runpod_client import RunPodEmbeddingProvider, runpod_configured
 
 logger = logging.getLogger(__name__)
-
-DEGRADED_CAVEAT = "Semantic matching unavailable; exact skill matching only (degraded)"
 
 
 def _to_dict(obj: Any) -> dict:
@@ -65,23 +69,12 @@ def role_to_matcher_format(role: Any) -> dict:
         "role_id": r["role_id"],
         "role_title": r["role_title"],
         "verified": r.get("verified", True),
-        # Milestone 6C-2B fix: RoleFixture (ours AND Jawad's cached O*NET
-        # roles alike) has no data_mode field at all, so defaulting to
-        # "fixture" here asserted a provenance we don't actually know —
-        # matcher.py's "Fixture role for testing; not verified
-        # occupational data" caveat would then wrongly fire for genuinely
-        # cached roles too, contradicting the envelope-level cached-
-        # provenance disclosure. Omit rather than guess; accurate
-        # provenance is disclosed at the envelope level instead (see
-        # careers.py's catalog_provenance_warnings()/matching_mode_warning()).
+        # RoleFixture (ours and Jawad's cached roles) has no data_mode: omit rather than guess,
+        # so the matcher's "Fixture role for testing" caveat does not fire for cached roles.
         "data_mode": r.get("data_mode"),
         "required_skills": [
-            # Milestone 6C-2A fix: preserve RoleRequirement.required (added
-            # in 6B-2 to carry Jawad's required/optional distinction)
-            # instead of hardcoding True for every skill. Importance still
-            # comes only from the real weight — never invented when
-            # unavailable (defaults to 1.0, matching the original).
-            {"skill_id": s["skill_id"], "importance": s.get("weight", 1.0), "required": s.get("required", True)}
+            {"skill_id": s["skill_id"], "importance": s.get("weight", 1.0),
+             "required": s.get("required", True)}
             for s in r["required_skills"]
         ],
         "transferable_skills": list(r.get("transferable_skills") or []),
@@ -129,6 +122,23 @@ class HussainMatchingProvider:
         self._providers: dict[tuple, RunPodEmbeddingProvider] = {}
         self._down_until = 0.0
 
+    def _applicable_pairs(self, catalogue: list[dict]) -> list[list[str]]:
+        """not_equivalent pairs whose two skill_ids are both in the catalogue.
+
+        A pair that cannot be applied is skipped with a warning naming it, so a list
+        written for another catalogue does not silently protect nothing."""
+        ids = {s["skill_id"] for s in catalogue}
+        pairs = []
+        for pair in self.not_equivalent:
+            if len(pair) == 2 and set(pair) <= ids:
+                pairs.append(pair)
+            else:
+                unknown = sorted(set(pair) - ids) if len(pair) == 2 else []
+                reason = (f"skill_id(s) not in the catalogue: {', '.join(unknown)}" if unknown
+                          else "not a pair of two skill_ids")
+                logger.warning("Ignoring not_equivalent pair %s (%s)", list(pair), reason)
+        return pairs
+
     def _semantic_similarity(self, catalogue: list[dict]) -> tuple[scoring.SimilarityFn | None, bool]:
         """Return (similarity function or None, degraded flag)."""
         if self.similarity is not None:
@@ -139,9 +149,8 @@ class HussainMatchingProvider:
         key = tuple((s["skill_id"], s["name"], tuple(s.get("aliases", []))) for s in catalogue)
         provider = self._providers.get(key)
         if provider is None:
-            ids = {s["skill_id"] for s in catalogue}
-            pairs = [p for p in self.not_equivalent if len(p) == 2 and set(p) <= ids]
-            provider = RunPodEmbeddingProvider.from_skills(catalogue, not_equivalent=pairs)
+            provider = RunPodEmbeddingProvider.from_skills(
+                catalogue, not_equivalent=self._applicable_pairs(catalogue))
         try:
             provider.precompute()  # the only network call; later lookups are local
         except Exception as exc:  # any failure degrades to exact matching
@@ -165,27 +174,18 @@ class HussainMatchingProvider:
         matches = data["matches"]
         if degraded:
             for m in matches:
-                m["caveats"].append(DEGRADED_CAVEAT)
-        # Milestone 6C-2A fix: scoring.skills_component() (unmodified,
-        # verbatim) puts every unmatched skill into missing_skills
-        # regardless of its required flag — it only uses `required` to
-        # halve the skill's scoring weight. That's correct for the score
-        # itself (methodology untouched here), but presenting an optional,
-        # unmatched skill as a missing_skills gap mischaracterizes it as
-        # mandatory. Filtered here, at the adapter/presentation layer only
-        # — RoleMatch's schema is unchanged, and no score/weight changes.
-        roles_by_id = {rd["role_id"]: rd for rd in role_dicts}
+                if DEGRADED_CAVEAT not in m["caveats"]:
+                    m["caveats"].append(DEGRADED_CAVEAT)
+        # skills_component() lists every unmatched role skill as missing (it only halves the weight of
+        # optional ones); an optional skill is not a mandatory gap, so it is not reported as missing.
+        optional_by_role = {
+            rd["role_id"]: {s["skill_id"] for s in rd["required_skills"] if not s.get("required", True)}
+            for rd in role_dicts
+        }
         for m in matches:
-            role = roles_by_id.get(m["role_id"])
-            if role is None:
-                continue
-            optional_skill_ids = {
-                s["skill_id"] for s in role["required_skills"] if not s.get("required", True)
-            }
-            if optional_skill_ids:
-                m["missing_skills"] = [
-                    s for s in m["missing_skills"] if s["skill_id"] not in optional_skill_ids
-                ]
+            optional = optional_by_role.get(m["role_id"])
+            if optional:
+                m["missing_skills"] = [s for s in m["missing_skills"] if s["skill_id"] not in optional]
         if self.result_model is not None:
             return [self.result_model(**m) for m in matches]
         return matches

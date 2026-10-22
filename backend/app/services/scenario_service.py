@@ -1,14 +1,18 @@
 """Orchestrates POST /scenarios/simulate.
 
-Per Milestone 4 scope: scenario_id does NOT alter matching scores — there is
-no validated disruption-modeling methodology yet (IMPLEMENTATION_PLAN.md
-lists "Scenario assumptions/match recompute" as future Hussain/Jawad/Rehan
-work). This service reuses MatchingService verbatim for "same matches" (the
-contract's own wording) and layers purely qualitative, clearly-labeled
-illustrative assumptions on top — never a fabricated numeric disruption
-index. Moderate vs fast are distinguished by wording, not by changing any
-score, so there is no contradiction between "scenario accepted" and
-"scores unchanged."
+Milestone 10C update: scenario_id CAN now shift matching scores slightly
+when CATALOG_MODE=cached and a requested role's required skills include
+one with a real, dated, rising/falling trend signal (Hussain's
+skill_weight_adjustments(), fed Jawad's cached GitHub developer-activity
+signals — see app/services/trend_signal_provider.py). This is still an
+illustrative, non-validated assumption-driven adjustment (±10%/±25% on a
+skill's weight), never a fabricated numeric disruption index or a
+forecast — see FixtureScenarioAssumptions' own uncertainty note and each
+affected match's own "Scenario adjusted the weight of..." caveat for the
+per-response truth. When no applicable signal exists for a request (no
+CATALOG_MODE=cached, or the role's skills have no covered/moving signal),
+scores remain identical to the baseline, exactly as before this
+milestone.
 """
 from __future__ import annotations
 
@@ -93,8 +97,12 @@ class ScenarioService:
         )
         warnings = [
             *match_outcome.warnings,
-            "Scenario assumptions are illustrative and qualitative only; "
-            "matching scores are identical to the baseline (non-scenario) "
-            "result — no validated scenario-driven scoring model exists yet.",
+            "Scenario assumptions are illustrative and qualitative only. "
+            "Matching scores may shift slightly when a real, dated trend "
+            "signal applies to one of the requested role's skills (see any "
+            "'Scenario adjusted the weight of...' note on a match) — "
+            "otherwise scores are identical to the baseline (non-scenario) "
+            "result. Either way, this is not a validated scenario-driven "
+            "scoring model or a labor-market forecast.",
         ]
         return ScenarioOutcome(payload=payload, warnings=warnings)

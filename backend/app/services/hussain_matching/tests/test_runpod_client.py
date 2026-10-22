@@ -1,6 +1,3 @@
-# Vendored from origin/feature/hussain-matching @ 61373a5 (owner: Hussain), source
-# services/matching/tests/test_runpod_client.py, with import paths rewritten to this package location
-# (including the monkeypatch.setattr target string below).
 """RunPod client and adapter fallback tests. All HTTP is mocked; nothing touches the network."""
 import io
 import json

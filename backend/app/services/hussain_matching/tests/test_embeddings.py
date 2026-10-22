@@ -1,5 +1,3 @@
-# Vendored from origin/feature/hussain-matching @ 61373a5 (owner: Hussain), source
-# services/matching/tests/test_embeddings.py, with import paths rewritten to this package location.
 """EmbeddingProvider tests.
 
 Fake-model tests always run. Real-model tests (synonyms vs unrelated pairs) skip

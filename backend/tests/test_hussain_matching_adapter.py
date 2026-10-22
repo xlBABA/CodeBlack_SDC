@@ -217,6 +217,10 @@ def test_score_itself_is_unaffected_by_the_missing_skills_filter():
 
 
 def test_min_semester_none_never_crashes_through_the_adapter():
+    """Milestone 10C: Hussain's latest matcher no longer gives free
+    100/100 credit for a role with no prerequisites — it reports 0
+    (the contract requires a number) since that dimension was never
+    actually assessed, not invented as a passing score."""
     role = RoleFixture(
         role_id="r", role_title="R", category="Test", min_semester=None,
         required_skills=(RoleRequirement("sql", "SQL"),),
@@ -225,7 +229,7 @@ def test_min_semester_none_never_crashes_through_the_adapter():
     profile = _profile(skills=[SkillRef(skill_id="sql", name="SQL")])
 
     results = HussainMatchingProvider(similarity=NO_SIMILARITY).match(profile, [role], None, [])
-    assert results[0]["score_breakdown"]["prerequisites"] == 100
+    assert results[0]["score_breakdown"]["prerequisites"] == 0
 
 
 def test_min_semester_none_does_not_invent_a_prerequisite():

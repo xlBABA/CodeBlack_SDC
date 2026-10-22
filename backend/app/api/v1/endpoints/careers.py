@@ -11,6 +11,9 @@ get_matching_provider is also imported by scenarios.py, roadmaps.py and
 projects.py, so the ENABLE_FIXTURES gate below applies consistently to
 every route that scores a role, from this one change.
 """
+import os
+import time
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -20,7 +23,7 @@ from app.core.time import utc_now_iso
 from app.db.session import get_db
 from app.schemas.matching import MatchRequest, MatchResponse, RoleMatch
 from app.schemas.profile import DataMode
-from app.services.hussain_matching.backend_adapter import HussainMatchingProvider
+from app.services.hussain_matching.backend_adapter import DEGRADED_CAVEAT, HussainMatchingProvider
 from app.services.interfaces import MatchingProvider, TrendProvider
 from app.services.matching_provider import FixtureMatchingProvider
 from app.services.matching_service import MatchingService
@@ -28,32 +31,117 @@ from app.services.profile_service import ProfileService
 from app.services.role_catalog import FixtureRoleCatalog, RoleCatalogProvider
 from app.services.role_catalog_cached import CachedCatalogError, CachedRoleCatalog
 from app.services.trend_provider import NullTrendProvider
+from app.services.trend_signal_provider import CachedTrendSignalProvider
 
 router = APIRouter()
 
-# Explicit no-similarity configuration (Milestone 6C-2B, Step 4): passing
-# a concrete similarity function means HussainMatchingProvider's
-# _semantic_similarity() returns it immediately and never calls
-# runpod_configured() at all — so no environment variable (even a
-# RUNPOD_API_KEY/RUNPOD_ENDPOINT_ID accidentally present in production)
-# can activate RunPod or a local sentence-transformers model from this
-# wiring. Never rely on their mere absence instead of this override.
-_NO_SIMILARITY = lambda skill_a, skill_b: 0.0  # noqa: E731
+# Milestone 10B: shared across requests (module/process lifetime), not
+# per-request. get_matching_provider() is a Depends() factory called
+# fresh on every HTTP request; constructing a new HussainMatchingProvider
+# each time (Milestone 10A's behavior) reset its RunPod circuit-breaker
+# (_down_until) on every single call, so a failed endpoint was retried on
+# literally the very next request instead of actually cooling down for
+# retry_after_seconds. Reusing one instance fixes that.
+#
+# Safe to share: HussainMatchingProvider never stores per-request student
+# data — profile/roles/scenario/signals are passed as .match() arguments
+# and never retained on self. Its only persisted state is the RunPod
+# cooldown timer and a precomputed-embedding cache keyed by the skill
+# catalogue's own shape (skill_id/name/aliases) — a function of Jawad's
+# catalog data and RunPod reachability, never of any individual's
+# profile. runpod_configured() is re-checked fresh on every .match() call
+# (never cached on the instance), so adding, removing, or rotating
+# RUNPOD_API_KEY/RUNPOD_ENDPOINT_ID takes effect on the very next call,
+# once any in-progress cooldown has elapsed.
+#
+# Minor accepted risk: route handlers are sync `def`, so FastAPI runs
+# them in a thread pool — concurrent requests could theoretically both
+# observe "not cooling down" at the exact cooldown boundary and both
+# attempt RunPod at once. That's a brief, harmless double-call, not a
+# crash or data race on shared data; not worth a lock for this milestone.
+#
+# Milestone 10C addendum — credential rotation and bounded cache age:
+# HussainMatchingProvider._providers caches a constructed
+# RunPodEmbeddingProvider keyed only by the skill catalogue's own shape
+# (skill_id/name/aliases) — NOT by RUNPOD_API_KEY/RUNPOD_ENDPOINT_ID. The
+# cached provider's underlying _RunPodModel bakes the API key in at
+# construction time. Without the check below, rotating or fixing
+# RUNPOD_API_KEY while the process is running would silently keep using
+# the OLD key forever (the cached provider is found and reused before
+# runpod_configured()'s fresh os.environ read ever matters again) — a
+# real, deployment-relevant bug this persistence otherwise introduces.
+# Fix: track which credentials (and how long ago) the current shared
+# instance was built with; rebuild it — a fresh HussainMatchingProvider,
+# discarding its old embedding-client cache — whenever either changes.
+# This also bounds how long any one skill-interpretation free-text query
+# cache (EmbeddingProvider._query_vectors, keyed by the student's own
+# typed skill text, kept in memory only) can live, instead of persisting
+# for the entire process lifetime.
+_shared_hussain_provider: HussainMatchingProvider | None = None
+_shared_hussain_provider_credentials: tuple[str, str] | None = None
+_shared_hussain_provider_created_at: float = 0.0
+_SHARED_PROVIDER_MAX_AGE_SECONDS = 30 * 60  # 30 minutes — a deployment tuning choice, not a contract
+
+
+def _current_runpod_credentials() -> tuple[str, str]:
+    return (os.environ.get("RUNPOD_API_KEY", ""), os.environ.get("RUNPOD_ENDPOINT_ID", ""))
+
+
+def _get_shared_hussain_provider() -> HussainMatchingProvider:
+    global _shared_hussain_provider, _shared_hussain_provider_credentials, _shared_hussain_provider_created_at
+    now = time.monotonic()
+    current_credentials = _current_runpod_credentials()
+    stale = (
+        _shared_hussain_provider is None
+        or current_credentials != _shared_hussain_provider_credentials
+        or (now - _shared_hussain_provider_created_at) >= _SHARED_PROVIDER_MAX_AGE_SECONDS
+    )
+    if stale:
+        _shared_hussain_provider = HussainMatchingProvider(result_model=RoleMatch)
+        _shared_hussain_provider_credentials = current_credentials
+        _shared_hussain_provider_created_at = now
+    return _shared_hussain_provider
+
+
+def reset_shared_hussain_provider_for_tests() -> None:
+    """Test-only hook (see tests/conftest.py's autouse fixture): clears
+    the module-level singleton above so each test starts with a fresh
+    circuit-breaker state, undoing the cross-request sharing this module
+    intentionally introduces for production. Never called from
+    application code."""
+    global _shared_hussain_provider, _shared_hussain_provider_credentials, _shared_hussain_provider_created_at
+    _shared_hussain_provider = None
+    _shared_hussain_provider_credentials = None
+    _shared_hussain_provider_created_at = 0.0
 
 
 def matching_mode_warning(settings: Settings) -> str | None:
     """Passed into MatchingService so its warnings stay accurate. None
     preserves MatchingService's own default fixture-mode text (still
-    correct for MATCHING_MODE=fixture)."""
+    correct for MATCHING_MODE=fixture).
+
+    Milestone 10A: no longer claims semantic similarity is "explicitly
+    disabled" — get_matching_provider() below no longer forces that.
+    Whether RunPod is actually contacted on a given request depends on
+    HussainMatchingProvider's own runpod_configured() check (both
+    RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID set) plus that endpoint's
+    reachability; this text can only describe the possibility, since it
+    is computed before matching runs. The per-match DEGRADED_CAVEAT is
+    the authoritative, per-response signal for whether this request
+    actually fell back."""
     if settings.MATCHING_MODE != "hussain":
         return None
     return (
         "MATCHING_MODE=hussain: scores are produced by Hussain's "
         "deterministic matching algorithm (app/services/hussain_matching), "
-        "running fully offline — semantic similarity is explicitly "
-        "disabled, so no RunPod endpoint or embedding model was "
-        "contacted. This methodology is an initial team choice, not a "
-        "validated model, and the score is not a hiring probability."
+        "running fully offline by default. Semantic skill-similarity may "
+        "use a configured RunPod embedding endpoint when both "
+        "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are set and that endpoint "
+        "is reachable; if they are absent, or the endpoint fails, matching "
+        "automatically falls back to exact skill matching only, and each "
+        f"affected match is labelled '{DEGRADED_CAVEAT}'. This methodology "
+        "is an initial team choice, not a validated model, and the score "
+        "is not a hiring probability."
     )
 
 
@@ -72,7 +160,17 @@ def get_matching_provider(settings: Settings = Depends(get_settings)) -> Matchin
                 "data. Set CATALOG_MODE=cached to use real cached role "
                 "data, or leave ENABLE_FIXTURES=true.",
             )
-        return HussainMatchingProvider(result_model=RoleMatch, similarity=_NO_SIMILARITY)
+        # Milestone 10A: similarity is left unset (None) deliberately —
+        # HussainMatchingProvider's own _semantic_similarity() decides per
+        # request, calling RunPod only when runpod_configured() is true
+        # (both RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID set), and degrading
+        # safely to exact-skill-only matching (DEGRADED_CAVEAT on every
+        # affected match) if they're absent or the endpoint call fails.
+        # Never guessed or forced either way from here.
+        # Milestone 10B: the shared, process-lifetime instance (see
+        # module-level comment above) — not a fresh one per request, so
+        # its RunPod circuit-breaker actually persists across requests.
+        return _get_shared_hussain_provider()
 
     # ENABLE_FIXTURES=False signals "I expect real inference." No real
     # MatchingProvider implementation exists yet (Hussain's), so that case
@@ -133,7 +231,9 @@ def catalog_provenance_warnings(settings: Settings) -> list[str]:
     if settings.CATALOG_MODE != "cached":
         return []
     scoring_description = (
-        "Hussain's deterministic matching algorithm, running fully offline (no RunPod contacted)"
+        "Hussain's deterministic matching algorithm (semantic skill-"
+        "similarity optionally via a configured RunPod endpoint, falling "
+        "back to exact skill matching if unconfigured or unreachable)"
         if settings.MATCHING_MODE == "hussain"
         else "an illustrative fixture algorithm (FixtureMatchingProvider)"
     )
@@ -147,7 +247,38 @@ def catalog_provenance_warnings(settings: Settings) -> list[str]:
     ]
 
 
-def get_trend_provider() -> TrendProvider:
+def trend_signal_provenance_warnings(settings: Settings) -> list[str]:
+    """Milestone 10C: discloses that CATALOG_MODE=cached feeds real,
+    dated trend signals into matching/scenarios — never claims this is
+    hiring demand, and never claims every skill or role has a signal
+    (Jawad's catalog covers 12 of 20 skills; the other 8 and any role
+    whose required skills are all uncovered simply see no adjustment,
+    which scenario_service.py's own warnings already disclose per
+    response)."""
+    if settings.CATALOG_MODE != "cached":
+        return []
+    return [
+        "CATALOG_MODE=cached: when a scenario is requested, skill weight "
+        "adjustments use Jawad's real, dated, cached GitHub developer-"
+        "activity signals (app/data/cached/trend_snapshots) — not every "
+        "skill has a covered signal, and this is developer-activity data, "
+        "never a verified hiring-demand measurement."
+    ]
+
+
+def get_trend_provider(settings: Settings = Depends(get_settings)) -> TrendProvider:
+    """Milestone 10C: CATALOG_MODE=cached feeds MatchingService Jawad's
+    real cached GitHub-developer-activity trend signals (CachedTrendSignalProvider —
+    a pure read of app/data/cached/trend_snapshots/, never a live GitHub
+    call); CATALOG_MODE=fixture (the default) keeps NullTrendProvider
+    (no signals), unchanged from before — consistent with every other
+    "use Jawad's real cached data only under CATALOG_MODE=cached" gate in
+    this file. CachedTrendSignalProvider never raises: missing/invalid
+    snapshot data degrades to an empty signal list, which
+    scenarios.py's skill_weight_adjustments() already handles as "no
+    scenario change" with its own explicit warning."""
+    if settings.CATALOG_MODE == "cached":
+        return CachedTrendSignalProvider()
     return NullTrendProvider()
 
 
@@ -179,5 +310,5 @@ def match_careers(
         data=outcome.payload,
         data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings + catalog_provenance_warnings(settings),
+        warnings=outcome.warnings + catalog_provenance_warnings(settings) + trend_signal_provenance_warnings(settings),
     )
