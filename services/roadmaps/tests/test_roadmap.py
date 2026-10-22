@@ -94,7 +94,7 @@ def test_new_manual_resources_are_used_for_excel_critical_thinking_and_cad():
 def test_mathematics_defaults_to_statistics_video_mit_kept_as_secondary():
     step = get_roadmap(PROFILE, "data_analyst", ["mathematics"])["steps"][0]
     assert (step["resource_id"], step["estimated_hours"], step["hours_basis"]) == (
-        "fcc_statistics_video_monika_wahi", 8.0, "team_estimate")
+        "fcc_statistics_video_monika_wahi", 8.25, "provider_stated")
     math = {r["resource_id"]: r.get("rank", 1) for r in RES["resources"] if "mathematics" in r["skill_ids"]}
     assert math == {"fcc_statistics_video_monika_wahi": 1, "mit_ocw_18_05_probability_statistics": 2}
 

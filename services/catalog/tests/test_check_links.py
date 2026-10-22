@@ -35,9 +35,9 @@ def test_jawads_manual_checks_are_detected():
     manual = manually_checked_urls()
     assert {
         "https://alison.com/course/thinking-critically",
-        "https://www.kdnuggets.com/2022/09/free-microsoft-excel-beginners-course.html",
+        "https://youtu.be/Vl0H-qTclOg",
         "https://learn.onshape.com/learning-paths/introduction-to-cad",
-        "https://expertbeacon.com/learn-college-level-statistics-in-this-free-8-hour-course/",
+        "https://youtu.be/xxpc-HPKN28",
     } <= manual
     assert "https://learn.sas.com/course/view.php?id=118" not in manual
 

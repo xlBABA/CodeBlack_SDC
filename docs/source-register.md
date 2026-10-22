@@ -72,7 +72,7 @@ Every roadmap step has a numeric `estimated_hours` (Rehan's `RoadmapStep` requir
 
 | `hours_basis` | meaning | where it comes from |
 |---|---|---|
-| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths and the Microsoft Learn *Introduction to Git* module (`duration_in_minutes` in Microsoft Learn's official catalog API), the freeCodeCamp Excel video (2:26:10 on the player) and Alison "Thinking Critically" (upper end of its stated 1.5-3 h). |
+| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths and the Microsoft Learn *Introduction to Git* module (`duration_in_minutes` in Microsoft Learn's official catalog API), the two freeCodeCamp YouTube videos (Excel 2:26:09 and statistics 8:15:04, video length shown on YouTube) and Alison "Thinking Critically" (upper end of its stated 1.5-3 h). |
 | `team_estimate` | The provider states **no** duration, so the team estimated one. **Not** a provider figure. | `resources.json` → `team_estimate_hours`, with `team_estimate_basis` showing the arithmetic from facts on the page. |
 
 Current team estimates (checked 2026-10-22):
@@ -84,13 +84,12 @@ Current team estimates (checked 2026-10-22):
 | MIT OCW — 18.05 Probability and Statistics | 112 h | Full one-semester course with weekly problem sets; assumed ~8 h/week × ~14 weeks |
 | SAS — SAS Programming 1: Essentials | 21 h | SAS says "a complete how-to in two days" and lists 21 h for the live-class format; assumed similar for self-paced |
 | Onshape — CAD Basics (Learning Pathway) | 7 h | 7 listed topics at about 1 h each; Onshape publishes no duration |
-| freeCodeCamp — statistics video by Monika Wahi | 8 h | Only a third-party article (expertbeacon.com, updated 2024-08-20) calls it an "8-hour course"; the video page itself has not been seen |
 | MDN — Dynamic scripting with JavaScript | 23 h | 23 lesson and challenge pages in the module × ~1 h |
 | Harvard — CS50x 2026 | 110 h | 11 weeks of material (Week 0–10, read by automated fetch; week count not verified by Jawad) × ~10 h/week |
 | GnuCash — Tutorial and Concepts Guide | 12 h | 16 chapters × ~45 min |
 | QGIS — Training Manual | 14 h | Core modules 2–8 (7 modules) × ~2 h |
 
-`checked_by` in `data/resources.json` records how each page was verified: `automated fetch (Claude Code)` or `Jawad, manually in browser` (used for pages that block automated requests or need a sign-in). When a skill has more than one resource, `rank` (lower = preferred) decides which one `get_roadmap` uses; mathematics uses the statistics video (rank 1) and keeps MIT 18.05 as rank 2.
+`checked_by` in `data/resources.json` records how each page was verified: `automated fetch (Claude Code)` or `Jawad, manually in browser` (used for pages that block automated requests or need a sign-in). When a skill has more than one resource, `rank` (lower = preferred) decides which one `get_roadmap` uses; mathematics uses the freeCodeCamp statistics video (rank 1) and keeps MIT 18.05 as rank 2.
 
 Rules: a resource has either `estimated_hours` (provider) or `team_estimate_hours` (team), never both. `total_estimated_hours` includes both kinds, and the roadmap's warnings name every step that uses a team estimate.
 
@@ -126,10 +125,10 @@ Each resource's `source_id` equals its `resource_id`. Price, hours and their bas
 | mslearn_power_bi_prepare_visualize | Microsoft Learn — Prepare and visualize data with Microsoft Power BI | https://learn.microsoft.com/en-us/training/paths/prepare-visualize-data-power-bi/ | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: data_visualization |
 | mslearn_vba_getting_started_office | Microsoft Learn (official Office VBA documentation) — Getting started with VBA in Office | https://learn.microsoft.com/en-us/office/vba/library-reference/concepts/getting-started-with-vba-in-office | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: vba |
 | mathworks_matlab_onramp | MathWorks (MATLAB Academy) — MATLAB Onramp | https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted | price: not_stated | 2026-10-22 | automated fetch (Claude Code) | skill: matlab |
-| fcc_statistics_video_monika_wahi | freeCodeCamp.org (instructor: Monika Wahi) — Statistics video course by Monika Wahi (freeCodeCamp) | https://expertbeacon.com/learn-college-level-statistics-in-this-free-8-hour-course/ | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: mathematics |
+| fcc_statistics_video_monika_wahi | freeCodeCamp.org (YouTube) — Statistics - A Full University Course on Data Science Basics | https://youtu.be/xxpc-HPKN28 | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: mathematics |
 | mit_ocw_18_05_probability_statistics | MIT OpenCourseWare — 18.05 Introduction to Probability and Statistics (Spring 2022) | https://ocw.mit.edu/courses/18-05-introduction-to-probability-and-statistics-spring-2022/ | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: mathematics |
 | sas_programming_1_essentials | SAS — SAS Programming 1: Essentials | https://learn.sas.com/course/view.php?id=118 | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: analytical_scientific_software |
-| fcc_excel_beginners_full_course | freeCodeCamp.org — Microsoft Excel Tutorial for Beginners - Full Course | https://www.kdnuggets.com/2022/09/free-microsoft-excel-beginners-course.html | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: excel |
+| fcc_excel_beginners_full_course | freeCodeCamp.org (YouTube) — Microsoft Excel Tutorial for Beginners - Full Course | https://youtu.be/Vl0H-qTclOg | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: excel |
 | alison_thinking_critically | Alison — Thinking Critically | https://alison.com/course/thinking-critically | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: critical_thinking |
 | onshape_cad_basics_pathway | Onshape Learning Center — CAD Basics (Learning Pathway) | https://learn.onshape.com/learning-paths/introduction-to-cad | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: cad_software |
 | mslearn_intro_to_git | Microsoft Learn — Introduction to Git | https://learn.microsoft.com/en-us/training/modules/intro-to-git/ | price: no_charge_observed | 2026-10-22 | Jawad, manually in browser | skill: git |

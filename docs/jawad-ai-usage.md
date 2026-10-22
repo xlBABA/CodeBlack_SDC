@@ -24,7 +24,8 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | ab21a9c | Renamed the product to "Mustaqbal AI" in 4 docstrings and 2 User-Agent labels (no IDs changed) | `services/*/__init__.py`, `services/trends/github_client.py`, `services/catalog/check_links.py` |
 | ecdeee3 | 4 more verified roles from O*NET (Software Developer, Accountant, Civil Engineer, Environmental Scientist), 6 new skills, SDG mappings, trend coverage and first real GitHub snapshots for the new skills, learning resources, and 2 portfolio projects per new role | `data/*.json`, `data/trend_snapshots/*.json`, `docs/source-register.md`, `services/trends/queries.py`, `services/trends/README.md`, `services/catalog/tests/test_catalog.py`, `services/roadmaps/tests/test_roadmap.py`, `services/roadmaps/tests/test_projects.py` |
 | a5045cb | Updated link-check report and this file | `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
-| this commit | Recorded my browser checks for 5 resources and the UCI Concrete dataset; moved the GnuCash resource to its gnucash.org guide URL | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| 4ba98a0 | Recorded my browser checks for 5 resources and the UCI Concrete dataset; moved the GnuCash resource to its gnucash.org guide URL | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| this commit | Pointed the statistics and Excel resources at their direct freeCodeCamp YouTube videos, with video lengths I saw (statistics hours now provider-stated, 8.25 h) | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `services/catalog/tests/test_check_links.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
@@ -51,9 +52,9 @@ It did not write any files in the repo.
 ## What I checked myself in my browser (2026-10-22)
 These have `"checked_by": "Jawad, manually in browser"` in `data/resources.json`:
 - Alison, *Thinking Critically*: free, "Avg. Duration 1.5-3 Hours".
-- freeCodeCamp *Microsoft Excel Tutorial for Beginners - Full Course*, embedded on KDnuggets: player length 2:26:10.
+- freeCodeCamp *Microsoft Excel Tutorial for Beginners - Full Course* on YouTube (https://youtu.be/Vl0H-qTclOg): the link opens, the title, and length 2:26:09. Earlier I checked it embedded on KDnuggets.
 - Onshape *CAD Basics (Learning Pathway)*: free sign-in, 7 topics, no stated duration.
-- The ExpertBeacon article on Monika Wahi's freeCodeCamp statistics course. I have not yet seen the video page itself.
+- freeCodeCamp *Statistics - A Full University Course on Data Science Basics* on YouTube (https://youtu.be/xxpc-HPKN28): the link opens, the title, and length 8:15:04. Earlier I had only seen an ExpertBeacon article about it. The instructor name (Monika Wahi) still comes only from that article.
 - Microsoft Learn, *Introduction to Git*: free, "1 hr 26 min".
 - MDN, *Dynamic scripting with JavaScript*: free.
 - Harvard CS50x 2026: free; no hours stated, so the 110 h stays a team estimate.
@@ -68,7 +69,7 @@ Not yet checked by me: the QGIS Training Manual's licence, the CS50x week count 
 
 ## What is a team estimate (not from a source)
 - **Role importance numbers:** the cases where `roles.json` differs from O*NET's bucketed score (mostly mathematics), every tool-skill importance, and every `required: true/false` flag. See "Importance score methodology" in `docs/source-register.md`.
-- **Learning hours** where the provider states none: VBA doc 1.5 h, MATLAB Onramp 3 h, MIT 18.05 112 h, SAS Programming 1 21 h, Onshape CAD Basics 7 h, statistics video 8 h, MDN JavaScript 23 h, CS50x 110 h, GnuCash guide 12 h, QGIS manual 14 h.
+- **Learning hours** where the provider states none: VBA doc 1.5 h, MATLAB Onramp 3 h, MIT 18.05 112 h, SAS Programming 1 21 h, Onshape CAD Basics 7 h, MDN JavaScript 23 h, CS50x 110 h, GnuCash guide 12 h, QGIS manual 14 h.
 - **All project hours.** Each is the sum of per-milestone estimates.
 - **SDG mappings.** The SDG chosen for each role and skill, and its reason, are our own judgment.
 - **Trend rules.** The 15% threshold, which skills get a GitHub topic, and the exclusion of 8 skills.
