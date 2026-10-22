@@ -1,0 +1,29 @@
+{
+  "data": {
+    "signals": [
+      {
+        "signal_id": "signal_demo_001",
+        "skill_id": "python",
+        "source_id": "source_signal_demo_001",
+        "signal_type": "repository_activity",
+        "metric_name": "illustrative_demo_metric",
+        "metric_value": null,
+        "unit": null,
+        "observed_at": "2026-09-01T00:00:00Z",
+        "retrieved_at": "2026-10-01T00:00:00Z",
+        "direction": "rising",
+        "confidence_note": "Synthetic/hypothetical demonstration signal; not a real sourced observation or vacancy-demand claim.",
+        "role_ids": [
+          "data_analyst"
+        ]
+      }
+    ],
+    "last_successful_refresh_at": null,
+    "source_status": "stale"
+  },
+  "data_mode": "fixture",
+  "generated_at": "2026-10-22T20:06:30Z",
+  "warnings": [
+    "No real trend source is connected yet; any signals shown are synthetic, clearly-labeled hypothetical placeholders demonstrating the contract shape, not sourced evidence or live job-market data."
+  ]
+}
