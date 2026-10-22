@@ -1,0 +1,96 @@
+{
+  "role_sdg_mappings": [
+    {
+      "role_id": "data_analyst",
+      "sdg_id": 8,
+      "reason": "Business intelligence/data analysis work directly supports organizations making productive, evidence-based decisions, matching SDG 8's focus on productivity and economic growth."
+    },
+    {
+      "role_id": "financial_analyst",
+      "sdg_id": 8,
+      "reason": "Financial analysts guide capital allocation and investment decisions that affect economic growth and job creation, a core part of SDG 8."
+    },
+    {
+      "role_id": "mechanical_engineer",
+      "sdg_id": 9,
+      "reason": "Mechanical engineers design and build industrial systems, products and infrastructure, directly supporting SDG 9's goal of resilient infrastructure and inclusive industrialization."
+    },
+    {
+      "role_id": "public_health_analyst",
+      "sdg_id": 3,
+      "reason": "Epidemiology-based analysis tracks disease patterns and health risks to protect population health, matching SDG 3's goal of health and well-being for all."
+    }
+  ],
+  "skill_sdg_mappings": [
+    {
+      "skill_id": "critical_thinking",
+      "sdg_id": 4,
+      "reason": "Core analytical competency built through education; a foundational learning outcome (SDG 4) that transfers across any evidence-based career."
+    },
+    {
+      "skill_id": "mathematics",
+      "sdg_id": 4,
+      "reason": "Quantitative literacy is a foundational education outcome (SDG 4) underlying STEM, finance, and health analysis work."
+    },
+    {
+      "skill_id": "complex_problem_solving",
+      "sdg_id": 4,
+      "reason": "A higher-order thinking skill developed through education (SDG 4), applicable across all four roles in this catalog."
+    },
+    {
+      "skill_id": "systems_analysis",
+      "sdg_id": 4,
+      "reason": "An analytical competency taught and strengthened through formal education and training (SDG 4)."
+    },
+    {
+      "skill_id": "attention_to_detail",
+      "sdg_id": 4,
+      "reason": "A work-quality competency developed through training and education (SDG 4), important for accurate financial analysis."
+    },
+    {
+      "skill_id": "excel",
+      "sdg_id": 8,
+      "reason": "A baseline digital workplace skill tied to employability, matching SDG target 8.6 on equipping youth with skills for employment."
+    },
+    {
+      "skill_id": "sql",
+      "sdg_id": 8,
+      "reason": "An in-demand technical skill directly tied to employability in data-driven roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "python",
+      "sdg_id": 8,
+      "reason": "An in-demand technical skill directly tied to employability in data-driven and engineering roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "data_visualization",
+      "sdg_id": 8,
+      "reason": "A widely-demanded workplace tool skill that improves employability across analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "cad_software",
+      "sdg_id": 9,
+      "reason": "CAD tools are used to design industrial products and infrastructure, supporting SDG 9's focus on inclusive, sustainable industrialization."
+    },
+    {
+      "skill_id": "matlab",
+      "sdg_id": 9,
+      "reason": "MATLAB is used for engineering modeling and simulation that underpins infrastructure and industrial design (SDG 9)."
+    },
+    {
+      "skill_id": "financial_analysis_software",
+      "sdg_id": 8,
+      "reason": "An in-demand finance-sector tool skill directly tied to employability in investment/analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "analytical_scientific_software",
+      "sdg_id": 8,
+      "reason": "A statistical-analysis tool skill tied to employability in quantitative analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "vba",
+      "sdg_id": 8,
+      "reason": "A workplace automation/scripting skill tied to employability in finance and analyst roles (SDG target 8.6)."
+    }
+  ]
+}
