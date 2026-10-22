@@ -8,7 +8,11 @@ One real, public, dated source per row. `source_id` is referenced from `data/rol
 | onet_13_2051_00 | O*NET OnLine — Financial and Investment Analysts (13-2051.00) | https://www.onetonline.org/link/summary/13-2051.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-21 | Technology/software skills (27 categories, fully populated) and work styles for this occupation. **LIMITED:** O*NET's own page states "data collection is currently underway" for this occupation — its Knowledge, Abilities, and Basic/Cross-Functional Skills sections are not yet populated at the source. We only use the populated Technology/Software Skills and Work Styles sections; nothing is invented to fill the gap. Not a hiring-demand feed. | Periodic | **Knowledge, Abilities, and general Skills sections: LIMITED (not yet available at source)**; US-labor-market-centric |
 | onet_17_2141_00 | O*NET OnLine — Mechanical Engineers (17-2141.00) | https://www.onetonline.org/link/summary/17-2141.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-21 | Typical skills and technology tools for this occupation. Not a hiring-demand feed. | Periodic | US-labor-market-centric |
 | onet_19_1041_00 | O*NET OnLine — Epidemiologists (19-1041.00) | https://www.onetonline.org/link/summary/19-1041.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-21 | Typical skills and technology tools for this occupation (used as the closest public-health analysis role). Not a hiring-demand feed. | Periodic | US-labor-market-centric |
-| github_search_repos | GitHub REST API — Search Repositories (`topic:<x> created:<start>..<end>`) | https://docs.github.com/en/rest/search/search#search-repositories | Public API; GitHub Terms of Service apply (documented, rate-limited automated use is permitted); free, optional personal access token via `services/trends/.env` (never committed) | continuous/live (a query against the current state of GitHub, not a fixed-date publication) | 2026-10-21 (first integration) | Count of NEW repositories created in a rolling 30-day window and tagged with a specific topic, compared to the prior 30-day window. **Developer/tech-ecosystem activity signal. NOT a hiring-demand measure.** | On demand per refresh; unauthenticated ~10 req/min, ~30 req/min with a token | Only 8 of 14 catalogue skills have a clear, verified GitHub topic (see `services/trends/README.md` for the full coverage table and the 6 explicitly excluded skills); topic tagging is voluntary so true activity can be undercounted; a count GitHub itself flags `incomplete_results: true` is treated as `unknown`, never trusted |
+| onet_15_1252_00 | O*NET OnLine — Software Developers (15-1252.00) | https://www.onetonline.org/link/summary/15-1252.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-22 | Typical skills (with 0-100 importance) and technology tools for this occupation. Tools come from O*NET's full Software Skills CSV export (https://www.onetonline.org/link/table/details/tc/15-1252.00/Software_Skills_15-1252-00.csv?fmt=csv), because the on-page list is truncated. Not a hiring-demand feed. | Periodic | US-labor-market-centric; Hot Technology flags are not in the CSV export |
+| onet_13_2011_00 | O*NET OnLine — Accountants and Auditors (13-2011.00) | https://www.onetonline.org/link/summary/13-2011.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-22 | Typical skills, work styles (Attention to Detail 100) and technology tools; one occupation covering both accountants and auditors. Not a hiring-demand feed. | Periodic | US-labor-market-centric; does not separate accountant from auditor |
+| onet_17_2051_00 | O*NET OnLine — Civil Engineers (17-2051.00) | https://www.onetonline.org/link/summary/17-2051.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-22 | Typical skills (with 0-100 importance) and technology tools for this occupation. Not a hiring-demand feed. | Periodic | US-labor-market-centric |
+| onet_19_2041_00 | O*NET OnLine — Environmental Scientists and Specialists, Including Health (19-2041.00) | https://www.onetonline.org/link/summary/19-2041.00 | Public domain (US Dept. of Labor, O*NET) | 2026-10-06 | 2026-10-22 | Typical skills (with 0-100 importance) and technology tools for this occupation. Not a hiring-demand feed. | Periodic | US-labor-market-centric; lists no Python or R |
+| github_search_repos | GitHub REST API — Search Repositories (`topic:<x> created:<start>..<end>`) | https://docs.github.com/en/rest/search/search#search-repositories | Public API; GitHub Terms of Service apply (documented, rate-limited automated use is permitted); free, optional personal access token via `services/trends/.env` (never committed) | continuous/live (a query against the current state of GitHub, not a fixed-date publication) | 2026-10-21 (first integration) | Count of NEW repositories created in a rolling 30-day window and tagged with a specific topic, compared to the prior 30-day window. **Developer/tech-ecosystem activity signal. NOT a hiring-demand measure.** | On demand per refresh; unauthenticated ~10 req/min, ~30 req/min with a token | Only 12 of 20 catalogue skills have a clear, verified GitHub topic (see `services/trends/README.md` for the full coverage table and the 8 explicitly excluded skills); topic tagging is voluntary so true activity can be undercounted; a count GitHub itself flags `incomplete_results: true` is treated as `unknown`, never trusted |
 
 ## Notes
 - All four sources are **occupation/skill-requirement descriptions**, not live job-posting or vacancy-demand data. They answer "what skills does this job typically need," not "how many jobs are open right now."
@@ -35,10 +39,29 @@ O*NET publishes a real 0-100 "Importance" score per skill/work-style, per occupa
 | public_health_analyst | critical_thinking | 81 | 5 | 5 | derived |
 | public_health_analyst | mathematics | 69 | 4 | 5 | **team estimate** — same reasoning as above |
 | financial_analyst | attention_to_detail | 100 (Work Style importance) | 5 | 5 | derived |
+| software_developer | programming | 75 | 5 | 5 | derived |
+| software_developer | critical_thinking | 72 | 5 | 5 | derived |
+| software_developer | systems_analysis | 63 | 4 | 4 | derived |
+| software_developer | complex_problem_solving | 60 | 4 | 4 | derived |
+| software_developer | mathematics | 44 | 2 | 2 | derived (optional: team estimate) |
+| accountant | attention_to_detail | 100 (Work Style importance) | 5 | 5 | derived |
+| accountant | critical_thinking | 63 | 4 | 4 | derived |
+| accountant | complex_problem_solving | 63 | 4 | 4 | derived |
+| accountant | mathematics | 60 | 4 | 4 | derived |
+| civil_engineer | mathematics | 72 | 5 | 5 | derived |
+| civil_engineer | critical_thinking | 72 | 5 | 5 | derived |
+| civil_engineer | complex_problem_solving | 72 | 5 | 5 | derived |
+| civil_engineer | systems_analysis | 69 | 4 | 4 | derived |
+| civil_engineer | science | 69 | 4 | 4 | derived |
+| environmental_scientist | science | 75 | 5 | 5 | derived |
+| environmental_scientist | complex_problem_solving | 75 | 5 | 5 | derived |
+| environmental_scientist | critical_thinking | 72 | 5 | 5 | derived |
+| environmental_scientist | mathematics | 56 | 3 | 3 | derived |
+| environmental_scientist | systems_analysis | 50 | 3 | 3 | derived |
 
-Source for each number: the occupation's own O*NET Details page (`https://www.onetonline.org/link/details/<code>`), retrieved 2026-10-21.
+Source for each number: the occupation's own O*NET Details page (`https://www.onetonline.org/link/details/<code>`), retrieved 2026-10-21 for the first 4 roles and 2026-10-22 for the last 4. For the 4 newer roles, the scores were read directly from the page HTML (the `Importance` cell of each skill row), not from an AI summary, and every value follows the bucket rule exactly.
 
-**2. Technology/tool skills (excel, sql, python, data_visualization, cad_software, matlab, financial_analysis_software, analytical_scientific_software, vba).**
+**2. Technology/tool skills (excel, sql, python, data_visualization, cad_software, matlab, financial_analysis_software, analytical_scientific_software, vba, javascript, git, accounting_software, gis).**
 O*NET does **not** publish a 0-100 importance number for individual technology/software skills — only whether a tool appears in the occupation's Technology Skills list, and sometimes a "Hot Technology" / "In Demand" badge. Our retrieval (an AI-summarized read of the rendered page) returned that badge inconsistently across repeated fetches for the same tool, so **every tool-skill importance number in `data/roles.json` is a team estimate**, informed by (a) whether the tool is confirmed present at all for that occupation [verified — see `data/skills.json` `source_ids`], and (b) the team's judgment of how central that tool is to the role. None should be read as an O*NET-derived score.
 
 **3. The `required: true/false` flag itself.** O*NET has no "required vs optional" field — this split is our own product design choice (to keep each role's core list short). It is a **team estimate** for every skill in every role.
@@ -49,7 +72,7 @@ Every roadmap step has a numeric `estimated_hours` (Rehan's `RoadmapStep` requir
 
 | `hours_basis` | meaning | where it comes from |
 |---|---|---|
-| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths (`duration_in_minutes` in Microsoft Learn's official catalog API), the freeCodeCamp Excel video (2:26:10 on the player) and Alison "Thinking Critically" (upper end of its stated 1.5-3 h). |
+| `provider_stated` | The provider's own published duration. | `resources.json` → `estimated_hours` (with `hours_source` quoting it). Currently the 3 Microsoft Learn paths and the Microsoft Learn *Introduction to Git* module (`duration_in_minutes` in Microsoft Learn's official catalog API), the freeCodeCamp Excel video (2:26:10 on the player) and Alison "Thinking Critically" (upper end of its stated 1.5-3 h). |
 | `team_estimate` | The provider states **no** duration, so the team estimated one. **Not** a provider figure. | `resources.json` → `team_estimate_hours`, with `team_estimate_basis` showing the arithmetic from facts on the page. |
 
 Current team estimates (checked 2026-10-22):
@@ -62,6 +85,10 @@ Current team estimates (checked 2026-10-22):
 | SAS — SAS Programming 1: Essentials | 21 h | SAS says "a complete how-to in two days" and lists 21 h for the live-class format; assumed similar for self-paced |
 | Onshape — CAD Basics (Learning Pathway) | 7 h | 7 listed topics at about 1 h each; Onshape publishes no duration |
 | freeCodeCamp — statistics video by Monika Wahi | 8 h | Only a third-party article (expertbeacon.com, updated 2024-08-20) calls it an "8-hour course"; the video page itself has not been seen |
+| MDN — Dynamic scripting with JavaScript | 23 h | 23 lesson and challenge pages in the module × ~1 h |
+| Harvard — CS50x 2026 | 110 h | 11 weeks of material (Week 0–10) × ~10 h/week |
+| GnuCash — Tutorial and Concepts Guide | 12 h | 16 chapters × ~45 min |
+| QGIS — Training Manual | 14 h | Core modules 2–8 (7 modules) × ~2 h |
 
 `checked_by` in `data/resources.json` records how each page was verified: `automated fetch (Claude Code)` or `Jawad, manually in browser` (used for pages that block automated requests or need a sign-in). When a skill has more than one resource, `rank` (lower = preferred) decides which one `get_roadmap` uses; mathematics uses the statistics video (rank 1) and keeps MIT 18.05 as rank 2.
 
@@ -81,8 +108,12 @@ Each page was opened on `checked_at` and its licence read from the page itself. 
 | uci_ccpp | UCI ML Repository — Combined Cycle Power Plant | https://archive.ics.uci.edu/dataset/294/combined+cycle+power+plant | CC BY 4.0 | 2026-10-22 | me_power_plant_regression | |
 | onshape_cad_basics | Onshape Learning Center — CAD Basics (Learning Pathway) | https://learn.onshape.com/learning-paths/introduction-to-cad | Onshape terms of use (tutorial, not a dataset) | 2026-10-22 | me_parametric_bracket_cad | `source_type: tutorial`; free sign-in required; checked manually by Jawad in a browser |
 | uci_diabetes_130 | UCI ML Repository — Diabetes 130-US Hospitals for Years 1999-2008 | https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008 | CC BY 4.0 | 2026-10-22 | ph_diabetes_readmission | **De-identified, public patient records. No part of the dataset is included in this app**; the project only links to the UCI page |
+| uci_concrete_compressive_strength | UCI ML Repository — Concrete Compressive Strength | https://archive.ics.uci.edu/dataset/165/concrete+compressive+strength | CC BY 4.0 | 2026-10-22 | ce_concrete_strength_model | 1,030 rows; ingredients in kg/m^3 and age in days |
+| uci_beijing_multi_site_air_quality | UCI ML Repository — Beijing Multi-Site Air Quality | https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data | CC BY 4.0 ("This dataset is licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license."); no other use restriction on the page | 2026-10-22 | es_beijing_air_quality_trends | 420,768 hourly rows from 12 sites, 2013-03-01 to 2017-02-28; data from the Beijing Municipal Environmental Monitoring Center; creator Song Chen; DOI 10.24432/C5RK5G; missing data marked NA |
 
-Checked and **not used**: SEC Financial Statement Data Sets (page returned 403 to automated checks), Our World in Data COVID-19 repository (archived; licence file not found), WHO Global Health Observatory (no licence text found on the page).
+Tutorial sources reused from the learning-resources table: `gnucash_tutorial_concepts_guide` (ac_gnucash_small_business_books) and `qgis_training_manual` (ce_qgis_site_analysis, es_qgis_forestry_mapping); both are `source_type: tutorial`. They are linked, not copied. Licence as seen on 2026-10-22: the GnuCash guide's contents list a "GNU Free Documentation License" appendix; the QGIS Training Manual index page shows only "© Copyright 2002-now, QGIS project" and states no licence.
+
+Checked and **not used**: UCI Air Quality (https://archive.ics.uci.edu/dataset/360/air+quality; labelled CC BY 4.0, but its description says "This dataset can be used exclusively for research purposes. Commercial purposes are fully excluded.", which does not fit a public Apache-2.0 repo), Natural Earth (returned 406 to automated checks, licence not read), SEC Financial Statement Data Sets (page returned 403 to automated checks), Our World in Data COVID-19 repository (archived; licence file not found), WHO Global Health Observatory (no licence text found on the page).
 
 ## Learning resources (`data/resources.json`)
 
@@ -101,6 +132,11 @@ Each resource's `source_id` equals its `resource_id`. Price, hours and their bas
 | fcc_excel_beginners_full_course | freeCodeCamp.org — Microsoft Excel Tutorial for Beginners - Full Course | https://www.kdnuggets.com/2022/09/free-microsoft-excel-beginners-course.html | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: excel |
 | alison_thinking_critically | Alison — Thinking Critically | https://alison.com/course/thinking-critically | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: critical_thinking |
 | onshape_cad_basics_pathway | Onshape Learning Center — CAD Basics (Learning Pathway) | https://learn.onshape.com/learning-paths/introduction-to-cad | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: cad_software |
+| mslearn_intro_to_git | Microsoft Learn — Introduction to Git | https://learn.microsoft.com/en-us/training/modules/intro-to-git/ | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: git |
+| mdn_javascript_dynamic_scripting | MDN Web Docs (Mozilla) — Dynamic scripting with JavaScript (Learn web development) | https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting | price: no_charge_observed | 2026-10-22 | automated fetch (Claude Code) | skill: javascript |
+| cs50x_2026 | Harvard University (CS50 OpenCourseWare) — CS50x 2026 (CS50's Introduction to Computer Science) | https://cs50.harvard.edu/x/ | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: programming |
+| gnucash_tutorial_concepts_guide | GnuCash (official documentation) — GnuCash Tutorial and Concepts Guide | https://www.gnucash.org/docs/v5/C/gnucash-guide/ | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: accounting_software |
+| qgis_training_manual | QGIS (official documentation) — QGIS Training Manual | https://docs.qgis.org/latest/en/docs/training_manual/ | price: free_stated | 2026-10-22 | automated fetch (Claude Code) | skill: gis |
 
 ## Scenario assumptions
 
@@ -112,7 +148,7 @@ How our dated GitHub signals feed Hussain's two scenarios (`services/matching/sc
    - **Fast AI adoption:** rising skill × 1.25 (+25%), falling skill × 0.75 (-25%).
    - `stable` and `unknown` signals change nothing. If one skill gets both a rising and a falling signal, it is left unchanged and a note is added. With no signals at all, the scenario changes nothing and says so.
    - The signal's `source_id` (`github_search_repos`) is added to the role's `evidence_ids`, so the result shows where the change came from.
-3. **Today's effect** (first snapshot, retrieved 2026-10-21): python, matlab, excel, vba and cad_software are `rising`; sql, data_visualization and financial_analysis_software are `stable`; nothing is `falling`. The 6 skills without a GitHub topic (critical_thinking, mathematics, complex_problem_solving, systems_analysis, attention_to_detail, analytical_scientific_software) never get a signal, so scenarios never change their weight.
+3. **Today's effect** (snapshots retrieved 2026-10-21 for the first 8 covered skills, 2026-10-22 for the 4 added later): python, matlab, excel, vba, cad_software, javascript, git, accounting_software and gis are `rising`; sql, data_visualization and financial_analysis_software are `stable`; nothing is `falling`. git only just crosses the threshold (+15.9%). The 8 skills without a GitHub topic (critical_thinking, mathematics, complex_problem_solving, systems_analysis, attention_to_detail, analytical_scientific_software, programming, science) never get a signal, so scenarios never change their weight.
 
 **These percentages are team assumptions, not forecasts.** The ±10% and ±25% values are the team's illustrative choices (see `UNCERTAINTY_NOTE` in `scenarios.py`). They are not research results and do not predict the job market or any student's outcome.
 

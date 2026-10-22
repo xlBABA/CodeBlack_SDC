@@ -88,6 +88,28 @@ def test_requested_notes_are_present():
     assert "exclude sex, marital status and age" in " ".join(by_id["fa_credit_default_analysis"]["milestones"])
 
 
+def test_new_role_projects_carry_their_honesty_labels():
+    by_id = {p["project_id"]: p for p in PROJECTS}
+    assert "CC BY 4.0" in by_id["es_beijing_air_quality_trends"]["data_note"]
+    assert "fictional" in by_id["ac_gnucash_small_business_books"]["data_note"]
+    for pid in ("ac_gnucash_small_business_books", "ce_qgis_site_analysis", "es_qgis_forestry_mapping"):
+        assert by_id[pid]["source_type"] == "tutorial", pid
+
+
+def test_dataset_licences_are_open_with_no_use_restriction():
+    # Every dataset project's source row must state an open licence and must not
+    # carry a research-only or non-commercial restriction (the repo is Apache-2.0).
+    rows = {line.split(" | ")[0].strip("| "): line for line in REGISTER.splitlines() if line.startswith("| ")}
+    for p in PROJECTS:
+        if p["source_type"] != "dataset":
+            continue
+        for sid in p["source_ids"]:
+            licence = rows[sid].split(" | ")[3]
+            assert "CC BY 4.0" in licence or "Creative Commons Attribution 4.0" in licence, sid
+            assert "research purposes" not in licence and "commercial" not in licence.lower(), sid
+    assert "uci_air_quality" not in json.dumps(PROJECTS)
+
+
 def test_limit_and_unknown_role():
     assert len(get_projects("mechanical_engineer", limit=1)["projects"]) == 1
     assert len(get_projects("mechanical_engineer")["projects"]) == 3  # default limit 3

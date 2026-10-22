@@ -15,6 +15,11 @@ COVERED_SKILLS: dict[str, str] = {
     "vba": "vba",
     "cad_software": "cad",
     "financial_analysis_software": "financial-analysis",
+    # added 2026-10-22, each checked live (new repos 2026-09-23..2026-10-22)
+    "javascript": "javascript",   # 12,377
+    "git": "git",                 # 1,596
+    "accounting_software": "accounting",  # 437
+    "gis": "gis",                 # 649
 }
 
 # skill_id -> why it is NOT scored (never guessed a topic to fill the gap)
@@ -40,5 +45,15 @@ NOT_COVERED_SKILLS: dict[str, str] = {
         "but at very low, noisy volume (checked 2026-10-21: spss 24, stata "
         "30, sas 33 new repos/30d) and no single topic represents all three "
         "without arbitrarily picking one."
+    ),
+    "programming": (
+        "A 'programming' topic exists (236 new repos/30d, checked 2026-10-22) but it tags "
+        "tutorials and resources about programming in general, while almost every repo "
+        "involves programming - too indirect a proxy, so left unscored rather than guessed."
+    ),
+    "science": (
+        "A 'science' topic exists (101 new repos/30d, checked 2026-10-22) but it tags science "
+        "content, not use of scientific methods as a workplace skill - too indirect, so left "
+        "unscored."
     ),
 }

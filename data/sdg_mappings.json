@@ -19,6 +19,41 @@
       "role_id": "public_health_analyst",
       "sdg_id": 3,
       "reason": "Epidemiology-based analysis tracks disease patterns and health risks to protect population health, matching SDG 3's goal of health and well-being for all."
+    },
+    {
+      "role_id": "software_developer",
+      "sdg_id": 9,
+      "reason": "Software developers build the digital systems and applications that modern industry and infrastructure run on, matching SDG 9 (industry, innovation and infrastructure; target 9.c on access to information and communications technology)."
+    },
+    {
+      "role_id": "accountant",
+      "sdg_id": 8,
+      "reason": "Accountants keep business finances accurate and sustainable, supporting the productive enterprises and economic growth that SDG 8 aims for."
+    },
+    {
+      "role_id": "accountant",
+      "sdg_id": 16,
+      "reason": "Accounting and auditing make organisations' finances transparent and accountable, matching SDG target 16.6 on effective, accountable and transparent institutions."
+    },
+    {
+      "role_id": "civil_engineer",
+      "sdg_id": 9,
+      "reason": "Civil engineers design and build roads, bridges, water systems and other infrastructure, the core of SDG 9's goal of resilient infrastructure."
+    },
+    {
+      "role_id": "civil_engineer",
+      "sdg_id": 11,
+      "reason": "Civil engineering shapes how cities are planned and built (transport, drainage, housing), directly supporting SDG 11 on sustainable cities and communities."
+    },
+    {
+      "role_id": "environmental_scientist",
+      "sdg_id": 3,
+      "reason": "O*NET describes this work as identifying and reducing pollutants and hazards that affect the environment or public health, matching SDG target 3.9 on reducing illness from hazardous chemicals and pollution."
+    },
+    {
+      "role_id": "environmental_scientist",
+      "sdg_id": 12,
+      "reason": "Tracking and reducing pollutants and hazardous materials supports SDG target 12.4 on the sound management of chemicals and wastes."
     }
   ],
   "skill_sdg_mappings": [
@@ -91,6 +126,36 @@
       "skill_id": "vba",
       "sdg_id": 8,
       "reason": "A workplace automation/scripting skill tied to employability in finance and analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "programming",
+      "sdg_id": 4,
+      "reason": "A core information and communications technology skill built through education, matching SDG target 4.4 on youth and adults with relevant ICT skills for employment."
+    },
+    {
+      "skill_id": "javascript",
+      "sdg_id": 8,
+      "reason": "An in-demand web programming skill directly tied to employability in software roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "git",
+      "sdg_id": 8,
+      "reason": "A standard workplace tool for collaborating on code, tied to employability in software and data roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "accounting_software",
+      "sdg_id": 8,
+      "reason": "A practical workplace tool skill tied to employability in accounting and bookkeeping roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "gis",
+      "sdg_id": 11,
+      "reason": "GIS is used to map land use, hazards and services for planning, supporting SDG target 11.3 on inclusive, sustainable urban planning."
+    },
+    {
+      "skill_id": "science",
+      "sdg_id": 4,
+      "reason": "Using scientific rules and methods is a foundational learning outcome built through education (SDG 4), needed for engineering and environmental work."
     }
   ]
 }

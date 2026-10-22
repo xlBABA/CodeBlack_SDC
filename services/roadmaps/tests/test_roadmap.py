@@ -181,6 +181,16 @@ def test_prerequisite_comes_first_even_if_lower_priority():
         roadmap._load = real_load
 
 
+def test_new_roles_get_plans_and_science_is_warned_not_guessed():
+    plan = get_roadmap(PROFILE, "environmental_scientist", ["science", "gis", "analytical_scientific_software"])
+    assert [s["skill_id"] for s in plan["steps"]] == ["gis", "analytical_scientific_software"]
+    assert any("science" in w and "No verified" in w for w in plan["warnings"])
+    sd = get_roadmap(PROFILE, "software_developer", ["git", "javascript"])
+    by = {s["skill_id"]: s for s in sd["steps"]}
+    assert (by["git"]["estimated_hours"], by["git"]["hours_basis"]) == (1.43, "provider_stated")
+    assert (by["javascript"]["estimated_hours"], by["javascript"]["hours_basis"]) == (23.0, "team_estimate")
+
+
 def test_unknown_role_returns_none():
     assert get_roadmap(PROFILE, "no_such_role", ["sql"]) is None
 

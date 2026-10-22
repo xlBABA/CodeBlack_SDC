@@ -32,6 +32,10 @@ topic here is guessed.
 | `vba` | `topic:vba` | 102 |
 | `cad_software` | `topic:cad` | 609 |
 | `financial_analysis_software` | `topic:financial-analysis` | 321 |
+| `javascript` | `topic:javascript` | 12,377 (checked 2026-10-22, window 2026-09-23..2026-10-22) |
+| `git` | `topic:git` | 1,596 (checked 2026-10-22) |
+| `accounting_software` | `topic:accounting` | 437 (checked 2026-10-22) |
+| `gis` | `topic:gis` | 649 (checked 2026-10-22) |
 
 **Not covered (no signal is emitted for these - never guessed):**
 
@@ -43,6 +47,8 @@ topic here is guessed.
 | `systems_analysis` | Cognitive/soft skill; no topic correlate. |
 | `attention_to_detail` | An O*NET Work Style, not a tool; no topic correlate. |
 | `analytical_scientific_software` | Covers SPSS/SAS/Stata collectively; each has its own topic but very low volume (spss 24, stata 30, sas 33 new repos/30d) and no single topic represents all three without arbitrarily picking one. |
+| `programming` | A `programming` topic exists (236 new repos/30d, 2026-10-22) but tags tutorials about programming in general, while almost every repo involves programming - too indirect. |
+| `science` | A `science` topic exists (101 new repos/30d, 2026-10-22) but tags science content, not use of scientific methods as a workplace skill - too indirect. |
 
 `services/trends/queries.py` is the source of truth for this table
 (`COVERED_SKILLS`, `NOT_COVERED_SKILLS`); `tests/test_queries.py` checks every
@@ -74,8 +80,8 @@ It needs adding to `contracts/openapi.yaml` if the frontend should use it.
 `services/trends/.gitignore`; see `.env.example` for the variable name) or the
 environment - never committed, never logged. Without it, calls are
 throttled to ~9/min; with it, ~28/min. A full `refresh_all()` normally makes
-8 calls (one "current" fetch per covered skill) once a "previous" window is
-cached for the day, or 16 calls the first time that day.
+12 calls (one "current" fetch per covered skill) once a "previous" window is
+cached for the day, or 24 calls the first time that day.
 
 ## How to show a real refresh in the demo
 Click refresh -> `refresh_all()` re-fetches each skill's *current* 30-day
