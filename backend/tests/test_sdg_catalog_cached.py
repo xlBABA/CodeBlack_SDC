@@ -7,18 +7,25 @@ import pytest
 from app.services.role_catalog_cached import CachedCatalogError
 from app.services.sdg_catalog_cached import _validate_sdg_mappings, load_cached_sdg_mappings
 
-JAWAD_ROLE_IDS = {"data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"}
+JAWAD_ROLE_IDS = {
+    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
+    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+}
 CANONICAL_SKILL_IDS = {
     "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis",
     "attention_to_detail", "excel", "sql", "python", "data_visualization", "cad_software",
     "matlab", "financial_analysis_software", "analytical_scientific_software", "vba",
+    "programming", "javascript", "git", "accounting_software", "gis", "science",
 }
 
 
 def test_loads_exactly_the_expected_mapping_counts():
+    """11 role mappings for 8 roles: some roles (accountant, civil_engineer)
+    now have more than one SDG — our validator only requires at least
+    one per role, so this is not a regression."""
     d = load_cached_sdg_mappings()
-    assert len(d["role_sdg_mappings"]) == 4
-    assert len(d["skill_sdg_mappings"]) == 14
+    assert len(d["role_sdg_mappings"]) == 11
+    assert len(d["skill_sdg_mappings"]) == 20
 
 
 def test_every_role_sdg_mapping_uses_a_canonical_role_id():
@@ -112,4 +119,4 @@ def test_rejects_incomplete_skill_coverage():
 
 def test_valid_data_still_loads_unchanged_after_validation_hardening():
     d = load_cached_sdg_mappings()
-    assert len(d["role_sdg_mappings"]) == 4 and len(d["skill_sdg_mappings"]) == 14
+    assert len(d["role_sdg_mappings"]) == 11 and len(d["skill_sdg_mappings"]) == 20

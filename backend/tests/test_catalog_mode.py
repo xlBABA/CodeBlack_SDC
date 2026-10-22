@@ -15,7 +15,10 @@ from app.core.config import Settings, get_settings
 from app.main import app
 from app.services.role_catalog import RoleCatalogProvider
 
-CACHED_ROLE_IDS = {"data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"}
+CACHED_ROLE_IDS = {
+    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
+    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+}
 OVERLAP_ROLE_IDS = {"data_analyst", "financial_analyst"}
 CACHED_ONLY_ROLE_IDS = {"mechanical_engineer", "public_health_analyst"}
 
@@ -48,34 +51,51 @@ def test_fixture_mode_is_the_default_and_unchanged(client: TestClient):
 # --- Cached mode: catalog selection --------------------------------------
 
 
-def test_cached_mode_returns_exactly_the_canonical_4_role_catalog(client: TestClient):
+def test_cached_mode_catalog_provider_returns_exactly_the_canonical_role_set():
+    """The underlying provider, not the limit<=6-constrained HTTP route,
+    is the right place to assert the full canonical role set — see
+    test_role_catalog_cached.py for the authoritative version of this
+    check; this just confirms get_role_catalog() wires to it."""
+    from app.core.config import Settings
+    from app.api.v1.endpoints.careers import get_role_catalog
+
+    catalog = get_role_catalog(Settings(CATALOG_MODE="cached", _env_file=None))
+    role_ids = {role.role_id for role in catalog.list_roles()}
+    assert role_ids == CACHED_ROLE_IDS
+
+
+def test_cached_mode_returns_only_canonical_role_ids_via_api(client: TestClient):
     _override_settings(CATALOG_MODE="cached")
     try:
-        response = client.post("/api/v1/careers/match", json={"profile": EMPTY_PROFILE, "limit": 4})
+        response = client.post("/api/v1/careers/match", json={"profile": EMPTY_PROFILE, "limit": 6})
     finally:
         _clear_override()
 
     assert response.status_code == 200
     role_ids = {m["role_id"] for m in response.json()["data"]["matches"]}
-    assert role_ids == CACHED_ROLE_IDS
+    assert len(role_ids) == 6
+    assert role_ids <= CACHED_ROLE_IDS  # MatchRequest.limit<=6 means not every role fits in one call
 
 
-def test_cached_mode_matches_all_four_roles_without_crashing(client: TestClient):
+def test_cached_mode_matches_via_api_without_crashing(client: TestClient):
     """Fix 2 (min_semester=None) and Fix 1 (required/optional) from
-    Milestone 6B-2 must hold for every real cached role, not just a
-    synthetic test role."""
+    Milestone 6B-2 must hold via the real HTTP path too, not just a
+    synthetic test role. MatchRequest.limit's frozen contract maximum is
+    6, so this cannot exercise all 8 cached roles in one call — see
+    test_hussain_matching_adapter.py / test_matching_mode.py for
+    all-eight-roles coverage that bypasses that limit."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.post(
             "/api/v1/careers/match",
-            json={"profile": {"interests": [], "skills": [{"skill_id": "sql", "name": "SQL"}], "projects": []}, "limit": 4},
+            json={"profile": {"interests": [], "skills": [{"skill_id": "sql", "name": "SQL"}], "projects": []}, "limit": 6},
         )
     finally:
         _clear_override()
 
     assert response.status_code == 200
     matches = response.json()["data"]["matches"]
-    assert len(matches) == 4
+    assert len(matches) == 6
     for match in matches:
         assert 0.0 <= match["score"] <= 100.0
         assert 0.0 <= match["score_breakdown"]["prerequisites"] <= 100.0

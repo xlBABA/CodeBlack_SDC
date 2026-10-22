@@ -16,11 +16,12 @@ from app.services.trend_provider_cached import (
     load_cached_trend_snapshots,
 )
 
-EXPECTED_SNAPSHOT_COUNT = 8
+EXPECTED_SNAPSHOT_COUNT = 12
 CANONICAL_SKILL_IDS = {
     "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis",
     "attention_to_detail", "excel", "sql", "python", "data_visualization", "cad_software",
     "matlab", "financial_analysis_software", "analytical_scientific_software", "vba",
+    "programming", "javascript", "git", "accounting_software", "gis", "science",
 }
 
 _BASE_WINDOW = {

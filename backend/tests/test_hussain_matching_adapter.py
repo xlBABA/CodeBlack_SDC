@@ -22,7 +22,10 @@ from app.services.matching_provider import FixtureMatchingProvider
 from app.services.role_catalog import FixtureRoleCatalog, RoleFixture, RoleRequirement
 from app.services.role_catalog_cached import CachedRoleCatalog
 
-CACHED_ROLE_IDS = {"data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"}
+CACHED_ROLE_IDS = {
+    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
+    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+}
 
 # Explicit no-similarity configuration (Step 5): never relies on the
 # ambient environment lacking RUNPOD_API_KEY/RUNPOD_ENDPOINT_ID.
@@ -108,7 +111,7 @@ def test_matches_against_real_cached_catalog_validate_as_rolematch():
         profile, roles, None, []
     )
 
-    assert len(results) == 4
+    assert len(results) == 8
     assert all(isinstance(m, RoleMatch) for m in results)
 
 
@@ -244,7 +247,7 @@ def test_real_cached_roles_all_have_no_invented_semester_prerequisite():
 # --- 7. Canonical role IDs --------------------------------------------------
 
 
-def test_all_four_canonical_cached_role_ids_survive_the_adapter():
+def test_all_eight_canonical_cached_role_ids_survive_the_adapter():
     profile = _profile()
     roles = CachedRoleCatalog().list_roles()
     results = HussainMatchingProvider(similarity=NO_SIMILARITY).match(profile, roles, None, [])

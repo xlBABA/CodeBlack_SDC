@@ -7,12 +7,16 @@ import pytest
 from app.services.project_catalog_cached import _validate_projects, load_cached_projects
 from app.services.role_catalog_cached import CachedCatalogError
 
-EXPECTED_PROJECT_COUNT = 9
-JAWAD_ROLE_IDS = {"data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"}
+EXPECTED_PROJECT_COUNT = 17
+JAWAD_ROLE_IDS = {
+    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
+    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+}
 CANONICAL_SKILL_IDS = {
     "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis",
     "attention_to_detail", "excel", "sql", "python", "data_visualization", "cad_software",
     "matlab", "financial_analysis_software", "analytical_scientific_software", "vba",
+    "programming", "javascript", "git", "accounting_software", "gis", "science",
 }
 
 

@@ -11,11 +11,12 @@ from app.services.resource_catalog_cached import (
 )
 from app.services.role_catalog_cached import CachedCatalogError
 
-EXPECTED_RESOURCE_COUNT = 11
+EXPECTED_RESOURCE_COUNT = 16
 CANONICAL_SKILL_IDS = {
     "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis",
     "attention_to_detail", "excel", "sql", "python", "data_visualization", "cad_software",
     "matlab", "financial_analysis_software", "analytical_scientific_software", "vba",
+    "programming", "javascript", "git", "accounting_software", "gis", "science",
 }
 
 
@@ -54,7 +55,7 @@ def test_every_resource_has_a_documented_hours_basis():
 
 def test_skills_without_resource_are_canonical_and_not_contradicted():
     gaps = skills_without_resource()
-    assert len(gaps) == 4
+    assert len(gaps) == 5  # +"science", added alongside the 4-role catalog expansion
     covered = {sid for r in load_cached_resources() for sid in r["skill_ids"]}
     for skill_id in gaps:
         assert skill_id in CANONICAL_SKILL_IDS

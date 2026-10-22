@@ -14,13 +14,19 @@ from app.services.role_catalog_cached import (
     load_cached_roles,
 )
 
-EXPECTED_ROLE_IDS = {"data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"}
+EXPECTED_ROLE_IDS = {
+    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
+    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+}
 
 
-def test_loads_exactly_jawads_four_canonical_roles():
+def test_loads_exactly_jawads_eight_canonical_roles():
+    """Milestone 6D-2A Extension: Jawad's catalog expanded from 4 to 8
+    roles (origin/feat/jawad-trends-data @ 4ba98a0) — the original 4
+    role_ids are unchanged, 4 new ones were added, none removed."""
     roles = load_cached_roles()
     assert {role.role_id for role in roles} == EXPECTED_ROLE_IDS
-    assert len(roles) == 4
+    assert len(roles) == 8
 
 
 def test_role_ids_and_skill_ids_are_unique():
@@ -62,6 +68,24 @@ def test_transferable_interests_not_invented():
         assert role.transferable_interests == ()
 
 
+def test_loads_exactly_jawads_twenty_canonical_skill_ids():
+    """Milestone 6D-2A Extension: skills.json expanded from 14 to 20
+    (programming, javascript, git, accounting_software, gis, science
+    added; none renamed or removed; the original 14 names/aliases are
+    unchanged, only source_ids provenance arrays grew)."""
+    from app.services.role_catalog_cached import _load_json
+
+    skills = _load_json("skills.json")["skills"]
+    skill_ids = {s["skill_id"] for s in skills}
+    assert skill_ids == {
+        "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis",
+        "attention_to_detail", "excel", "sql", "python", "data_visualization", "cad_software",
+        "matlab", "financial_analysis_software", "analytical_scientific_software", "vba",
+        "programming", "javascript", "git", "accounting_software", "gis", "science",
+    }
+    assert len(skills) == 20
+
+
 def test_canonical_lookup_by_role_id():
     roles = load_cached_roles()
     data_analyst = next(r for r in roles if r.role_id == "data_analyst")
@@ -76,18 +100,21 @@ def test_unknown_role_id_behavior():
 
 def test_canonical_cached_role_ids_remain_unchanged():
     """Milestone 6B-2 compatibility mapping, pinned as a regression test:
-    Jawad's 4 canonical role_ids must never be silently renamed to match
+    Jawad's canonical role_ids must never be silently renamed to match
     our fixture catalog's vocabulary. 2 overlap (data_analyst,
-    financial_analyst); 2 do not (mechanical_engineer vs. our
-    mechanical_design_engineer; public_health_analyst vs. our
-    sustainability_coordinator) — see role_catalog_cached.py / the 6B-2
-    report for what this means once cached mode is ever activated."""
+    financial_analyst); the other 6 (now including the 4 roles added in
+    the Milestone 6D-2A Extension) do not — see role_catalog_cached.py /
+    the 6B-2 report for what this means once cached mode is ever
+    activated."""
     cached_ids = {role.role_id for role in load_cached_roles()}
     fixture_ids = {role.role_id for role in FixtureRoleCatalog().list_roles()}
 
     assert cached_ids == EXPECTED_ROLE_IDS
     assert cached_ids & fixture_ids == {"data_analyst", "financial_analyst"}
-    assert cached_ids - fixture_ids == {"mechanical_engineer", "public_health_analyst"}
+    assert cached_ids - fixture_ids == {
+        "mechanical_engineer", "public_health_analyst",
+        "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    }
     assert fixture_ids - cached_ids == {"mechanical_design_engineer", "sustainability_coordinator"}
 
 
@@ -126,6 +153,11 @@ def test_cached_roles_preserve_jawads_actual_required_optional_split():
         "financial_analyst": {"analytical_scientific_software", "vba"},
         "mechanical_engineer": {"python", "excel"},
         "public_health_analyst": {"excel", "data_visualization"},
+        # Added in the Milestone 6D-2A Extension (origin/feat/jawad-trends-data @ 4ba98a0):
+        "software_developer": {"mathematics"},
+        "accountant": {"sql", "vba", "data_visualization"},
+        "civil_engineer": {"matlab", "excel"},
+        "environmental_scientist": {"excel", "sql"},
     }
     roles = {role.role_id: role for role in load_cached_roles()}
     for role_id, optional_skill_ids in expected_optional.items():

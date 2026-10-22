@@ -13,13 +13,17 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints.careers import get_matching_provider, get_role_catalog
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.schemas.profile import StudentProfile
 from app.services.hussain_matching import scoring
 from app.services.hussain_matching.backend_adapter import HussainMatchingProvider
 from app.services.matching_provider import FixtureMatchingProvider
 
 EMPTY_PROFILE = {"interests": [], "skills": [], "projects": []}
 SQL_PROFILE = {"interests": [], "skills": [{"skill_id": "sql", "name": "SQL"}], "projects": []}
-CACHED_ROLE_IDS = {"data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"}
+CACHED_ROLE_IDS = {
+    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
+    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+}
 
 
 def _override_settings(**overrides):
@@ -206,15 +210,49 @@ def test_hussain_mode_response_matches_rolematch_schema(client: TestClient):
         assert 0.0 <= match["score"] <= 100.0
 
 
-def test_all_four_canonical_cached_role_ids_work_in_hussain_mode(client: TestClient):
+def test_canonical_cached_role_ids_work_in_hussain_mode_via_api(client: TestClient):
+    """MatchRequest.limit's frozen contract maximum is 6, so a single API
+    call can't exercise all 8 cached roles — see
+    test_all_eight_roles_match_without_crashing_in_hussain_mode below for
+    the complete, limit-unconstrained check."""
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
-        response = client.post("/api/v1/careers/match", json={"profile": SQL_PROFILE, "limit": 4})
+        response = client.post("/api/v1/careers/match", json={"profile": SQL_PROFILE, "limit": 6})
     finally:
         _clear_override()
 
     role_ids = {m["role_id"] for m in response.json()["data"]["matches"]}
-    assert role_ids == CACHED_ROLE_IDS
+    assert len(role_ids) == 6
+    assert role_ids <= CACHED_ROLE_IDS
+
+
+def test_all_eight_roles_match_without_crashing_in_hussain_mode():
+    """Step 4: all 8 roles, MATCHING_MODE=hussain, no RunPod. Bypasses
+    MatchRequest.limit<=6 by calling the provider directly, the same way
+    MatchingService.match() does before truncating."""
+    import urllib.request
+
+    from app.api.v1.endpoints.careers import get_matching_provider, get_role_catalog
+    from app.core.config import Settings
+
+    def _forbidden(*a, **k):
+        raise AssertionError("urlopen must never be called")
+
+    original_urlopen = urllib.request.urlopen
+    urllib.request.urlopen = _forbidden
+    try:
+        settings = Settings(MATCHING_MODE="hussain", CATALOG_MODE="cached", _env_file=None)
+        roles = get_role_catalog(settings).list_roles()
+        assert {r.role_id for r in roles} == CACHED_ROLE_IDS
+
+        provider = get_matching_provider(settings)
+        results = provider.match(StudentProfile(**EMPTY_PROFILE), roles, None, [])
+        assert len(results) == 8
+        for match in results:
+            assert 0.0 <= match.score <= 100.0
+            assert 0.0 <= match.score_breakdown.prerequisites <= 100.0
+    finally:
+        urllib.request.urlopen = original_urlopen
 
 
 def test_optional_skills_never_appear_as_missing_in_hussain_mode_via_api(client: TestClient):
@@ -413,3 +451,53 @@ def test_fixture_default_end_to_end_unchanged(client: TestClient):
 def test_get_matching_provider_fixture_mode_still_returns_fixture_matching_provider():
     provider = get_matching_provider(Settings(_env_file=None))
     assert isinstance(provider, FixtureMatchingProvider)
+
+
+# --- Milestone 6D-2A Extension: 8-role catalog regression tests ----------
+
+
+def test_matching_service_returns_top_6_of_8_cached_roles(db_session):
+    """MatchingService.match()'s existing matches[:request.limit] truncation,
+    unmodified by the catalog expansion, applied to the real 8-role
+    cached catalog — catalog_coverage.verified must report 8, not a
+    stale hardcoded 4."""
+    from app.schemas.matching import MatchRequest
+    from app.services.matching_service import MatchingService
+    from app.services.profile_service import ProfileService
+    from app.services.role_catalog_cached import CachedRoleCatalog
+    from app.services.trend_provider import NullTrendProvider
+
+    service = MatchingService(
+        profile_service=ProfileService(db_session),
+        catalog=CachedRoleCatalog(),
+        matcher=HussainMatchingProvider(similarity=lambda a, b: 0.0),
+        trends=NullTrendProvider(),
+    )
+    profile = StudentProfile(**SQL_PROFILE)
+    outcome = service.match(MatchRequest(profile=profile))
+
+    assert len(outcome.payload.matches) == 6
+    assert outcome.payload.catalog_coverage.verified == 8
+    assert outcome.payload.catalog_coverage.total_target == 30
+
+
+def test_new_roles_and_skills_do_not_change_scenario_scores(client: TestClient):
+    """The scenario_id='fast' vs. baseline guarantee must hold for the
+    newly added roles/skills too, not just the original 4 — scores stay
+    identical because MatchingService still injects NullTrendProvider
+    (no real signals), regardless of catalog size."""
+    _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
+    profile = {"interests": [], "skills": [{"skill_id": "javascript", "name": "JavaScript"}], "projects": []}
+    try:
+        baseline = client.post(
+            "/api/v1/scenarios/simulate", json={"profile": profile, "scenario_id": "moderate"}
+        )
+        fast = client.post("/api/v1/scenarios/simulate", json={"profile": profile, "scenario_id": "fast"})
+    finally:
+        _clear_override()
+
+    assert baseline.status_code == 200 and fast.status_code == 200
+    baseline_scores = {m["role_id"]: m["score"] for m in baseline.json()["data"]["matches"]}
+    fast_scores = {m["role_id"]: m["score"] for m in fast.json()["data"]["matches"]}
+    assert baseline_scores == fast_scores
+    assert "software_developer" in baseline_scores  # sanity: a new role was actually exercised
