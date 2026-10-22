@@ -1,6 +1,7 @@
 import { BriefcaseBusiness, History, Layers, Route, Timer, TrendingUp, UserRoundPen } from 'lucide-react'
 import { Link } from 'react-router'
-import { EmptyState, ErrorState } from '@/components/api-states'
+import { ApiWarnings } from '@/components/api-warnings'
+import { EmptyState, ErrorNotice, ErrorState } from '@/components/api-states'
 import { AssistCard } from '@/components/dashboard/assist-card'
 import { KpiChip } from '@/components/dashboard/kpi-chip'
 import { LearningPipeline } from '@/components/dashboard/learning-pipeline'
@@ -10,14 +11,20 @@ import { SkillGap } from '@/components/dashboard/skill-gap'
 import { TopMatchCard } from '@/components/dashboard/top-match-card'
 import { TrendSnapshot } from '@/components/dashboard/trend-snapshot'
 import { DataModeBadge } from '@/components/data-mode-badge'
+import { NoProfile } from '@/components/no-profile'
 import { Page } from '@/components/page/page'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useApi } from '@/hooks/use-api'
 import { useDemoStudent } from '@/hooks/use-demo-student'
-import { api } from '@/mocks/api'
+import { useMatches } from '@/hooks/use-matches'
+import { useRequest } from '@/hooks/use-request'
+import { api } from '@/lib/api'
+import { useStoredProfile } from '@/lib/profile-store'
+
+/** Hours per week the dashboard roadmap assumes; the role workspace lets the student change it. */
+const HOURS_PER_WEEK = 8
 
 function DashboardSkeleton() {
   return (
@@ -42,14 +49,21 @@ function DashboardSkeleton() {
  */
 export default function Dashboard() {
   const demo = useDemoStudent()
-  const [analysis, retryAnalysis] = useApi(api.analyze)
-  const [trends] = useApi(api.getTrends)
-  const [roadmap] = useApi(api.getRoadmap)
-  const [insights] = useApi(api.getInsights)
+  const stored = useStoredProfile()
+  // while the demo student is being analysed, don't match the previous profile
+  const profile = demo.loading || demo.error ? null : stored
+  const [match, retryMatch] = useMatches(profile)
 
-  const a = analysis.status === 'ok' ? analysis.envelope : null
-  const matches = a?.data.matches ?? []
+  const m = match.status === 'ok' ? match.data : null
+  const matches = m?.data.matches ?? []
   const top = matches[0]
+  const roleKey = profile && top ? `${top.role_id}:${profile.analyzed_at}` : null
+
+  const [trends, retryTrends] = useRequest(roleKey && `trends:${roleKey}`, (signal) => api.getTrends({ role_id: top!.role_id, limit: 4 }, { signal }))
+  const [roadmap, retryRoadmap] = useRequest(roleKey && `roadmap:${roleKey}`, (signal) =>
+    api.generateRoadmap({ profile: profile!.profile, role_id: top!.role_id, hours_per_week: HOURS_PER_WEEK }, { signal }),
+  )
+  const road = roadmap.status === 'ok' ? roadmap.data : null
 
   return (
     <Page
@@ -58,11 +72,11 @@ export default function Dashboard() {
       subtitle="Where your skills point today, what is shifting in the market, and what to learn next. It informs your choice; it does not make it."
       meta={
         <>
-          {a && <DataModeBadge mode={a.data_mode} />}
-          {demo && <Badge tone="primary">Demo student</Badge>}
-          {a && (
+          {m && <DataModeBadge mode={m.data_mode} />}
+          {stored?.demo && <Badge tone="primary">Demo student</Badge>}
+          {m && (
             <Badge tone="slate" dot>
-              {a.data.catalog.roles_verified} of {a.data.catalog.roles_total} roles verified
+              {m.data.catalog_coverage.verified} of {m.data.catalog_coverage.total_target} roles verified
             </Badge>
           )}
         </>
@@ -76,14 +90,16 @@ export default function Dashboard() {
         </Button>,
       ]}
     >
-      {analysis.status === 'loading' && <DashboardSkeleton />}
-      {analysis.status === 'error' && <ErrorState error={analysis.error} onRetry={retryAnalysis} />}
+      {demo.error && <ErrorState error={demo.error} onRetry={demo.retry} />}
+      {!demo.error && !profile && !demo.loading && <NoProfile what="the roles your skills line up with" />}
+      {(demo.loading || (profile && match.status === 'loading')) && <DashboardSkeleton />}
+      {match.status === 'error' && profile && <ErrorState error={match.error} onRetry={retryMatch} />}
 
-      {a && !top && (
+      {m && !top && (
         <Card>
           <EmptyState
             title="No role matches yet"
-            body="Add a few skills and a project to your profile and we will show the roles they line up with."
+            body="None of the verified roles lines up with this profile yet. Add a few skills and a project and try again."
             action={
               <Button asChild>
                 <Link to="/start">Add skills</Link>
@@ -93,20 +109,30 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {a && top && (
+      {m && top && profile && (
         <div className="grid gap-4 lg:grid-cols-12">
           <div data-enter="head" className="flex flex-wrap gap-x-10 gap-y-4 py-1 lg:col-span-12">
-            <KpiChip icon={BriefcaseBusiness} value={matches.length} label="roles matched to your profile" />
-            <KpiChip icon={Layers} value={top.missing_skills.length} label={`skills to build for ${top.title.toLowerCase()}`} />
-            {roadmap.status === 'ok' && <KpiChip icon={Timer} value={roadmap.envelope.data.total_hours} format="hours" label="on your current roadmap" />}
+            <KpiChip icon={BriefcaseBusiness} value={matches.length} label={`roles matched, of ${m.data.catalog_coverage.verified} verified`} />
+            <KpiChip icon={Layers} value={top.missing_skills?.length ?? 0} label={`skills to build for ${top.role_title.toLowerCase()}`} />
+            {road && <KpiChip icon={Timer} value={road.data.total_estimated_hours} format="hours1" label="on your current roadmap" />}
           </div>
 
           <div className="lg:col-span-7">
             <TopMatchCard match={top} />
           </div>
           <Card className="lg:col-span-5" aria-labelledby="matches-title">
-            <CardHeader id="matches-title" title="All matches" subtitle="Ranked by alignment estimate" icon={BriefcaseBusiness} />
-            <RoleTiles matches={matches} />
+            <CardHeader
+              id="matches-title"
+              title="All matches"
+              subtitle="Ranked by alignment estimate"
+              icon={BriefcaseBusiness}
+              action={
+                <Link to="/roles" className="text-sm font-semibold text-primary hover:underline">
+                  See all {matches.length}
+                </Link>
+              }
+            />
+            <RoleTiles matches={matches.slice(0, 4)} />
           </Card>
 
           <Card className="lg:col-span-5" aria-labelledby="gap-title">
@@ -118,35 +144,50 @@ export default function Dashboard() {
             <CardHeader
               id="trend-title"
               title="Trend snapshot"
-              subtitle={trends.status === 'ok' ? trends.envelope.data.window : 'Skill demand signals'}
+              subtitle={`Skill signals for ${top.role_title}`}
               icon={TrendingUp}
-              action={trends.status === 'ok' ? <DataModeBadge mode={trends.envelope.data_mode} /> : undefined}
+              action={trends.status === 'ok' ? <DataModeBadge mode={trends.data.data_mode} /> : undefined}
             />
             {trends.status === 'loading' && <Skeleton className="h-56 rounded-tile" />}
-            {trends.status === 'error' && <p className="text-muted-foreground">Trend signals are unavailable right now ({trends.error.code}).</p>}
+            {trends.status === 'error' && <ErrorNotice error={trends.error} onRetry={retryTrends} />}
             {trends.status === 'ok' &&
-              (trends.envelope.data.signals.length ? (
-                <TrendSnapshot signals={trends.envelope.data.signals} />
+              (trends.data.data.signals?.length ? (
+                <TrendSnapshot trends={trends.data.data} limit={3} />
               ) : (
-                <EmptyState title="No signals yet" body="Trend data has not been collected for this window." />
+                <EmptyState title="No signals yet" body="No dated trend signals have been collected for this role." />
               ))}
+            {trends.status === 'ok' && <ApiWarnings items={trends.data.warnings} className="mt-3" />}
           </Card>
 
-          <div className="lg:col-span-3">{roadmap.status === 'ok' && <NextUp roadmap={roadmap.envelope.data} />}</div>
+          <div className="lg:col-span-3">
+            {roadmap.status === 'loading' && <Skeleton className="h-full min-h-[260px] rounded-card" />}
+            {road && <NextUp roadmap={road.data} roleId={top.role_id} roleTitle={top.role_title} skills={top.missing_skills} />}
+          </div>
 
           <Card className="lg:col-span-8" aria-labelledby="pipeline-title">
             <CardHeader
               id="pipeline-title"
               title="Learning pipeline"
-              subtitle={roadmap.status === 'ok' ? `${top.title} roadmap · ${roadmap.envelope.data.total_hours} h in total` : undefined}
+              subtitle={road ? `${top.role_title} roadmap · ${road.data.total_estimated_hours} h at ${HOURS_PER_WEEK} h a week` : undefined}
               icon={Route}
-              action={roadmap.status === 'ok' ? <DataModeBadge mode={roadmap.envelope.data_mode} /> : undefined}
+              action={road ? <DataModeBadge mode={road.data_mode} /> : undefined}
             />
-            {roadmap.status === 'ok' ? <LearningPipeline steps={roadmap.envelope.data.steps} /> : <Skeleton className="h-48 rounded-tile" />}
+            {roadmap.status === 'loading' && <Skeleton className="h-48 rounded-tile" />}
+            {roadmap.status === 'error' && <ErrorNotice error={roadmap.error} onRetry={retryRoadmap} />}
+            {road &&
+              (road.data.steps.length ? (
+                <LearningPipeline steps={road.data.steps} skills={top.missing_skills} />
+              ) : (
+                <EmptyState
+                  title="No roadmap steps"
+                  body={top.missing_skills?.length ? 'None of the missing skills has a learning resource in the catalogue yet.' : `You already have every core skill listed for ${top.role_title}.`}
+                />
+              ))}
+            {road && <ApiWarnings items={road.warnings} className="mt-4" />}
           </Card>
 
           <div className="grid gap-4 lg:col-span-4">
-            {insights.status === 'ok' && <AssistCard notes={insights.envelope.data.notes} mode={insights.envelope.data_mode} />}
+            <AssistCard match={top} mode={m.data_mode} />
             {/* reserved slot for the future "What changed" panel */}
             <Card className="border-dashed !bg-transparent !shadow-none" aria-labelledby="changed-title">
               <div className="flex items-center gap-2.5">
@@ -164,11 +205,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {a.warnings.length > 0 && (
-            <p data-enter="head" className="text-sm text-muted-foreground lg:col-span-12">
-              {a.warnings.join(' ')}
-            </p>
-          )}
+          <ApiWarnings items={m.warnings} className="lg:col-span-12" />
         </div>
       )}
     </Page>

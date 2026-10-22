@@ -10,7 +10,7 @@ export type NavItem = {
 
 export const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Overview', icon: LayoutGrid, match: '/dashboard' },
-  { to: '/roles/data_analyst', label: 'Roles', icon: BriefcaseBusiness, match: '/roles' },
+  { to: '/roles', label: 'Roles', icon: BriefcaseBusiness, match: '/roles' },
   { to: '/start', label: 'Profile', icon: UserRoundPen, match: '/start' },
   { to: '/methodology', label: 'Method', icon: BookOpenText, match: '/methodology' },
 ]

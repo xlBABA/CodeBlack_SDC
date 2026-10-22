@@ -5,6 +5,7 @@ import { lazyPage } from '@/lib/lazy-page'
 export const APP_ROUTES = [
   { path: '/dashboard', Page: lazyPage(() => import('@/pages/dashboard')) },
   { path: '/start', Page: lazyPage(() => import('@/pages/start')) },
+  { path: '/roles', Page: lazyPage(() => import('@/pages/roles')) },
   { path: '/roles/:roleId', Page: lazyPage(() => import('@/pages/role')) },
   { path: '/methodology', Page: lazyPage(() => import('@/pages/methodology')) },
   { path: '/design', Page: lazyPage(() => import('@/pages/design-system')) },

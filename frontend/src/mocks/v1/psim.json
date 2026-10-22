@@ -1,0 +1,20 @@
+{
+  "data": {
+    "baseline_score": 23.0,
+    "simulated_score": 48.0,
+    "assumed_skill_ids": [
+      "data_visualization",
+      "mathematics",
+      "systems_analysis"
+    ],
+    "disclaimer": "Hypothetical simulation only: assumes this project's associated skills were gained, not that the project was actually completed. It does not guarantee employment, an internship, or eligibility — scores are an estimated profile-alignment change, not a real-world outcome measurement."
+  },
+  "data_mode": "fixture",
+  "generated_at": "2026-10-22T20:07:32Z",
+  "warnings": [
+    "MATCHING_MODE=hussain: scores are produced by Hussain's deterministic matching algorithm (app/services/hussain_matching), running fully offline — semantic similarity is explicitly disabled, so no RunPod endpoint or embedding model was contacted. This methodology is an initial team choice, not a validated model, and the score is not a hiring probability.",
+    "Simulated score is a hypothetical, deterministic recalculation using the same fixture matching logic as /careers/match; it is not a validated prediction of real-world outcomes.",
+    "CATALOG_MODE=cached: the role and skill catalog inputs for this response come from Jawad's cached, real O*NET-derived dataset — those role/skill identifiers are not fictional. Matching scores are still calculated by Hussain's deterministic matching algorithm, running fully offline (no RunPod contacted). data_mode remains 'fixture' because the generated score is still fixture-based, even though the underlying sourced roles themselves are real.",
+    "CATALOG_MODE=cached: the projects in this response come from Jawad's verified, cached project dataset — real datasets/tutorials and team-estimated hours, not fixture placeholders."
+  ]
+}

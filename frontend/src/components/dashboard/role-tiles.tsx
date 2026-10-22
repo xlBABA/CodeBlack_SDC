@@ -1,11 +1,10 @@
 import { useRef } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router'
-import { SdgBadges } from '@/components/sdg-badges'
-import { TrendArrow } from '@/components/trend-arrow'
 import { CountUp } from '@/components/page/count-up'
 import { useLift } from '@/hooks/use-hover-fx'
-import type { RoleMatch } from '@/mocks/types'
+import { DEFAULT_CAVEAT } from '@/lib/role-copy'
+import type { RoleMatch } from '@/types/api'
 import { cn } from '@/lib/utils'
 
 // solid colour tiles, one per rank (Rapport idea)
@@ -18,6 +17,8 @@ const TILE = [
 
 function RoleTile({ match, rank }: { match: RoleMatch; rank: number }) {
   const ref = useRef<HTMLAnchorElement>(null)
+  const have = match.matched_skills?.length ?? 0
+  const total = have + (match.missing_skills?.length ?? 0)
   useLift(ref, true)
   return (
     <Link
@@ -32,26 +33,27 @@ function RoleTile({ match, rank }: { match: RoleMatch; rank: number }) {
           <ArrowUpRight className="size-4" />
         </span>
       </span>
-      <span className="mt-1 text-lg leading-tight font-bold tracking-[-0.01em]">{match.title}</span>
-      <TrendArrow direction={match.trend} withLabel className="mt-1 !text-current opacity-85" />
+      <span className="mt-1 text-lg leading-tight font-bold tracking-[-0.01em]">{match.role_title}</span>
+      <span className="mt-1 text-sm font-semibold opacity-85">
+        {have} of {total} core skills
+      </span>
       <span className="mt-auto flex items-end justify-between gap-2 pt-4">
         <span className="grid">
           <span className="flex items-baseline gap-1">
-            <CountUp value={match.alignment_estimate} className="text-[2rem] leading-none font-extrabold tracking-[-0.04em]" />
+            <CountUp value={match.score} className="text-[2rem] leading-none font-extrabold tracking-[-0.04em]" />
             <small className="text-xs font-semibold opacity-75">alignment estimate</small>
           </span>
           {/* every score sits next to at least one caveat */}
-          <small className="mt-1 line-clamp-2 text-xs leading-snug opacity-80">{match.caveats[0]}</small>
+          <small className="mt-1 line-clamp-2 text-xs leading-snug opacity-80">{match.caveats?.[0] ?? DEFAULT_CAVEAT}</small>
         </span>
-        <SdgBadges goals={match.sdgs.slice(0, 2)} size="sm" className="flex-none" />
       </span>
     </Link>
   )
 }
 
-export function RoleTiles({ matches }: { matches: RoleMatch[] }) {
+export function RoleTiles({ matches, className }: { matches: RoleMatch[]; className?: string }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className={cn('grid gap-3 sm:grid-cols-2', className)}>
       {matches.map((m, i) => (
         <RoleTile key={m.role_id} match={m} rank={i} />
       ))}

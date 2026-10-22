@@ -5,7 +5,7 @@ import type { CountFormat } from '@/lib/motion'
 export type BootSegment = { text: string; kind?: 'prompt' | 'demo' | 'ok' | 'dim' }
 export const INTRO_LINES: BootSegment[][] = [
   [{ text: '>', kind: 'prompt' }, { text: ' scanning AI & job-market signals... ' }, { text: '[demo]', kind: 'demo' }],
-  [{ text: '>', kind: 'prompt' }, { text: ' mapping skills to future roles... ' }, { text: '30 roles, 4 verified', kind: 'dim' }],
+  [{ text: '>', kind: 'prompt' }, { text: ' mapping skills to future roles... ' }, { text: '30 roles, 8 verified', kind: 'dim' }],
   [{ text: '>', kind: 'prompt' }, { text: ' linking every role to the UN SDGs... ' }, { text: '17 goals', kind: 'dim' }],
   [{ text: '>', kind: 'prompt' }, { text: ' ready', kind: 'ok' }],
 ]
@@ -41,7 +41,7 @@ export const JOURNEY: JourneyStep[] = [
 
 export const CINEMA = {
   intro: 'One profile in. A whole picture out.',
-  badges: ['Data analyst', 'Financial analyst', 'Sustainability coordinator', 'Mechanical design engineer'],
+  badges: ['Data analyst', 'Financial analyst', 'Environmental scientist', 'Software developer'],
   title: 'Your alignment report',
   offer: ['Alignment estimates, with caveats', 'Trend signals, with sources', 'A roadmap, with hours', 'SDG links, with reasons'],
 }

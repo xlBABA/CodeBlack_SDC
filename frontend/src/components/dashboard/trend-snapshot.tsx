@@ -1,55 +1,55 @@
-import { ExternalLink } from 'lucide-react'
+import { TrendArrow } from '@/components/trend-arrow'
 import { Badge } from '@/components/ui/badge'
-import type { TrendSignal } from '@/mocks/types'
-import { cn } from '@/lib/utils'
+import { skillName } from '@/content/skills'
+import { fmtDate } from '@/lib/role-copy'
+import type { TrendSignal, TrendsPayload } from '@/types/api'
 
-const fmt = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
+const STATUS = {
+  ok: { tone: 'good', label: 'Sources up to date' },
+  stale: { tone: 'warn', label: 'Sources stale' },
+  unavailable: { tone: 'bad', label: 'Sources unavailable' },
+} as const
+
+const metric = (s: TrendSignal) =>
+  s.metric_value == null ? s.metric_name.replace(/_/g, ' ') : `${s.metric_name.replace(/_/g, ' ')}: ${s.metric_value}${s.unit ? ` ${s.unit}` : ''}`
 
 /**
- * Diverging bars around a centre line: rising to the right, declining to the left.
- * Stale signals use the hatched fill (Halden idea) and say so in words too.
+ * Dated skill-demand signals exactly as the API sends them: direction, metric, source and
+ * both dates. No bar lengths are drawn because the signals carry no comparable magnitude.
+ * Stale sources use the hatched swatch (Halden idea) and say so in words too.
  */
-export function TrendSnapshot({ signals }: { signals: TrendSignal[] }) {
-  const max = Math.max(...signals.map((s) => Math.abs(s.change_pct)), 1)
+export function TrendSnapshot({ trends, limit }: { trends: TrendsPayload; limit?: number }) {
+  const signals = (trends.signals ?? []).slice(0, limit)
+  const status = STATUS[trends.source_status]
   return (
-    <ul className="grid gap-3.5">
-      {signals.map((s) => {
-        const w = (Math.abs(s.change_pct) / max) * 50
-        const rising = s.change_pct >= 0
-        return (
-          <li key={s.skill} data-enter="item">
+    <div className="grid gap-3.5">
+      <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <Badge tone={status.tone} dot enter={false} className="py-0 text-2xs">
+          {status.label}
+        </Badge>
+        {trends.last_successful_refresh_at ? `last refreshed ${fmtDate(trends.last_successful_refresh_at)}` : 'never refreshed from a live source'}
+      </p>
+      <ul className="grid gap-3">
+        {signals.map((s) => (
+          <li key={s.signal_id} data-enter="item" className="rounded-[16px] bg-well p-3">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="font-semibold">{s.skill}</span>
-              <span className={cn('text-sm font-bold tabular-nums', s.direction === 'rising' ? 'text-good' : s.direction === 'declining' ? 'text-tomato' : 'text-muted-foreground')}>
-                {rising ? '+' : ''}
-                {s.change_pct}%
-              </span>
+              <span className="font-semibold">{skillName(s.skill_id)}</span>
+              <TrendArrow direction={s.direction} withLabel />
             </div>
-            <div className="relative mt-1.5 h-2.5 rounded-full bg-well">
-              <span aria-hidden className="absolute top-[-3px] bottom-[-3px] left-1/2 w-px bg-line-2" />
+            <div className="relative mt-2 h-2 rounded-full bg-raised">
               <i
                 data-enter="bar"
                 aria-hidden
-                className={cn('absolute inset-y-0 block rounded-full', s.status === 'stale' ? 'hatch' : rising ? 'bg-good' : 'bg-tomato')}
-                style={rising ? { left: '50%', width: `${w}%` } : { right: '50%', width: `${w}%`, transformOrigin: '100% 50%' }}
+                className={trends.source_status === 'ok' ? 'block h-full w-full rounded-full bg-line-2' : 'hatch block h-full w-full rounded-full'}
               />
             </div>
-            <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-              <a href={s.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline-offset-2 hover:underline">
-                {s.source}
-                <ExternalLink className="size-3" aria-hidden />
-              </a>
-              <span>· observed {fmt(s.observed_at)}</span>
-              <span>· retrieved {fmt(s.retrieved_at)}</span>
-              {s.status !== 'fresh' && (
-                <Badge tone={s.status === 'stale' ? 'warn' : 'bad'} enter={false} className="py-0 text-2xs">
-                  {s.status}
-                </Badge>
-              )}
+            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+              {metric(s)} · {s.signal_type.replace(/_/g, ' ')} · source <code className="font-mono">{s.source_id}</code> · observed {fmtDate(s.observed_at)} · retrieved {fmtDate(s.retrieved_at)}
             </p>
+            <p className="mt-1 text-xs leading-relaxed italic">{s.confidence_note}</p>
           </li>
-        )
-      })}
-    </ul>
+        ))}
+      </ul>
+    </div>
   )
 }

@@ -5,6 +5,7 @@ import { Mesh } from '@/components/mesh'
 import { markAppReady, shellGate } from '@/lib/app-ready'
 import { gsap } from '@/lib/gsap'
 import { dur, EASE, rise } from '@/lib/motion'
+import { ApiProgress, OutageBanner } from './api-feedback'
 import { Dock } from './dock'
 import { MobileTabs } from './mobile-tabs'
 import { PageSkeleton } from './page-skeleton'
@@ -50,6 +51,7 @@ export function AppShell() {
   return (
     <div ref={shell} data-app className="min-h-dvh">
       <Mesh />
+      <ApiProgress />
       <a
         href="#main"
         className="fixed top-3 left-3 z-[100] -translate-y-20 rounded-full bg-ink px-4 py-2.5 font-bold text-ink-foreground focus:translate-y-0"
@@ -60,6 +62,7 @@ export function AppShell() {
       <div className="mx-auto max-w-[1440px] px-[var(--gutter)] pb-[calc(96px+env(safe-area-inset-bottom))] md:pb-10 lg:pl-[calc(var(--gutter)+76px)]">
         <TopBar />
         <main id="main" tabIndex={-1} className="outline-none">
+          <OutageBanner />
           <RouteTransition>
             {(location) => (
               // the skeleton only shows on a cold load; later navigations preload first

@@ -220,6 +220,10 @@ html.theming *::after {
     letter-spacing: -0.01em;
   }
 
+  .api-progress {
+    animation: api-progress 1.1s var(--ease) infinite;
+  }
+
   .skeleton {
     position: relative;
     overflow: hidden;
@@ -276,6 +280,14 @@ html.theming *::after {
   }
 }
 
+@keyframes api-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(260%);
+  }
+}
 @keyframes shimmer {
   to {
     transform: translateX(100%);

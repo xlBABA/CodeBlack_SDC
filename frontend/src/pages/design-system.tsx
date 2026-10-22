@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Bell, Copy, Moon, Palette, Play, RotateCcw, Sparkles, Zap } from 'lucide-react'
+import { ApiDiagnostics } from '@/components/api-diagnostics'
 import { DataModeBadge } from '@/components/data-mode-badge'
 import { Page } from '@/components/page/page'
 import { CountUp } from '@/components/page/count-up'
@@ -50,6 +51,7 @@ export default function DesignSystem() {
       ]}
     >
       <div key={replay} className="grid gap-4 lg:grid-cols-2">
+        {import.meta.env.DEV && <ApiDiagnostics />}
         <Card>
           <CardHeader icon={Palette} title="Surfaces" />
           <div className="grid grid-cols-4 gap-2.5">

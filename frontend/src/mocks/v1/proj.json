@@ -1,0 +1,55 @@
+{
+  "data": {
+    "projects": [
+      {
+        "project_id": "da_bank_campaign_analysis",
+        "title": "Bank marketing campaign analysis",
+        "skill_ids": [
+          "sql",
+          "data_visualization",
+          "mathematics",
+          "systems_analysis"
+        ],
+        "estimated_hours": 12.0,
+        "source_ids": [
+          "uci_bank_marketing"
+        ],
+        "milestones": [
+          "Explore the dataset's rows and fields",
+          "Write SQL for conversion rates by job, month and contact type",
+          "Chart the segments",
+          "Identify likely drivers and note possible confounders",
+          "Write a short recommendation memo"
+        ]
+      },
+      {
+        "project_id": "da_online_retail_dashboard",
+        "title": "Online retail sales dashboard",
+        "skill_ids": [
+          "sql",
+          "excel",
+          "data_visualization",
+          "critical_thinking"
+        ],
+        "estimated_hours": 14.0,
+        "source_ids": [
+          "uci_online_retail_ii"
+        ],
+        "milestones": [
+          "Load and clean the data (remove cancellations and blank customer IDs)",
+          "Write SQL queries for monthly revenue and the top 10 products",
+          "Analyse returns and cancellations",
+          "Build a Power BI dashboard",
+          "Write a one-page findings note"
+        ]
+      }
+    ]
+  },
+  "data_mode": "fixture",
+  "generated_at": "2026-10-22T20:06:30Z",
+  "warnings": [
+    "Estimated hours for these recommended projects are team estimates, not provider-verified durations.",
+    "CATALOG_MODE=cached: the role and skill catalog inputs for this response come from Jawad's cached, real O*NET-derived dataset — those role/skill identifiers are not fictional. Matching scores are still calculated by Hussain's deterministic matching algorithm, running fully offline (no RunPod contacted). data_mode remains 'fixture' because the generated score is still fixture-based, even though the underlying sourced roles themselves are real.",
+    "CATALOG_MODE=cached: the projects in this response come from Jawad's verified, cached project dataset — real datasets/tutorials and team-estimated hours, not fixture placeholders."
+  ]
+}

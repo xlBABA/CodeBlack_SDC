@@ -1,9 +1,9 @@
 import { ArrowUpRight, Info } from 'lucide-react'
 import { Link } from 'react-router'
 import { CountUp } from '@/components/page/count-up'
-import { TrendArrow } from '@/components/trend-arrow'
 import { Card } from '@/components/ui/card'
-import type { RoleMatch } from '@/mocks/types'
+import { DEFAULT_CAVEAT } from '@/lib/role-copy'
+import type { RoleMatch } from '@/types/api'
 
 const PARTS = [
   ['skills', 'Skills'],
@@ -13,21 +13,22 @@ const PARTS = [
 ] as const
 
 /** Deep hero card for the best-aligned role (Halden idea): score, caveat, skill coverage, breakdown. */
-export function TopMatchCard({ match }: { match: RoleMatch }) {
-  const matched = match.matched_skills.length
-  const total = matched + match.missing_skills.length
+export function TopMatchCard({ match, eyebrow = 'Your strongest alignment right now', workspaceLink = true }: { match: RoleMatch; eyebrow?: string; workspaceLink?: boolean }) {
+  const have = match.matched_skills ?? []
+  const missing = match.missing_skills ?? []
+  const matched = have.length
+  const total = matched + missing.length
   return (
     <Card variant="deep" className="grid h-full gap-6 p-5 sm:p-7 md:grid-cols-[minmax(0,1fr)_220px]" aria-labelledby="top-match-title">
       <div className="flex min-w-0 flex-col">
         <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-          Your strongest alignment right now
-          <TrendArrow direction={match.trend} className="rounded-full bg-white/12 px-2 py-0.5 !text-[#bff0d9]" withLabel />
+          {eyebrow}
         </p>
         <h2 id="top-match-title" className="mt-2 text-[clamp(1.9rem,1.3rem+1.6vw,2.7rem)] leading-[1.05] font-extrabold tracking-[-0.03em]">
-          {match.title}
+          {match.role_title}
         </h2>
         <div className="mt-4 flex items-end gap-3">
-          <CountUp value={match.alignment_estimate} className="text-[clamp(3.6rem,2.6rem+3vw,5.4rem)] leading-[0.85] font-extrabold tracking-[-0.05em]" />
+          <CountUp value={match.score} className="text-[clamp(3.6rem,2.6rem+3vw,5.4rem)] leading-[0.85] font-extrabold tracking-[-0.05em]" />
           <span className="pb-1.5 text-sm leading-tight font-semibold text-muted-foreground">
             / 100
             <br />
@@ -36,18 +37,19 @@ export function TopMatchCard({ match }: { match: RoleMatch }) {
         </div>
         <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
           <Info className="mt-0.5 size-4 flex-none" aria-hidden />
-          {match.caveats[0]}
+          {match.caveats?.[0] ?? DEFAULT_CAVEAT}
         </p>
+        <p className="mt-2 text-sm text-muted-foreground">{match.explanation}</p>
         <ul className="mt-5 flex flex-wrap gap-1.5" aria-label="Skills for this role">
-          {match.matched_skills.map((s) => (
-            <li key={s} data-enter="item" className="rounded-full bg-white/14 px-3 py-1 text-sm font-semibold">
-              {s}
+          {have.map((s) => (
+            <li key={s.skill_id} data-enter="item" className="rounded-full bg-white/14 px-3 py-1 text-sm font-semibold">
+              {s.name}
             </li>
           ))}
-          {match.missing_skills.map((s) => (
-            <li key={s} data-enter="item" className="rounded-full border border-dashed border-white/35 px-3 py-1 text-sm font-semibold text-[#f6faf8c4]">
+          {missing.map((s) => (
+            <li key={s.skill_id} data-enter="item" className="rounded-full border border-dashed border-white/35 px-3 py-1 text-sm font-semibold text-[#f6faf8c4]">
               <span className="sr-only">Missing: </span>
-              {s}
+              {s.name}
             </li>
           ))}
         </ul>
@@ -56,10 +58,10 @@ export function TopMatchCard({ match }: { match: RoleMatch }) {
             <span>
               <b>{matched}</b> of {total} key skills matched
             </span>
-            <span className="text-muted-foreground">{match.missing_skills.length} to build</span>
+            <span className="text-muted-foreground">{missing.length} to build</span>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-white/15">
-            <i data-enter="bar" className="block h-full rounded-full bg-[linear-gradient(90deg,#bff0d9,#f0c64a)]" style={{ width: `${(matched / total) * 100}%` }} />
+            <i data-enter="bar" className="block h-full rounded-full bg-[linear-gradient(90deg,#bff0d9,#f0c64a)]" style={{ width: `${total ? (matched / total) * 100 : 0}%` }} />
           </div>
         </div>
       </div>
@@ -70,20 +72,22 @@ export function TopMatchCard({ match }: { match: RoleMatch }) {
           <div key={key} data-enter="item">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{label}</span>
-              <b>{match.breakdown[key]}</b>
+              <b>{Math.round(match.score_breakdown[key])}</b>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/15">
-              <i data-enter="bar" className="block h-full rounded-full bg-[#f6faf8]" style={{ width: `${match.breakdown[key]}%` }} />
+              <i data-enter="bar" className="block h-full rounded-full bg-[#f6faf8]" style={{ width: `${match.score_breakdown[key]}%` }} />
             </div>
           </div>
         ))}
-        <Link
-          to={`/roles/${match.role_id}`}
-          className="mt-auto inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f6faf8] px-5 font-bold whitespace-nowrap text-[#0d2a20] transition hover:bg-white"
-        >
-          Open workspace
-          <ArrowUpRight className="size-4" aria-hidden />
-        </Link>
+        {workspaceLink && (
+          <Link
+            to={`/roles/${match.role_id}`}
+            className="mt-auto inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f6faf8] px-5 font-bold whitespace-nowrap text-[#0d2a20] transition hover:bg-white"
+          >
+            Open workspace
+            <ArrowUpRight className="size-4" aria-hidden />
+          </Link>
+        )}
       </div>
     </Card>
   )

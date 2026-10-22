@@ -1,11 +1,12 @@
-import { MoveRight, TrendingDown, TrendingUp } from 'lucide-react'
-import type { TrendDirection } from '@/mocks/types'
+import { CircleHelp, MoveRight, TrendingDown, TrendingUp } from 'lucide-react'
+import type { TrendDirection } from '@/types/api'
 import { cn } from '@/lib/utils'
 
 const META = {
-  rising: { Icon: TrendingUp, label: 'Rising demand', cls: 'text-good' },
-  stable: { Icon: MoveRight, label: 'Stable demand', cls: 'text-muted-foreground' },
-  declining: { Icon: TrendingDown, label: 'Declining demand', cls: 'text-tomato' },
+  rising: { Icon: TrendingUp, label: 'Rising', cls: 'text-good' },
+  stable: { Icon: MoveRight, label: 'Stable', cls: 'text-muted-foreground' },
+  falling: { Icon: TrendingDown, label: 'Falling', cls: 'text-tomato' },
+  unknown: { Icon: CircleHelp, label: 'Direction unknown', cls: 'text-muted-foreground' },
 } satisfies Record<TrendDirection, unknown>
 
 export function TrendArrow({ direction, withLabel = false, className }: { direction: TrendDirection; withLabel?: boolean; className?: string }) {

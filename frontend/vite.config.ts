@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { PRODUCT_NAME, PRODUCT_TAGLINE, STORAGE_PREFIX } from './src/config/product.ts'
 
+const API_ORIGIN = 'https://mustaqbal-ai.replit.app'
+
 // Fills %PRODUCT_NAME% etc. (and %BASE_URL%) in index.html from the product constant and config.
 function productHtml(): Plugin {
   const values: Record<string, string> = { PRODUCT_NAME, PRODUCT_TAGLINE, STORAGE_PREFIX, BASE_URL: '/' }
@@ -22,5 +24,8 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
-  server: { port: 5173, strictPort: true },
+  // /api goes to the backend in dev and preview, so the browser sees one origin (no CORS)
+  // and a build served from the backend's own domain later needs no changes.
+  server: { port: 5173, strictPort: true, proxy: { '/api': { target: API_ORIGIN, changeOrigin: true, secure: true } } },
+  preview: { proxy: { '/api': { target: API_ORIGIN, changeOrigin: true, secure: true } } },
 })

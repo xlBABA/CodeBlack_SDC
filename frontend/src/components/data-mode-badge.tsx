@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge'
-
-export type DataMode = 'live' | 'cached' | 'fixture'
+import type { DataMode } from '@/types/api'
 
 const MODES: Record<DataMode, { label: string; tone: 'good' | 'sky' | 'warn'; hint: string }> = {
   live: { label: 'Live', tone: 'good', hint: 'Fetched just now from the analysis service' },
