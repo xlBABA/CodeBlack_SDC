@@ -24,7 +24,7 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 | Source | Used for | Licence / terms |
 |---|---|---|
 | O*NET OnLine (US Dept. of Labor), 8 occupation pages plus 1 Software Skills CSV export | Role skills, 0-100 importance scores and technology tools | Public domain, with attribution |
-| GitHub REST API — Search Repositories | Trend signal: new repositories per skill topic, 30 days vs the previous 30 | GitHub Terms of Service. The demo uses only the 12 saved snapshots (retrieved 2026-10-21 and 2026-10-22); it makes no live GitHub request. |
+| GitHub REST API — Search Repositories | Trend signal: new repositories per skill topic, 30 days vs the previous 30 | GitHub Terms of Service. 12 saved snapshots (retrieved 2026-10-21 and 2026-10-22) exist as data and in my standalone `services/trends`. The demo makes no live GitHub request. **Not shown in the app:** the deployed `/api/v1/trends` returns placeholder data labelled `fixture`. |
 | Microsoft Learn: catalog API, 4 learning paths and modules, and 1 VBA documentation page | Learning resources; provider-stated hours from the catalog API's `duration_in_minutes` | Free to access |
 | MathWorks MATLAB Onramp, MIT OpenCourseWare 18.05, SAS Programming 1, Alison, MDN, GnuCash guide, 2 freeCodeCamp.org videos on YouTube | Learning resources | Free to access (see `docs/source-register.md`) |
 | Harvard CS50x 2026 | Learning resource (programming) | CC BY-NC-SA 4.0; we link only and never copy or redistribute it |
@@ -32,7 +32,7 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 | Onshape CAD Basics | Learning resource and project tutorial (CAD) | Onshape's own terms of use; we link only |
 | UCI Machine Learning Repository: 8 datasets | Portfolio projects (linked, not copied) | CC BY 4.0 |
 | World Bank — World Development Indicators | Portfolio projects (linked, not copied) | Creative Commons Attribution 4.0 |
-| UN Sustainable Development Goals (17 goals and their targets) | SDG mapping for every role and skill (team judgment) | Public UN framework |
+| UN Sustainable Development Goals (17 goals and their targets) | SDG mapping for every role and skill (team judgment). **Shown in the app:** the deployed `/api/v1/sdgs/{role_id}` returns these mappings (`data_mode: "cached"`). | Public UN framework |
 
 ## Software and libraries
 
@@ -44,4 +44,4 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 | Hussain's matcher (`services/matching`, his branch, used read-only) | Tested that my data works with his matcher, in a throwaway worktree. Nothing was committed there. |
 
 ## Not used in my part
-I did not use RunPod, Replit, or a Gemini/OpenAI model in my part. Those belong to teammates' parts, if they use them.
+I did not use RunPod, Replit, or a Gemini/OpenAI model in my part. The app is deployed on Replit by Rehan (https://mustaqbal-ai.replit.app). I only read it with GET requests to check what it shows.
