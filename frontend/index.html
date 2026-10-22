@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ece8df" />
+    <meta name="description" content="%PRODUCT_NAME% — %PRODUCT_TAGLINE%" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400..800&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
+    <title>%PRODUCT_NAME%</title>
+    <script>
+      /* Before first paint: apply the saved theme so the page never flashes the wrong colours,
+         and mark html.js so the app shell can stay hidden until its load animation is ready.
+         The failsafe un-hides it after 4 s if the bundle never gets there. */
+      (function (d) {
+        d.classList.add('js')
+        try {
+          var pref = JSON.parse(localStorage.getItem('%STORAGE_PREFIX%:theme') || '"system"')
+          var dark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+          d.dataset.theme = dark ? 'dark' : 'light'
+          var accent = JSON.parse(localStorage.getItem('%STORAGE_PREFIX%:accent') || '"emerald"')
+          if (accent !== 'emerald') d.dataset.accent = accent
+          // the landing page (base path root) uses its own teal palette
+          var landing = location.pathname.replace('%BASE_URL%', '/') === '/'
+          if (landing) d.dataset.palette = 'landing'
+          document.querySelector('meta[name="theme-color"]').content = landing ? (dark ? '#0b1517' : '#edf3f3') : dark ? '#0f1412' : '#ece8df'
+        } catch (e) {}
+        setTimeout(function () { d.classList.add('failsafe') }, 4000)
+      })(document.documentElement)
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
