@@ -89,7 +89,7 @@
       "title": "Statistics - A Full University Course on Data Science Basics",
       "provider": "freeCodeCamp.org",
       "url": "https://youtu.be/xxpc-HPKN28",
-      "url_note": "Direct YouTube link to the freeCodeCamp.org video. Replaces the earlier link to the third-party ExpertBeacon article. Jawad saw in a browser on 2026-10-22: the link opens, the title, and the length 8:15:04. The instructor name (Monika Wahi) comes only from that third-party article (expertbeacon.com, updated 2024-08-20) and is not confirmed on the video page.",
+      "url_note": "Direct YouTube link to the freeCodeCamp.org video. Replaces the earlier link to the third-party ExpertBeacon article. Jawad saw in a browser on 2026-10-22: the link opens, the title, and the length 8:15:04. The instructor name (Monika Wahi), first seen in that third-party article (expertbeacon.com, updated 2024-08-20), is confirmed in the YouTube description ('Course by Monika Wahi'), checked by Jawad in a browser on 2026-10-22.",
       "level": "beginner",
       "price": {"status": "free_stated", "note": "Free freeCodeCamp.org video on YouTube."},
       "estimated_hours": 8.25,

@@ -27,7 +27,8 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | 4ba98a0 | Recorded my browser checks for 5 resources and the UCI Concrete dataset; moved the GnuCash resource to its gnucash.org guide URL | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 86bdcb5 | Pointed the statistics and Excel resources at their direct freeCodeCamp YouTube videos, with video lengths I saw (statistics hours now provider-stated, 8.25 h) | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `services/catalog/tests/test_check_links.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 3bae8f4 | Recorded my browser checks of the CS50x licence (CC BY-NC-SA 4.0) and week count, and that the QGIS manual names no licence | `docs/source-register.md`, `data/resources.json` (note text only), `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
-| this commit | Moved the two video notes (what I saw in the browser; instructor name from a third-party article) into the existing `url_note` field, so the data fits Rehan's cached importer with no new fields; added a test for his allowed field list | `data/resources.json`, `services/roadmaps/tests/test_roadmap.py`, `docs/jawad-ai-usage.md` |
+| 72e7ebc | Moved the two video notes (what I saw in the browser; instructor name from a third-party article) into the existing `url_note` field, so the data fits Rehan's cached importer with no new fields; added a test for his allowed field list | `data/resources.json`, `services/roadmaps/tests/test_roadmap.py`, `docs/jawad-ai-usage.md` |
+| this commit | Recorded that the statistics video's instructor (Monika Wahi) is confirmed in its YouTube description, as I checked in a browser (text only, in the existing `url_note`) | `data/resources.json`, `docs/source-register.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
@@ -56,7 +57,7 @@ These have `"checked_by": "Jawad, manually in browser"` in `data/resources.json`
 - Alison, *Thinking Critically*: free, "Avg. Duration 1.5-3 Hours".
 - freeCodeCamp *Microsoft Excel Tutorial for Beginners - Full Course* on YouTube (https://youtu.be/Vl0H-qTclOg): the link opens, the title, and length 2:26:09. Earlier I checked it embedded on KDnuggets.
 - Onshape *CAD Basics (Learning Pathway)*: free sign-in, 7 topics, no stated duration.
-- freeCodeCamp *Statistics - A Full University Course on Data Science Basics* on YouTube (https://youtu.be/xxpc-HPKN28): the link opens, the title, and length 8:15:04. Earlier I had only seen an ExpertBeacon article about it. The instructor name (Monika Wahi) still comes only from that article.
+- freeCodeCamp *Statistics - A Full University Course on Data Science Basics* on YouTube (https://youtu.be/xxpc-HPKN28): the link opens, the title, and length 8:15:04. Earlier I had only seen an ExpertBeacon article about it. The instructor name (Monika Wahi) is confirmed in the YouTube description ("Course by Monika Wahi"), checked in my browser on 2026-10-22.
 - Microsoft Learn, *Introduction to Git*: free, "1 hr 26 min".
 - MDN, *Dynamic scripting with JavaScript*: free.
 - Harvard CS50x 2026: free; Week 0 to Week 10 = 11 weeks; no hours stated, so the 110 h stays a team estimate. Licence CC BY-NC-SA 4.0, read on https://cs50.harvard.edu/x/license/; we link only and do not copy or redistribute the material.
