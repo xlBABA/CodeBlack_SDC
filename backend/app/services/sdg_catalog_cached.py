@@ -2,15 +2,17 @@
 (app/data/cached/sdg_mappings.json; byte-identical copy of
 feat/jawad-trends-data:data/sdg_mappings.json as of commit 2838340).
 
-Milestone 6D-2A scope: import and validation ONLY — see
-resource_catalog_cached.py's module docstring for the same disclaimer.
-Not wired into SdgCatalogProvider, GET /sdgs/{role_id}, or
-FixtureSdgCatalog (which, unlike get_role_catalog()/get_matching_provider(),
-currently has no CATALOG_MODE awareness at all).
+Milestone 6D-2A added import and validation (load_cached_sdg_mappings()).
+Milestone 6D-2C adds CachedSdgCatalog, satisfying
+app.services.sdg_catalog.SdgCatalogProvider — still not wired into GET
+/sdgs/{role_id} or FixtureSdgCatalog (which, unlike
+get_role_catalog()/get_matching_provider(), currently has no CATALOG_MODE
+awareness at all).
 """
 from __future__ import annotations
 
 from app.services.role_catalog_cached import CachedCatalogError, _load_json, _require_dict, load_cached_roles
+from app.services.sdg_catalog import RoleSdgFixture, RoleSdgMappingSet, SkillSdgFixture
 
 _REQUIRED_ROLE_MAPPING_FIELDS = {"role_id", "sdg_id", "reason"}
 _REQUIRED_SKILL_MAPPING_FIELDS = {"skill_id", "sdg_id", "reason"}
@@ -91,3 +93,43 @@ def load_cached_sdg_mappings() -> dict:
 
     _validate_sdg_mappings(role_mappings, skill_mappings, role_ids, skill_ids)
     return {"role_sdg_mappings": role_mappings, "skill_sdg_mappings": skill_mappings}
+
+
+def _required_skill_ids_for_role(role_id: str) -> set[str]:
+    role = next((r for r in load_cached_roles() if r.role_id == role_id), None)
+    if role is None:
+        return set()
+    return {req.skill_id for req in role.required_skills}
+
+
+class CachedSdgCatalog:
+    """Satisfies app.services.sdg_catalog.SdgCatalogProvider using
+    Jawad's real, cached SDG mapping dataset exclusively — never mixes
+    in anything from FixtureSdgCatalog. A role_id outside Jawad's own
+    canonical set (e.g. our fixture-only mechanical_design_engineer,
+    sustainability_coordinator) has no entry in role_sdg_mappings at
+    all, so get() returns None for it — honest empty, never an
+    accidental join to a fixture-only role_id. RoleSdgMappingSet.role_sdg
+    is a tuple, so a role with multiple SDGs (e.g. accountant, 2;
+    civil_engineer, 2) is preserved exactly, with no schema change
+    needed. Not wired into GET /sdgs/{role_id} or any FastAPI dependency
+    yet (Milestone 6D-2C scope: adapter implementation and testing only).
+    """
+
+    def get(self, role_id: str) -> RoleSdgMappingSet | None:
+        mappings = load_cached_sdg_mappings()
+        role_sdg = tuple(
+            RoleSdgFixture(sdg_id=m["sdg_id"], reason=m["reason"])
+            for m in mappings["role_sdg_mappings"]
+            if m["role_id"] == role_id
+        )
+        if not role_sdg:
+            return None
+
+        relevant_skill_ids = _required_skill_ids_for_role(role_id)
+        skill_sdg = tuple(
+            SkillSdgFixture(skill_id=m["skill_id"], sdg_id=m["sdg_id"], reason=m["reason"])
+            for m in mappings["skill_sdg_mappings"]
+            if m["skill_id"] in relevant_skill_ids
+        )
+        return RoleSdgMappingSet(role_id=role_id, role_sdg=role_sdg, skill_sdg=skill_sdg)

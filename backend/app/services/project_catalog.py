@@ -21,6 +21,18 @@ class ProjectFixture:
     estimated_hours: float
     source_ids: tuple[str, ...]
     milestones: tuple[str, ...]
+    # Additive (Milestone 6D-2B/6D-2C): None for every existing fixture
+    # project above, unchanged. CachedProjectCatalog (project_catalog_cached.py)
+    # populates these from Jawad's real data. RecommendedProject (the
+    # frozen public DTO) has no matching fields at all — these are for
+    # internal use (e.g. ProjectRecommendationService's warnings), never
+    # exposed as their own response field.
+    difficulty: str | None = None
+    expected_outcome: str | None = None
+    hours_basis: str | None = None
+    hours_basis_note: str | None = None
+    source_type: str | None = None
+    checked_at: str | None = None
 
     @property
     def skill_ids(self) -> tuple[str, ...]:

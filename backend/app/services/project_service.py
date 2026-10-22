@@ -89,8 +89,18 @@ class ProjectRecommendationService:
             return (-overlap, project.project_id)
 
         ranked = sorted(candidates, key=relevance)[:limit]
+        warnings: list[str] = []
+        if any(p.hours_basis == "team_estimate" for p in ranked):
+            # Milestone 6D-2C: RecommendedProject has no per-project text
+            # field to carry this, so it's disclosed at the envelope
+            # level instead — never fires for FixtureProjectCatalog
+            # projects, whose hours_basis is always None.
+            warnings.append(
+                "Estimated hours for these recommended projects are team "
+                "estimates, not provider-verified durations."
+            )
         return ProjectRecommendationOutcome(
-            projects=[_to_recommended(p) for p in ranked], warnings=[]
+            projects=[_to_recommended(p) for p in ranked], warnings=warnings
         )
 
 

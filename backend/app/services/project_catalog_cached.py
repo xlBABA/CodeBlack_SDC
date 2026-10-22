@@ -2,9 +2,11 @@
 (app/data/cached/projects.json; byte-identical copy of
 feat/jawad-trends-data:data/projects.json as of commit 2838340).
 
-Milestone 6D-2A scope: import and validation ONLY — see
-resource_catalog_cached.py's module docstring for the same disclaimer.
-Not wired into ProjectCatalogProvider, any route, or FixtureProjectCatalog.
+Milestone 6D-2A added import and validation (load_cached_projects()).
+Milestone 6D-2C adds CachedProjectCatalog, satisfying
+app.services.project_catalog.ProjectCatalogProvider — still not wired
+into any route or DI, and never mixes in anything from
+FixtureProjectCatalog (see CachedProjectCatalog's own docstring).
 
 Known gap, preserved rather than reconciled: every project's role_id
 uses Jawad's own canonical set (data_analyst, financial_analyst,
@@ -16,6 +18,8 @@ validation concern.
 """
 from __future__ import annotations
 
+from app.schemas.profile import SkillRef
+from app.services.project_catalog import ProjectFixture
 from app.services.role_catalog_cached import CachedCatalogError, _load_json, _require_dict, load_cached_roles
 
 _REQUIRED_PROJECT_FIELDS = {
@@ -95,3 +99,53 @@ def load_cached_projects() -> list[dict]:
     projects = doc.get("projects") or []
     _validate_projects(projects, role_ids, skill_ids)
     return projects
+
+
+def _skill_names() -> dict[str, str]:
+    skills_doc = _load_json("skills.json")
+    return {s["skill_id"]: s["name"] for s in skills_doc["skills"]}
+
+
+def _to_project_fixture(project: dict, skill_names: dict[str, str]) -> ProjectFixture:
+    skills = []
+    for skill_id in project["skill_ids"]:
+        if skill_id not in skill_names:
+            # load_cached_projects() already validated every skill_id
+            # against cached skills.json — this is a defensive guard
+            # against that invariant breaking, never a place to invent
+            # a name for an unknown skill.
+            raise CachedCatalogError(
+                f"{project['project_id']}: unknown skill_id '{skill_id}' has no resolvable name"
+            )
+        skills.append(SkillRef(skill_id=skill_id, name=skill_names[skill_id]))
+    return ProjectFixture(
+        project_id=project["project_id"],
+        title=project["title"],
+        role_id=project["role_id"],
+        skills=tuple(skills),
+        estimated_hours=float(project["estimated_hours"]),
+        source_ids=tuple(project["source_ids"]),
+        milestones=tuple(project["milestones"]),
+        difficulty=project.get("difficulty"),
+        expected_outcome=project.get("expected_outcome"),
+        hours_basis=project.get("hours_basis"),
+        hours_basis_note=project.get("hours_basis_note"),
+        source_type=project.get("source_type"),
+        checked_at=project.get("checked_at"),
+    )
+
+
+class CachedProjectCatalog:
+    """Satisfies app.services.project_catalog.ProjectCatalogProvider
+    using Jawad's real, cached project dataset exclusively — never mixes
+    in anything from FixtureProjectCatalog. Loads and validates on every
+    call (same reasoning as CachedRoleCatalog/CachedResourceCatalog).
+    Not wired into any route or FastAPI dependency yet (Milestone 6D-2C
+    scope: adapter implementation and testing only)."""
+
+    def list_projects(self) -> list[ProjectFixture]:
+        skill_names = _skill_names()
+        return [_to_project_fixture(p, skill_names) for p in load_cached_projects()]
+
+    def get(self, project_id: str) -> ProjectFixture | None:
+        return next((p for p in self.list_projects() if p.project_id == project_id), None)
