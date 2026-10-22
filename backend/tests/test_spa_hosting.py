@@ -2,8 +2,14 @@
 
 Covers: HTML entrypoint, static assets, deep-link fallback, and that
 /api/v1, /docs and /openapi.json are preserved exactly — both when a
-frontend build is present and (against the real app, since no frontend
-build exists on this branch) when it is absent.
+frontend build is present and when it is absent.
+
+Milestone 9E: the real-app checks below never assume whether
+frontend/dist currently exists on disk — that varies by checkout (a
+plain backend-only checkout has none; an integration worktree that has
+already run `npm run build` does). Each check instead reads the actual
+filesystem state via app.main.FRONTEND_DIST_DIR and asserts the response
+is consistent with *that*, so the suite passes identically either way.
 """
 from __future__ import annotations
 
@@ -13,6 +19,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+import app.main as main_module
 from app.api.v1.router import api_router
 from app.core.errors import register_exception_handlers
 from app.spa import mount_spa
@@ -140,11 +147,30 @@ def test_mount_spa_is_a_no_op_when_dist_exists_but_index_html_is_missing(tmp_pat
     assert client.get("/").status_code == 404
 
 
-def test_real_app_is_unaffected_because_no_frontend_build_exists_on_this_branch(client: TestClient):
-    """Uses the shared app.main.app via the existing `client` fixture —
-    frontend/dist genuinely does not exist on this branch, so this proves
-    requirement 4 against the real app, not a simulation."""
+def test_frontend_dist_dir_points_at_repo_root_frontend_dist():
+    """main.py's FRONTEND_DIST_DIR must resolve to repo_root/frontend/dist,
+    a sibling of the backend/ checkout — checked structurally, never by
+    asserting whether that directory currently exists (see module docstring)."""
+    backend_dir = Path(main_module.__file__).resolve().parent.parent  # backend/
+    expected = backend_dir.parent / "frontend" / "dist"  # repo_root/frontend/dist
+    assert main_module.FRONTEND_DIST_DIR == expected
+
+
+def test_real_app_spa_mount_is_consistent_with_actual_dist_presence(client: TestClient):
+    """Uses the shared app.main.app via the existing `client` fixture.
+    Reads whether frontend/dist/index.html actually exists on disk in
+    *this* checkout, then asserts the real app's behavior matches that
+    state — 200 SPA HTML if a build is present, the original 404 if not.
+    Passes identically on a backend-only checkout and on an integration
+    worktree with a real frontend build, unlike the fragile "it never
+    exists" assumption this replaces."""
     assert client.get("/api/v1/health").status_code == 200
+
+    dist_build_present = (main_module.FRONTEND_DIST_DIR / "index.html").is_file()
     root = client.get("/")
-    assert root.status_code == 404
-    assert root.json() == {"detail": "Not Found"}
+    if dist_build_present:
+        assert root.status_code == 200
+        assert "text/html" in root.headers["content-type"]
+    else:
+        assert root.status_code == 404
+        assert root.json() == {"detail": "Not Found"}

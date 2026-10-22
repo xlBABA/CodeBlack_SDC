@@ -1,0 +1,345 @@
+{
+  "data": {
+    "matches": [
+      {
+        "role_id": "public_health_analyst",
+        "role_title": "Public Health Analyst",
+        "score": 34.0,
+        "score_type": "profile_alignment_estimate",
+        "matched_skills": [
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          },
+          {
+            "skill_id": "python",
+            "name": "Python",
+            "proficiency": null
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill_id": "critical_thinking",
+            "name": "Critical Thinking",
+            "proficiency": null
+          },
+          {
+            "skill_id": "mathematics",
+            "name": "Mathematics",
+            "proficiency": null
+          }
+        ],
+        "score_breakdown": {
+          "skills": 28.0,
+          "experience": 0.0,
+          "prerequisites": 100.0,
+          "transferable": 0.0
+        },
+        "evidence_ids": [
+          "onet_19_1041_00"
+        ],
+        "explanation": "You have 2 of 4 core skills for Public Health Analyst. Skill coverage 28/100, experience 0/100, prerequisites 100/100. This is an estimated profile alignment, not a hiring prediction.",
+        "caveats": [
+          "No project mentions a skill this role needs."
+        ]
+      },
+      {
+        "role_id": "software_developer",
+        "role_title": "Software Developer",
+        "score": 28.0,
+        "score_type": "profile_alignment_estimate",
+        "matched_skills": [
+          {
+            "skill_id": "python",
+            "name": "Python",
+            "proficiency": null
+          },
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill_id": "programming",
+            "name": "Programming",
+            "proficiency": null
+          },
+          {
+            "skill_id": "critical_thinking",
+            "name": "Critical Thinking",
+            "proficiency": null
+          },
+          {
+            "skill_id": "systems_analysis",
+            "name": "Systems Analysis",
+            "proficiency": null
+          },
+          {
+            "skill_id": "complex_problem_solving",
+            "name": "Complex Problem Solving",
+            "proficiency": null
+          },
+          {
+            "skill_id": "javascript",
+            "name": "JavaScript",
+            "proficiency": null
+          },
+          {
+            "skill_id": "git",
+            "name": "Git",
+            "proficiency": null
+          }
+        ],
+        "score_breakdown": {
+          "skills": 18.0,
+          "experience": 0.0,
+          "prerequisites": 100.0,
+          "transferable": 0.0
+        },
+        "evidence_ids": [
+          "onet_15_1252_00"
+        ],
+        "explanation": "You have 2 of 8 core skills for Software Developer. Skill coverage 18/100, experience 0/100, prerequisites 100/100. This is an estimated profile alignment, not a hiring prediction.",
+        "caveats": [
+          "No project mentions a skill this role needs."
+        ]
+      },
+      {
+        "role_id": "financial_analyst",
+        "role_title": "Financial Analyst",
+        "score": 24.0,
+        "score_type": "profile_alignment_estimate",
+        "matched_skills": [
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill_id": "attention_to_detail",
+            "name": "Attention to Detail",
+            "proficiency": null
+          },
+          {
+            "skill_id": "excel",
+            "name": "Excel",
+            "proficiency": null
+          },
+          {
+            "skill_id": "financial_analysis_software",
+            "name": "Financial Analysis Software",
+            "proficiency": null
+          },
+          {
+            "skill_id": "data_visualization",
+            "name": "Data Visualization",
+            "proficiency": null
+          }
+        ],
+        "score_breakdown": {
+          "skills": 11.0,
+          "experience": 0.0,
+          "prerequisites": 100.0,
+          "transferable": 0.0
+        },
+        "evidence_ids": [
+          "onet_13_2051_00"
+        ],
+        "explanation": "You have 1 of 5 core skills for Financial Analyst. Skill coverage 11/100, experience 0/100, prerequisites 100/100. This is an estimated profile alignment, not a hiring prediction.",
+        "caveats": [
+          "No project mentions a skill this role needs."
+        ]
+      },
+      {
+        "role_id": "data_analyst",
+        "role_title": "Data Analyst",
+        "score": 23.0,
+        "score_type": "profile_alignment_estimate",
+        "matched_skills": [
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill_id": "critical_thinking",
+            "name": "Critical Thinking",
+            "proficiency": null
+          },
+          {
+            "skill_id": "mathematics",
+            "name": "Mathematics",
+            "proficiency": null
+          },
+          {
+            "skill_id": "complex_problem_solving",
+            "name": "Complex Problem Solving",
+            "proficiency": null
+          },
+          {
+            "skill_id": "data_visualization",
+            "name": "Data Visualization",
+            "proficiency": null
+          },
+          {
+            "skill_id": "systems_analysis",
+            "name": "Systems Analysis",
+            "proficiency": null
+          }
+        ],
+        "score_breakdown": {
+          "skills": 10.0,
+          "experience": 0.0,
+          "prerequisites": 100.0,
+          "transferable": 0.0
+        },
+        "evidence_ids": [
+          "onet_15_2051_01"
+        ],
+        "explanation": "You have 1 of 6 core skills for Data Analyst. Skill coverage 10/100, experience 0/100, prerequisites 100/100. This is an estimated profile alignment, not a hiring prediction.",
+        "caveats": [
+          "No project mentions a skill this role needs."
+        ]
+      },
+      {
+        "role_id": "accountant",
+        "role_title": "Accountant",
+        "score": 20.0,
+        "score_type": "profile_alignment_estimate",
+        "matched_skills": [
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill_id": "attention_to_detail",
+            "name": "Attention to Detail",
+            "proficiency": null
+          },
+          {
+            "skill_id": "excel",
+            "name": "Excel",
+            "proficiency": null
+          },
+          {
+            "skill_id": "critical_thinking",
+            "name": "Critical Thinking",
+            "proficiency": null
+          },
+          {
+            "skill_id": "complex_problem_solving",
+            "name": "Complex Problem Solving",
+            "proficiency": null
+          },
+          {
+            "skill_id": "mathematics",
+            "name": "Mathematics",
+            "proficiency": null
+          },
+          {
+            "skill_id": "accounting_software",
+            "name": "Accounting Software",
+            "proficiency": null
+          }
+        ],
+        "score_breakdown": {
+          "skills": 4.0,
+          "experience": 0.0,
+          "prerequisites": 100.0,
+          "transferable": 0.0
+        },
+        "evidence_ids": [
+          "onet_13_2011_00"
+        ],
+        "explanation": "You have 0 of 6 core skills for Accountant. Skill coverage 4/100, experience 0/100, prerequisites 100/100. This is an estimated profile alignment, not a hiring prediction.",
+        "caveats": [
+          "No project mentions a skill this role needs."
+        ]
+      },
+      {
+        "role_id": "environmental_scientist",
+        "role_title": "Environmental Scientist",
+        "score": 19.0,
+        "score_type": "profile_alignment_estimate",
+        "matched_skills": [
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill_id": "science",
+            "name": "Science",
+            "proficiency": null
+          },
+          {
+            "skill_id": "complex_problem_solving",
+            "name": "Complex Problem Solving",
+            "proficiency": null
+          },
+          {
+            "skill_id": "critical_thinking",
+            "name": "Critical Thinking",
+            "proficiency": null
+          },
+          {
+            "skill_id": "gis",
+            "name": "GIS",
+            "proficiency": null
+          },
+          {
+            "skill_id": "mathematics",
+            "name": "Mathematics",
+            "proficiency": null
+          },
+          {
+            "skill_id": "systems_analysis",
+            "name": "Systems Analysis",
+            "proficiency": null
+          },
+          {
+            "skill_id": "analytical_scientific_software",
+            "name": "Analytical/Statistical Software",
+            "proficiency": null
+          }
+        ],
+        "score_breakdown": {
+          "skills": 3.0,
+          "experience": 0.0,
+          "prerequisites": 100.0,
+          "transferable": 0.0
+        },
+        "evidence_ids": [
+          "onet_19_2041_00"
+        ],
+        "explanation": "You have 0 of 7 core skills for Environmental Scientist. Skill coverage 3/100, experience 0/100, prerequisites 100/100. This is an estimated profile alignment, not a hiring prediction.",
+        "caveats": [
+          "No project mentions a skill this role needs."
+        ]
+      }
+    ],
+    "catalog_coverage": {
+      "verified": 8,
+      "total_target": 30
+    },
+    "methodology_version": "v1"
+  },
+  "data_mode": "fixture",
+  "generated_at": "2026-10-22T20:06:30Z",
+  "warnings": [
+    "MATCHING_MODE=hussain: scores are produced by Hussain's deterministic matching algorithm (app/services/hussain_matching), running fully offline — semantic similarity is explicitly disabled, so no RunPod endpoint or embedding model was contacted. This methodology is an initial team choice, not a validated model, and the score is not a hiring probability.",
+    "CATALOG_MODE=cached: the role and skill catalog inputs for this response come from Jawad's cached, real O*NET-derived dataset — those role/skill identifiers are not fictional. Matching scores are still calculated by Hussain's deterministic matching algorithm, running fully offline (no RunPod contacted). data_mode remains 'fixture' because the generated score is still fixture-based, even though the underlying sourced roles themselves are real."
+  ]
+}
