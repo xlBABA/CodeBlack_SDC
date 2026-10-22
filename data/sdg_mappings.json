@@ -1,0 +1,161 @@
+{
+  "role_sdg_mappings": [
+    {
+      "role_id": "data_analyst",
+      "sdg_id": 8,
+      "reason": "Business intelligence/data analysis work directly supports organizations making productive, evidence-based decisions, matching SDG 8's focus on productivity and economic growth."
+    },
+    {
+      "role_id": "financial_analyst",
+      "sdg_id": 8,
+      "reason": "Financial analysts guide capital allocation and investment decisions that affect economic growth and job creation, a core part of SDG 8."
+    },
+    {
+      "role_id": "mechanical_engineer",
+      "sdg_id": 9,
+      "reason": "Mechanical engineers design and build industrial systems, products and infrastructure, directly supporting SDG 9's goal of resilient infrastructure and inclusive industrialization."
+    },
+    {
+      "role_id": "public_health_analyst",
+      "sdg_id": 3,
+      "reason": "Epidemiology-based analysis tracks disease patterns and health risks to protect population health, matching SDG 3's goal of health and well-being for all."
+    },
+    {
+      "role_id": "software_developer",
+      "sdg_id": 9,
+      "reason": "Software developers build the digital systems and applications that modern industry and infrastructure run on, matching SDG 9 (industry, innovation and infrastructure; target 9.c on access to information and communications technology)."
+    },
+    {
+      "role_id": "accountant",
+      "sdg_id": 8,
+      "reason": "Accountants keep business finances accurate and sustainable, supporting the productive enterprises and economic growth that SDG 8 aims for."
+    },
+    {
+      "role_id": "accountant",
+      "sdg_id": 16,
+      "reason": "Accounting and auditing make organisations' finances transparent and accountable, matching SDG target 16.6 on effective, accountable and transparent institutions."
+    },
+    {
+      "role_id": "civil_engineer",
+      "sdg_id": 9,
+      "reason": "Civil engineers design and build roads, bridges, water systems and other infrastructure, the core of SDG 9's goal of resilient infrastructure."
+    },
+    {
+      "role_id": "civil_engineer",
+      "sdg_id": 11,
+      "reason": "Civil engineering shapes how cities are planned and built (transport, drainage, housing), directly supporting SDG 11 on sustainable cities and communities."
+    },
+    {
+      "role_id": "environmental_scientist",
+      "sdg_id": 3,
+      "reason": "O*NET describes this work as identifying and reducing pollutants and hazards that affect the environment or public health, matching SDG target 3.9 on reducing illness from hazardous chemicals and pollution."
+    },
+    {
+      "role_id": "environmental_scientist",
+      "sdg_id": 12,
+      "reason": "Tracking and reducing pollutants and hazardous materials supports SDG target 12.4 on the sound management of chemicals and wastes."
+    }
+  ],
+  "skill_sdg_mappings": [
+    {
+      "skill_id": "critical_thinking",
+      "sdg_id": 4,
+      "reason": "Core analytical competency built through education; a foundational learning outcome (SDG 4) that transfers across any evidence-based career."
+    },
+    {
+      "skill_id": "mathematics",
+      "sdg_id": 4,
+      "reason": "Quantitative literacy is a foundational education outcome (SDG 4) underlying STEM, finance, and health analysis work."
+    },
+    {
+      "skill_id": "complex_problem_solving",
+      "sdg_id": 4,
+      "reason": "A higher-order thinking skill developed through education (SDG 4), applicable across all four roles in this catalog."
+    },
+    {
+      "skill_id": "systems_analysis",
+      "sdg_id": 4,
+      "reason": "An analytical competency taught and strengthened through formal education and training (SDG 4)."
+    },
+    {
+      "skill_id": "attention_to_detail",
+      "sdg_id": 4,
+      "reason": "A work-quality competency developed through training and education (SDG 4), important for accurate financial analysis."
+    },
+    {
+      "skill_id": "excel",
+      "sdg_id": 8,
+      "reason": "A baseline digital workplace skill tied to employability, matching SDG target 8.6 on equipping youth with skills for employment."
+    },
+    {
+      "skill_id": "sql",
+      "sdg_id": 8,
+      "reason": "An in-demand technical skill directly tied to employability in data-driven roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "python",
+      "sdg_id": 8,
+      "reason": "An in-demand technical skill directly tied to employability in data-driven and engineering roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "data_visualization",
+      "sdg_id": 8,
+      "reason": "A widely-demanded workplace tool skill that improves employability across analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "cad_software",
+      "sdg_id": 9,
+      "reason": "CAD tools are used to design industrial products and infrastructure, supporting SDG 9's focus on inclusive, sustainable industrialization."
+    },
+    {
+      "skill_id": "matlab",
+      "sdg_id": 9,
+      "reason": "MATLAB is used for engineering modeling and simulation that underpins infrastructure and industrial design (SDG 9)."
+    },
+    {
+      "skill_id": "financial_analysis_software",
+      "sdg_id": 8,
+      "reason": "An in-demand finance-sector tool skill directly tied to employability in investment/analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "analytical_scientific_software",
+      "sdg_id": 8,
+      "reason": "A statistical-analysis tool skill tied to employability in quantitative analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "vba",
+      "sdg_id": 8,
+      "reason": "A workplace automation/scripting skill tied to employability in finance and analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "programming",
+      "sdg_id": 4,
+      "reason": "A core information and communications technology skill built through education, matching SDG target 4.4 on youth and adults with relevant ICT skills for employment."
+    },
+    {
+      "skill_id": "javascript",
+      "sdg_id": 8,
+      "reason": "An in-demand web programming skill directly tied to employability in software roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "git",
+      "sdg_id": 8,
+      "reason": "A standard workplace tool for collaborating on code, tied to employability in software and data roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "accounting_software",
+      "sdg_id": 8,
+      "reason": "A practical workplace tool skill tied to employability in accounting and bookkeeping roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "gis",
+      "sdg_id": 11,
+      "reason": "GIS is used to map land use, hazards and services for planning, supporting SDG target 11.3 on inclusive, sustainable urban planning."
+    },
+    {
+      "skill_id": "science",
+      "sdg_id": 4,
+      "reason": "Using scientific rules and methods is a foundational learning outcome built through education (SDG 4), needed for engineering and environmental work."
+    }
+  ]
+}

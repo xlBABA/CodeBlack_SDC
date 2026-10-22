@@ -1,0 +1,373 @@
+{
+  "_note": "Curated portfolio projects for the 4 verified roles. Every source_id is registered in docs/source-register.md (URL and licence checked on checked_at). estimated_hours is always a team estimate: the sum of the per-milestone hours in hours_basis_note. No project is described as trending (we have no signal evidence for that). Datasets are linked, never copied into this app.",
+  "data_mode": "cached",
+  "projects": [
+    {
+      "project_id": "da_online_retail_dashboard",
+      "role_id": "data_analyst",
+      "title": "Online retail sales dashboard",
+      "skill_ids": ["sql", "excel", "data_visualization", "critical_thinking"],
+      "difficulty": "beginner",
+      "expected_outcome": "A dashboard of monthly revenue, top products and returns, plus a one-page findings note.",
+      "milestones": [
+        "Load and clean the data (remove cancellations and blank customer IDs)",
+        "Write SQL queries for monthly revenue and the top 10 products",
+        "Analyse returns and cancellations",
+        "Build a Power BI dashboard",
+        "Write a one-page findings note"
+      ],
+      "estimated_hours": 14,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 3 + 3 + 2 + 4 + 2 h per milestone.",
+      "source_ids": ["uci_online_retail_ii"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "da_bank_campaign_analysis",
+      "role_id": "data_analyst",
+      "title": "Bank marketing campaign analysis",
+      "skill_ids": ["sql", "data_visualization", "mathematics", "systems_analysis"],
+      "difficulty": "beginner-intermediate",
+      "expected_outcome": "Conversion rates by customer segment, with recommendations and clearly stated limits.",
+      "milestones": [
+        "Explore the dataset's rows and fields",
+        "Write SQL for conversion rates by job, month and contact type",
+        "Chart the segments",
+        "Identify likely drivers and note possible confounders",
+        "Write a short recommendation memo"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 3 + 2 + 2 h per milestone.",
+      "source_ids": ["uci_bank_marketing"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "fa_macro_indicator_workbook",
+      "role_id": "financial_analyst",
+      "title": "Macroeconomic comparison workbook",
+      "skill_ids": ["excel", "vba", "data_visualization", "attention_to_detail"],
+      "difficulty": "beginner-intermediate",
+      "expected_outcome": "An Excel workbook comparing GDP growth and inflation for 5 countries, refreshed and formatted by a VBA macro.",
+      "milestones": [
+        "Download GDP growth and inflation indicators for 5 countries, 2000 to the latest year",
+        "Clean the data in Excel with check formulas",
+        "Calculate growth rates and inflation-adjusted values",
+        "Write a VBA macro that refreshes and formats the comparison sheet",
+        "Build a chart dashboard",
+        "Write a short comparison memo"
+      ],
+      "estimated_hours": 14,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 2 + 3 + 2 + 2 h per milestone.",
+      "source_ids": ["worldbank_wdi"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "fa_credit_default_analysis",
+      "role_id": "financial_analyst",
+      "title": "Credit card default risk analysis",
+      "skill_ids": ["excel", "sql", "data_visualization", "attention_to_detail"],
+      "difficulty": "intermediate",
+      "expected_outcome": "Default rates by credit limit and repayment history, and a simple Excel risk score that does not use sex, marital status or age.",
+      "milestones": [
+        "Load the data into SQL or Excel and check every field against the data dictionary",
+        "Calculate default rates by credit-limit band and by recent repayment status",
+        "Build pivot tables and charts of the results",
+        "Build a simple Excel risk score using only repayment and balance fields (exclude sex, marital status and age)",
+        "Check how well the score separates defaulters and write up its limits"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 2 + 3 + 2 h per milestone.",
+      "source_ids": ["uci_default_credit_card"],
+      "source_type": "dataset",
+      "data_note": "The dataset includes sex, marital status and age columns; the project deliberately leaves them out of the risk score.",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "me_predictive_maintenance",
+      "role_id": "mechanical_engineer",
+      "title": "Machine failure analysis",
+      "skill_ids": ["python", "mathematics", "complex_problem_solving", "critical_thinking"],
+      "difficulty": "intermediate",
+      "expected_outcome": "A notebook explaining machine failure modes, with a simple, evaluated failure classifier.",
+      "milestones": [
+        "Load the data",
+        "Explore the different failure types",
+        "Build features in Python (for example torque times tool wear)",
+        "Fit a threshold rule and a logistic regression model",
+        "Evaluate the models and explain their errors"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 1 + 2 + 3 + 4 + 2 h per milestone.",
+      "source_ids": ["uci_ai4i_2020"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "me_power_plant_regression",
+      "role_id": "mechanical_engineer",
+      "title": "Power plant output model in MATLAB",
+      "skill_ids": ["matlab", "mathematics", "excel", "critical_thinking"],
+      "difficulty": "beginner-intermediate",
+      "expected_outcome": "A MATLAB regression of power output from ambient conditions, with a physical interpretation of the results.",
+      "milestones": [
+        "Import the data into MATLAB",
+        "Plot each ambient variable against power output",
+        "Fit a linear regression model",
+        "Test the model on held-out data and report the error",
+        "Summarise the results in Excel",
+        "Explain the results physically"
+      ],
+      "estimated_hours": 11,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 1 + 2 + 3 + 2 + 1 + 2 h per milestone.",
+      "source_ids": ["uci_ccpp"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "me_parametric_bracket_cad",
+      "role_id": "mechanical_engineer",
+      "title": "Parametric bracket and assembly in CAD",
+      "skill_ids": ["cad_software", "complex_problem_solving", "mathematics"],
+      "difficulty": "beginner",
+      "expected_outcome": "A parametric bracket with size variants, a small assembly and a dimensioned 2D drawing.",
+      "milestones": [
+        "Sketch the bracket profile with constraints",
+        "Build the parametric part",
+        "Create size variants using variables",
+        "Assemble the bracket with fasteners",
+        "Produce a dimensioned 2D drawing"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 2 + 3 + 2 h per milestone.",
+      "source_ids": ["onshape_cad_basics"],
+      "source_type": "tutorial",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "ph_diabetes_readmission",
+      "role_id": "public_health_analyst",
+      "title": "Hospital readmission patterns (diabetes)",
+      "skill_ids": ["sql", "python", "mathematics", "critical_thinking", "data_visualization"],
+      "difficulty": "intermediate",
+      "expected_outcome": "Readmission rates by patient group, with a significance test and clear observational-data caveats.",
+      "milestones": [
+        "Load the data",
+        "Clean the missing-value codes",
+        "Write SQL for readmission rates by age band and admission type",
+        "Compare groups statistically in Python",
+        "Chart the results and write a caveats section"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 1 + 3 + 3 + 3 + 2 h per milestone.",
+      "source_ids": ["uci_diabetes_130"],
+      "source_type": "dataset",
+      "data_note": "The dataset is de-identified, public and licensed CC BY 4.0. No part of it is included in this app; the project only links to the UCI page.",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "ph_health_indicator_trends",
+      "role_id": "public_health_analyst",
+      "title": "Health spending vs outcomes across countries",
+      "skill_ids": ["excel", "python", "data_visualization", "mathematics", "critical_thinking"],
+      "difficulty": "beginner",
+      "expected_outcome": "Trend charts and a correlation analysis of health spending and outcomes, stating clearly that correlation is not causation.",
+      "milestones": [
+        "Choose 3 health indicators for 10 countries",
+        "Clean the data in Excel",
+        "Calculate correlations and draw scatter plots in Python",
+        "Chart the trends over time",
+        "Write up the limitations"
+      ],
+      "estimated_hours": 11,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 2 + 3 + 2 + 2 h per milestone.",
+      "source_ids": ["worldbank_wdi"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "sd_wdi_web_dashboard",
+      "role_id": "software_developer",
+      "title": "Web dashboard for World Bank indicators",
+      "skill_ids": ["javascript", "git", "programming", "complex_problem_solving"],
+      "difficulty": "beginner-intermediate",
+      "expected_outcome": "A small browser app that loads World Bank indicator data and charts it, kept in a Git repository with a clear history.",
+      "milestones": [
+        "Download 3 indicators for 5 countries as CSV",
+        "Set up a Git repository with a README and a branch per feature",
+        "Write JavaScript that loads and parses the CSV",
+        "Draw line charts in the browser",
+        "Add input checks and friendly error messages",
+        "Publish the page and document how to run it"
+      ],
+      "estimated_hours": 15,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 1 + 4 + 4 + 2 + 2 h per milestone.",
+      "source_ids": ["worldbank_wdi"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "sd_python_sales_report_cli",
+      "role_id": "software_developer",
+      "title": "Command-line sales report tool in Python",
+      "skill_ids": ["python", "git", "sql", "programming"],
+      "difficulty": "intermediate",
+      "expected_outcome": "A tested Python command-line tool that loads retail transactions into SQLite and prints sales reports.",
+      "milestones": [
+        "Design the command-line options and data model",
+        "Load the data into SQLite with Python",
+        "Write SQL queries for the reports",
+        "Write unit tests for loading and reports",
+        "Use Git branches and pull requests for each feature",
+        "Write usage documentation"
+      ],
+      "estimated_hours": 13,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 3 + 3 + 1 + 1 h per milestone.",
+      "source_ids": ["uci_online_retail_ii"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "ac_gnucash_small_business_books",
+      "role_id": "accountant",
+      "title": "One month of books for a fictional small business in GnuCash",
+      "skill_ids": ["accounting_software", "attention_to_detail", "mathematics", "excel"],
+      "difficulty": "beginner",
+      "expected_outcome": "A complete, reconciled month of bookkeeping for a made-up business, with an income statement and balance sheet.",
+      "milestones": [
+        "Set up a chart of accounts for a fictional shop",
+        "Enter one month of fictional transactions",
+        "Reconcile the bank account",
+        "Run the income statement and balance sheet reports",
+        "Export to Excel and check every total"
+      ],
+      "estimated_hours": 11,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 2 + 2 + 2 h per milestone.",
+      "source_ids": ["gnucash_tutorial_concepts_guide"],
+      "source_type": "tutorial",
+      "data_note": "Uses fictional transactions the student makes up; no real company or personal data.",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "ac_revenue_reconciliation",
+      "role_id": "accountant",
+      "title": "Monthly revenue reconciliation",
+      "skill_ids": ["excel", "sql", "attention_to_detail", "critical_thinking"],
+      "difficulty": "intermediate",
+      "expected_outcome": "A monthly net-revenue ledger that separates sales from cancellations and is cross-checked two ways.",
+      "milestones": [
+        "Load the invoice data",
+        "Separate sales from cancellations (invoice codes starting with 'C')",
+        "Build a monthly net revenue ledger in Excel",
+        "Cross-check the Excel totals with SQL",
+        "Investigate the 10 largest adjustments",
+        "Write a short reconciliation note"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 2 + 3 + 2 + 2 + 1 h per milestone.",
+      "source_ids": ["uci_online_retail_ii"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "ce_concrete_strength_model",
+      "role_id": "civil_engineer",
+      "title": "Concrete strength vs mix design",
+      "skill_ids": ["mathematics", "matlab", "excel", "science", "critical_thinking"],
+      "difficulty": "intermediate",
+      "expected_outcome": "A MATLAB model of concrete compressive strength from mix ingredients and age, with an engineering interpretation.",
+      "milestones": [
+        "Import the data into MATLAB",
+        "Explore how age and the water-to-cement ratio affect strength",
+        "Fit a regression model in MATLAB",
+        "Test the model on held-out data",
+        "Build a mix-design summary table in Excel",
+        "Explain the results in engineering terms"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 1 + 2 + 3 + 2 + 2 + 2 h per milestone.",
+      "source_ids": ["uci_concrete_compressive_strength"],
+      "source_type": "dataset",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "ce_qgis_site_analysis",
+      "role_id": "civil_engineer",
+      "title": "Site suitability analysis in QGIS",
+      "skill_ids": ["gis", "systems_analysis", "complex_problem_solving"],
+      "difficulty": "beginner",
+      "expected_outcome": "A site-suitability map built by following the QGIS Training Manual's vector modules, with stated criteria.",
+      "milestones": [
+        "Work through the 'Creating and Exploring a Basic Map' module",
+        "Work through the 'Classifying Vector Data' and 'Creating Vector Data' modules",
+        "Run the analysis in the 'Vector Analysis' module",
+        "Lay out the final map ('Laying out the Maps' module)",
+        "Write up the selection criteria and assumptions"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 3 + 3 + 2 + 2 h per milestone.",
+      "source_ids": ["qgis_training_manual"],
+      "source_type": "tutorial",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "es_beijing_air_quality_trends",
+      "role_id": "environmental_scientist",
+      "title": "Air pollution and weather across 12 Beijing monitoring sites",
+      "skill_ids": ["science", "mathematics", "excel", "critical_thinking", "analytical_scientific_software"],
+      "difficulty": "intermediate",
+      "expected_outcome": "Seasonal pollutant trends for 12 monitoring sites and how they relate to weather, with clear limits on what the data can show.",
+      "milestones": [
+        "Combine the 12 site files and handle missing values (marked NA)",
+        "Calculate daily and monthly averages of PM2.5 and NO2 for each site",
+        "Compare pollutant levels with wind speed, rain and temperature",
+        "Chart the seasonal trends and compare the sites",
+        "Write up the limitations: one city, March 2013 to February 2017 only, and correlation is not cause"
+      ],
+      "estimated_hours": 13,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 3 + 3 + 3 + 2 + 2 h per milestone.",
+      "source_ids": ["uci_beijing_multi_site_air_quality"],
+      "source_type": "dataset",
+      "data_note": "Licensed CC BY 4.0, as stated on the UCI page, with no extra use restriction. Credit the creator (Song Chen) and UCI. No part of the dataset is included in this app; the project only links to the UCI page.",
+      "checked_at": "2026-10-22"
+    },
+    {
+      "project_id": "es_qgis_forestry_mapping",
+      "role_id": "environmental_scientist",
+      "title": "Forestry mapping in QGIS",
+      "skill_ids": ["gis", "science", "mathematics", "critical_thinking"],
+      "difficulty": "intermediate",
+      "expected_outcome": "A forest map and summary produced by following the QGIS Training Manual's Forestry Application module.",
+      "milestones": [
+        "Work through the 'Creating and Exploring a Basic Map' module",
+        "Work through the 'Forestry Application' module with its sample data",
+        "Summarise the module's results in a table",
+        "Lay out the final map",
+        "Write up the limitations"
+      ],
+      "estimated_hours": 12,
+      "hours_basis": "team_estimate",
+      "hours_basis_note": "Team estimate: 2 + 4 + 2 + 2 + 2 h per milestone.",
+      "source_ids": ["qgis_training_manual"],
+      "source_type": "tutorial",
+      "checked_at": "2026-10-22"
+    }
+  ]
+}

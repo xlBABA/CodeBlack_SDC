@@ -1,0 +1,22 @@
+{
+  "skill_id": "cad_software",
+  "source_status": "cached",
+  "source_id": "github_search_repos",
+  "current": {
+    "topic": "cad",
+    "start": "2026-09-22",
+    "end": "2026-10-21",
+    "total_count": 602,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:39:05Z"
+  },
+  "previous": {
+    "topic": "cad",
+    "start": "2026-08-23",
+    "end": "2026-09-21",
+    "total_count": 390,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:39:03Z"
+  },
+  "prior_snapshot": null
+}
