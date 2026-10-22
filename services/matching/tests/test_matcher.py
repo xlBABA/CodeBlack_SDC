@@ -77,6 +77,40 @@ def test_missing_prerequisite_info_is_a_caveat(matcher, roles):
     assert any(c.startswith("Not provided") for c in m["caveats"])
 
 
+def test_role_without_prerequisites_is_not_assessed(matcher, cs_student, roles):
+    from services.matching import scoring
+    role = {**roles[0], "prerequisites": []}
+    assert scoring.prerequisites_component(cs_student, role) == (None, [])
+
+    m = matcher.match_roles(cs_student, [role])["matches"][0]
+    assert "prerequisites not assessed" in m["explanation"]
+    assert "prerequisites 100/100" not in m["explanation"]
+    assert m["score_breakdown"]["prerequisites"] == 0  # contract needs a number
+    assert not any(c.startswith(("Not provided", "Usually expected")) for c in m["caveats"])
+
+
+def test_missing_prerequisites_weight_is_redistributed_not_free_points(matcher, cs_student, roles):
+    from services.matching import scoring
+    role = {**roles[0], "prerequisites": []}
+    m = matcher.match_roles(cs_student, [role])["matches"][0]
+    b = m["score_breakdown"]
+    parts = {"skills": b["skills"], "experience": b["experience"], "transferable": b["transferable"]}
+    if role.get("transferable_skills") or role.get("transferable_interests"):
+        expected = scoring.combine({**parts, "prerequisites": None})
+    else:
+        expected = scoring.combine({"skills": b["skills"], "experience": b["experience"],
+                                    "prerequisites": None, "transferable": None})
+    assert m["score"] == expected
+    # the old behaviour would have added 15 free points: it must differ for a weak profile
+    assert scoring.combine({"skills": 20, "experience": 0, "prerequisites": None, "transferable": None}) == 14
+    assert scoring.combine({"skills": 20, "experience": 0, "prerequisites": 100.0, "transferable": None}) == 29
+
+
+def test_combine_with_nothing_optional_still_uses_skills_and_experience():
+    from services.matching import scoring
+    assert scoring.combine({"skills": 50, "experience": 50, "prerequisites": None, "transferable": None}) == 50
+
+
 # ---- scenarios and trend signals ----
 
 SQL_RISING = [{"signal_id": "sig1", "skill_id": "sql", "source_id": "fixture_src_1", "direction": "rising"}]
@@ -93,6 +127,22 @@ def test_no_signals_means_scenarios_do_not_change_scores(matcher, cs_student, ro
     fast = _score(matcher, cs_student, roles, "data_analyst", "fast", [])
     assert mod["score"] == fast["score"]
     assert any("No dated trend signals" in c for c in mod["caveats"])
+
+
+def test_scenario_caveat_names_the_signal_type(matcher, cs_student, roles):
+    typed = [{**SQL_RISING[0], "signal_type": "developer_activity"}]
+    m = _score(matcher, cs_student, roles, "data_analyst", "fast", typed)
+    caveat = next(c for c in m["caveats"] if c.startswith("Scenario adjusted"))
+    assert "GitHub developer-activity" in caveat and "not job demand" in caveat
+
+    untyped = _score(matcher, cs_student, roles, "data_analyst", "fast", SQL_RISING)
+    caveat = next(c for c in untyped["caveats"] if c.startswith("Scenario adjusted"))
+    assert "unspecified-type" in caveat and "job demand" not in caveat
+
+    other = [{**SQL_RISING[0], "signal_type": "job_demand"}]
+    caveat = next(c for c in _score(matcher, cs_student, roles, "data_analyst", "fast", other)["caveats"]
+                  if c.startswith("Scenario adjusted"))
+    assert "job_demand signals" in caveat and "not job demand" not in caveat
 
 
 def test_rising_held_skill_raises_score_more_in_fast(matcher, cs_student, roles):

@@ -11,6 +11,11 @@ from .scenarios import skill_weight_adjustments
 
 DEFAULT_LIMIT = 6
 TOTAL_TARGET_ROLES = 30
+# What a trend signal measures, by its `signal_type`; named in the scenario caveat so a
+# developer-activity signal is never read as job demand.
+SIGNAL_TYPE_LABELS = {
+    "developer_activity": "GitHub developer-activity (not job demand)",
+}
 DEGRADED_CAVEAT = "Semantic matching unavailable; exact skill matching only (degraded)"
 
 
@@ -107,9 +112,13 @@ class Matcher:
         caveats = list(prereq_caveats) + interpretation_notes + skill_notes + exp_notes + scenario_notes
         if role_signals:
             names = sorted({n.name_of(sig["skill_id"]) for sig in role_signals})
+            kinds = sorted({
+                SIGNAL_TYPE_LABELS.get(sig.get("signal_type"), sig.get("signal_type") or "unspecified-type")
+                for sig in role_signals
+            })
             caveats.append(
                 "Scenario adjusted the weight of: " + ", ".join(names)
-                + " (based on dated trend signals; an assumption, not a forecast)."
+                + f" (based on dated {' and '.join(kinds)} signals; an assumption, not a forecast)."
             )
         if role.get("data_mode") == "fixture":
             caveats.append("Fixture role for testing; not verified occupational data.")
@@ -124,7 +133,8 @@ class Matcher:
             + (f" (plus {required_interpreted} interpreted from your wording, partial credit)"
                if required_interpreted else "")
             + f". Skill coverage {round(s)}/100, experience "
-            f"{round(e)}/100, prerequisites {round(q)}/100"
+            f"{round(e)}/100, "
+            + (f"prerequisites {round(q)}/100" if q is not None else "prerequisites not assessed")
             + (f", transferable skills {round(t)}/100" if t is not None else "")
             + ". This is an estimated profile alignment, not a hiring prediction."
         )
@@ -144,7 +154,8 @@ class Matcher:
             "score_breakdown": {
                 "skills": round(s),
                 "experience": round(e),
-                "prerequisites": round(q),
+                # contract requires a number; None means "not defined for this role"
+                "prerequisites": round(q) if q is not None else 0,
                 # contract requires a number; None means "not defined for this role"
                 "transferable": round(t) if t is not None else 0,
             },

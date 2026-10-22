@@ -22,7 +22,7 @@ dependencies (pytest for tests). Output follows `contracts/API_CONTRACT.md`.
 
 - **S, skills:** weighted coverage of role skills. Weight = importance (1 to 5), halved for optional skills, times the scenario multiplier. Credit = proficiency factor (beginner 0.60, intermediate 0.85, advanced 1.00, unspecified 0.85). A semantically similar skill (embedding similarity of at least 0.60, see Embedding similarity below) gets 0.5 credit and the gap stays listed.
 - **E, experience:** 35 points per project that mentions a role skill (maximum 70), plus 30 if the experience summary mentions one.
-- **Q, prerequisites:** share of prerequisites met. Missing information counts half and is shown as a caveat. An unmet hard prerequisite is shown as an explicit warning.
+- **Q, prerequisites:** share of prerequisites met. Missing information counts half and is shown as a caveat. An unmet hard prerequisite is shown as an explicit warning. If a role lists no prerequisites, Q is not assessed: the weight is redistributed (as for T) and the explanation says "prerequisites not assessed".
 - **T, transferable:** share of the role's transferable skills the student has. If a role has none, the weight is redistributed.
 
 All weights are initial team choices, not research results. The score is an
@@ -133,6 +133,6 @@ python -m pytest services/matching -q
 
 ## Known limitations
 - Experience detection is keyword based (catalogue names and aliases only).
-- `transferable` is reported as 0 in the breakdown when a role defines no transferable skills.
+- `transferable` and `prerequisites` are reported as 0 in the breakdown when a role defines none (the contract requires a number); they are left out of the total and the weight is redistributed.
 - Embedding similarity compares skill names and aliases only, and names alone cannot reliably separate close skills (hard negatives score 0.35 to 0.65, overlapping many true synonyms). The `not_equivalent` list only covers pairs someone has already listed; unlisted close pairs can still get half credit at 0.60. Review it whenever the catalogue grows.
 - The threshold is calibrated on 52 fictional pairs and is a team choice, not a validated value. Re-run the calibration script (and add hard negatives) when the catalogue or model changes.

@@ -110,10 +110,11 @@ def experience_component(
     return float(min(100, points)), notes
 
 
-def prerequisites_component(profile: dict, role: dict) -> tuple[float, list[str]]:
+def prerequisites_component(profile: dict, role: dict) -> tuple[float | None, list[str]]:
+    """Q, or None when the role lists no prerequisites (nothing to assess; weight is redistributed)."""
     prereqs = role.get("prerequisites") or []
     if not prereqs:
-        return 100.0, []
+        return None, []
     caveats: list[str] = []
     credit = 0.0
     for pre in prereqs:
