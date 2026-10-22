@@ -1,0 +1,22 @@
+{
+  "skill_id": "sql",
+  "source_status": "cached",
+  "source_id": "github_search_repos",
+  "current": {
+    "topic": "sql",
+    "start": "2026-09-22",
+    "end": "2026-10-21",
+    "total_count": 3531,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:38:40Z"
+  },
+  "previous": {
+    "topic": "sql",
+    "start": "2026-08-23",
+    "end": "2026-09-21",
+    "total_count": 3273,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:38:38Z"
+  },
+  "prior_snapshot": null
+}

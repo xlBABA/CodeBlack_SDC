@@ -1,0 +1,22 @@
+{
+  "skill_id": "excel",
+  "source_status": "cached",
+  "source_id": "github_search_repos",
+  "current": {
+    "topic": "excel",
+    "start": "2026-09-22",
+    "end": "2026-10-21",
+    "total_count": 1472,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:38:57Z"
+  },
+  "previous": {
+    "topic": "excel",
+    "start": "2026-08-23",
+    "end": "2026-09-21",
+    "total_count": 1264,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:38:55Z"
+  },
+  "prior_snapshot": null
+}
