@@ -25,7 +25,8 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | ecdeee3 | 4 more verified roles from O*NET (Software Developer, Accountant, Civil Engineer, Environmental Scientist), 6 new skills, SDG mappings, trend coverage and first real GitHub snapshots for the new skills, learning resources, and 2 portfolio projects per new role | `data/*.json`, `data/trend_snapshots/*.json`, `docs/source-register.md`, `services/trends/queries.py`, `services/trends/README.md`, `services/catalog/tests/test_catalog.py`, `services/roadmaps/tests/test_roadmap.py`, `services/roadmaps/tests/test_projects.py` |
 | a5045cb | Updated link-check report and this file | `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 4ba98a0 | Recorded my browser checks for 5 resources and the UCI Concrete dataset; moved the GnuCash resource to its gnucash.org guide URL | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
-| this commit | Pointed the statistics and Excel resources at their direct freeCodeCamp YouTube videos, with video lengths I saw (statistics hours now provider-stated, 8.25 h) | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `services/catalog/tests/test_check_links.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| 86bdcb5 | Pointed the statistics and Excel resources at their direct freeCodeCamp YouTube videos, with video lengths I saw (statistics hours now provider-stated, 8.25 h) | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `services/catalog/tests/test_check_links.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| this commit | Recorded my browser checks of the CS50x licence (CC BY-NC-SA 4.0) and week count, and that the QGIS manual names no licence | `docs/source-register.md`, `data/resources.json` (note text only), `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
@@ -57,15 +58,15 @@ These have `"checked_by": "Jawad, manually in browser"` in `data/resources.json`
 - freeCodeCamp *Statistics - A Full University Course on Data Science Basics* on YouTube (https://youtu.be/xxpc-HPKN28): the link opens, the title, and length 8:15:04. Earlier I had only seen an ExpertBeacon article about it. The instructor name (Monika Wahi) still comes only from that article.
 - Microsoft Learn, *Introduction to Git*: free, "1 hr 26 min".
 - MDN, *Dynamic scripting with JavaScript*: free.
-- Harvard CS50x 2026: free; no hours stated, so the 110 h stays a team estimate.
+- Harvard CS50x 2026: free; Week 0 to Week 10 = 11 weeks; no hours stated, so the 110 h stays a team estimate. Licence CC BY-NC-SA 4.0, read on https://cs50.harvard.edu/x/license/; we link only and do not copy or redistribute the material.
 - GnuCash *Tutorial and Concepts Guide*, at https://www.gnucash.org/viewdoc.phtml?rev=5&lang=C&doc=guide.
-- QGIS Training Manual: the module list includes Vector Analysis and Forestry Application.
+- QGIS Training Manual: the module list includes Vector Analysis and Forestry Application. The page footer says only "© Copyright 2002-now, QGIS project" and names no licence, so we record "licence not stated" and link only.
 
 I also checked the UCI Concrete Compressive Strength dataset page: CC BY 4.0. This one is a project dataset, so it is noted in `docs/source-register.md`, not in `resources.json`.
 
 Everything else was checked by automated requests from Claude Code. See `docs/link-check-report.md`.
 
-Not yet checked by me: the QGIS Training Manual's licence, the CS50x week count (11 weeks), the other new project datasets (including the UCI Beijing Multi-Site Air Quality dataset, CC BY 4.0) and the O*NET pages for the 4 newer roles.
+Not yet checked by me: the other new project datasets (including the UCI Beijing Multi-Site Air Quality dataset, CC BY 4.0) and the O*NET pages for the 4 newer roles.
 
 ## What is a team estimate (not from a source)
 - **Role importance numbers:** the cases where `roles.json` differs from O*NET's bucketed score (mostly mathematics), every tool-skill importance, and every `required: true/false` flag. See "Importance score methodology" in `docs/source-register.md`.

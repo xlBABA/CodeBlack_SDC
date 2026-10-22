@@ -85,7 +85,7 @@ Current team estimates (checked 2026-10-22):
 | SAS — SAS Programming 1: Essentials | 21 h | SAS says "a complete how-to in two days" and lists 21 h for the live-class format; assumed similar for self-paced |
 | Onshape — CAD Basics (Learning Pathway) | 7 h | 7 listed topics at about 1 h each; Onshape publishes no duration |
 | MDN — Dynamic scripting with JavaScript | 23 h | 23 lesson and challenge pages in the module × ~1 h |
-| Harvard — CS50x 2026 | 110 h | 11 weeks of material (Week 0–10, read by automated fetch; week count not verified by Jawad) × ~10 h/week |
+| Harvard — CS50x 2026 | 110 h | 11 weeks of material (Week 0–10, checked by Jawad in a browser on 2026-10-22) × ~10 h/week. CS50x states no hours, so 110 h stays a team estimate |
 | GnuCash — Tutorial and Concepts Guide | 12 h | 16 chapters × ~45 min |
 | QGIS — Training Manual | 14 h | Core modules 2–8 (7 modules) × ~2 h |
 
@@ -110,7 +110,7 @@ Each page was opened on `checked_at` and its licence read from the page itself. 
 | uci_concrete_compressive_strength | UCI ML Repository — Concrete Compressive Strength | https://archive.ics.uci.edu/dataset/165/concrete+compressive+strength | CC BY 4.0 | 2026-10-22 | ce_concrete_strength_model | 1,030 rows; ingredients in kg/m^3 and age in days; licence CC BY 4.0 checked manually by Jawad in a browser on 2026-10-22 |
 | uci_beijing_multi_site_air_quality | UCI ML Repository — Beijing Multi-Site Air Quality | https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data | CC BY 4.0 ("This dataset is licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license."); no other use restriction on the page | 2026-10-22 | es_beijing_air_quality_trends | 420,768 hourly rows from 12 sites, 2013-03-01 to 2017-02-28; data from the Beijing Municipal Environmental Monitoring Center; creator Song Chen; DOI 10.24432/C5RK5G; missing data marked NA |
 
-Tutorial sources reused from the learning-resources table: `gnucash_tutorial_concepts_guide` (ac_gnucash_small_business_books) and `qgis_training_manual` (ce_qgis_site_analysis, es_qgis_forestry_mapping); both are `source_type: tutorial`. They are linked, not copied. Licence as seen on 2026-10-22: the GnuCash guide's contents list a "GNU Free Documentation License" appendix; the QGIS Training Manual index page shows only "© Copyright 2002-now, QGIS project" and states no licence (not verified).
+Tutorial sources reused from the learning-resources table: `gnucash_tutorial_concepts_guide` (ac_gnucash_small_business_books) and `qgis_training_manual` (ce_qgis_site_analysis, es_qgis_forestry_mapping); both are `source_type: tutorial`. They are linked, not copied. Licence as seen on 2026-10-22: the GnuCash guide's contents list a "GNU Free Documentation License" appendix; the QGIS Training Manual page footer says only "© Copyright 2002-now, QGIS project" and names no licence (checked by Jawad in a browser on 2026-10-22). Licence: not stated on the page; we link only and do not copy the manual.
 
 Checked and **not used**: UCI Air Quality (https://archive.ics.uci.edu/dataset/360/air+quality; labelled CC BY 4.0, but its description says "This dataset can be used exclusively for research purposes. Commercial purposes are fully excluded.", which does not fit a public Apache-2.0 repo), Natural Earth (returned 406 to automated checks, licence not read), SEC Financial Statement Data Sets (page returned 403 to automated checks), Our World in Data COVID-19 repository (archived; licence file not found), WHO Global Health Observatory (no licence text found on the page).
 
@@ -133,9 +133,9 @@ Each resource's `source_id` equals its `resource_id`. Price, hours and their bas
 | onshape_cad_basics_pathway | Onshape Learning Center — CAD Basics (Learning Pathway) | https://learn.onshape.com/learning-paths/introduction-to-cad | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: cad_software |
 | mslearn_intro_to_git | Microsoft Learn — Introduction to Git | https://learn.microsoft.com/en-us/training/modules/intro-to-git/ | price: no_charge_observed | 2026-10-22 | Jawad, manually in browser | skill: git |
 | mdn_javascript_dynamic_scripting | MDN Web Docs (Mozilla) — Dynamic scripting with JavaScript (Learn web development) | https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting | price: no_charge_observed | 2026-10-22 | Jawad, manually in browser | skill: javascript |
-| cs50x_2026 | Harvard University (CS50 OpenCourseWare) — CS50x 2026 (CS50's Introduction to Computer Science) | https://cs50.harvard.edu/x/ | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: programming |
+| cs50x_2026 | Harvard University (CS50 OpenCourseWare) — CS50x 2026 (CS50's Introduction to Computer Science) | https://cs50.harvard.edu/x/ | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: programming. Licence: CC BY-NC-SA 4.0, read from https://cs50.harvard.edu/x/license/ manually by Jawad in a browser on 2026-10-22; we link only and do not copy or redistribute the material |
 | gnucash_tutorial_concepts_guide | GnuCash (official documentation) — GnuCash Tutorial and Concepts Guide | https://www.gnucash.org/viewdoc.phtml?rev=5&lang=C&doc=guide | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: accounting_software |
-| qgis_training_manual | QGIS (official documentation) — QGIS Training Manual | https://docs.qgis.org/latest/en/docs/training_manual/ | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: gis |
+| qgis_training_manual | QGIS (official documentation) — QGIS Training Manual | https://docs.qgis.org/latest/en/docs/training_manual/ | price: free_stated | 2026-10-22 | Jawad, manually in browser | skill: gis. Licence: not stated on the page (footer says only "© Copyright 2002-now, QGIS project"; checked by Jawad 2026-10-22); we link only |
 
 ## Scenario assumptions
 

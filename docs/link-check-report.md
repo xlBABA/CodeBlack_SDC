@@ -2,7 +2,7 @@
 
 Generated 2026-10-22 (UTC) by `python -m services.catalog.check_links`, which checks every URL in `data/resources.json`, `data/projects.json`, `docs/source-register.md`.
 
-Summary: 37 URLs. OK: 37.
+Summary: 38 URLs. OK: 38.
 
 `BLOCKED (needs manual check)` means the site refused an automated request (HTTP 401/403/429 or a bot-challenge page). It is **not** a pass: someone has to open it in a browser.
 
@@ -19,6 +19,7 @@ Summary: 37 URLs. OK: 37.
 | https://archive.ics.uci.edu/dataset/502/online+retail+ii | 200 | OK | no | docs/source-register.md |
 | https://archive.ics.uci.edu/dataset/601/ai4i+2020+predictive+maintenance+dataset | 200 | OK | no | docs/source-register.md |
 | https://cs50.harvard.edu/x/ | 200 | OK | yes | data/resources.json, docs/source-register.md |
+| https://cs50.harvard.edu/x/license/ | 200 | OK | yes | docs/source-register.md |
 | https://datacatalog.worldbank.org/search/dataset/0037712/World-Development-Indicators | 200 | OK | no | docs/source-register.md |
 | https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting | 200 | OK | yes | data/resources.json, docs/source-register.md |
 | https://docs.github.com/en/rest/search/search#search-repositories | 200 | OK | no | docs/source-register.md |
