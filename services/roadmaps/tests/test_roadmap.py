@@ -58,6 +58,20 @@ def test_each_resource_has_provenance_and_honest_hours():
             assert "team_estimate_hours" not in r, r["resource_id"]  # never mix the two
 
 
+def test_resource_fields_fit_rehans_cached_importer():
+    # Copy of _REQUIRED_RESOURCE_FIELDS / _ALLOWED_RESOURCE_METADATA_FIELDS from
+    # origin/feature/rehan-backend-foundation:backend/app/services/resource_catalog_cached.py
+    # (commit f0cb9db). His importer rejects any other field. Re-copy if that file changes.
+    required = {
+        "resource_id", "source_id", "skill_ids", "title", "provider", "url", "level",
+        "price", "estimated_hours", "hours_source", "prerequisites", "checked_at", "checked_by",
+    }
+    allowed = {"rank", "team_estimate_basis", "team_estimate_hours", "title_note", "topics", "url_note"}
+    for r in RES["resources"]:
+        assert required <= set(r), (r["resource_id"], required - set(r))
+        assert set(r) <= required | allowed, (r["resource_id"], set(r) - required - allowed)
+
+
 # --- get_roadmap -----------------------------------------------------------
 
 def test_shape_matches_contract():

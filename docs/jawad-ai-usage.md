@@ -26,7 +26,8 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | a5045cb | Updated link-check report and this file | `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 4ba98a0 | Recorded my browser checks for 5 resources and the UCI Concrete dataset; moved the GnuCash resource to its gnucash.org guide URL | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 86bdcb5 | Pointed the statistics and Excel resources at their direct freeCodeCamp YouTube videos, with video lengths I saw (statistics hours now provider-stated, 8.25 h) | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `services/catalog/tests/test_check_links.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
-| this commit | Recorded my browser checks of the CS50x licence (CC BY-NC-SA 4.0) and week count, and that the QGIS manual names no licence | `docs/source-register.md`, `data/resources.json` (note text only), `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| 3bae8f4 | Recorded my browser checks of the CS50x licence (CC BY-NC-SA 4.0) and week count, and that the QGIS manual names no licence | `docs/source-register.md`, `data/resources.json` (note text only), `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| this commit | Moved the two video notes (what I saw in the browser; instructor name from a third-party article) into the existing `url_note` field, so the data fits Rehan's cached importer with no new fields; added a test for his allowed field list | `data/resources.json`, `services/roadmaps/tests/test_roadmap.py`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 

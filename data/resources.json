@@ -88,17 +88,15 @@
       "rank": 1,
       "title": "Statistics - A Full University Course on Data Science Basics",
       "provider": "freeCodeCamp.org",
-      "instructor_note": "A third-party article (expertbeacon.com, updated 2024-08-20) names the instructor as Monika Wahi; not confirmed on the video page.",
       "url": "https://youtu.be/xxpc-HPKN28",
-      "url_note": "Direct YouTube link to the freeCodeCamp.org video. Replaces the earlier link to the third-party ExpertBeacon article.",
+      "url_note": "Direct YouTube link to the freeCodeCamp.org video. Replaces the earlier link to the third-party ExpertBeacon article. Jawad saw in a browser on 2026-10-22: the link opens, the title, and the length 8:15:04. The instructor name (Monika Wahi) comes only from that third-party article (expertbeacon.com, updated 2024-08-20) and is not confirmed on the video page.",
       "level": "beginner",
       "price": {"status": "free_stated", "note": "Free freeCodeCamp.org video on YouTube."},
       "estimated_hours": 8.25,
       "hours_source": "Provider-stated: video length shown on YouTube, 8:15:04 = 8.25 h.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "Jawad, manually in browser",
-      "checked_note": "Jawad saw in a browser: the link opens, the title, and the length 8:15:04."
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "mit_ocw_18_05_probability_statistics",
@@ -142,15 +140,14 @@
       "title": "Microsoft Excel Tutorial for Beginners - Full Course",
       "provider": "freeCodeCamp.org",
       "url": "https://youtu.be/Vl0H-qTclOg",
-      "url_note": "Direct YouTube link to the freeCodeCamp.org video. Replaces the earlier link to the KDnuggets page that embedded it.",
+      "url_note": "Direct YouTube link to the freeCodeCamp.org video. Replaces the earlier link to the KDnuggets page that embedded it. Jawad saw in a browser on 2026-10-22: the link opens, the title, and the length 2:26:09.",
       "level": "beginner",
       "price": {"status": "free_stated", "note": "Free freeCodeCamp.org video on YouTube."},
       "estimated_hours": 2.44,
       "hours_source": "Provider-stated: video length shown on YouTube, 2:26:09 = 2.44 h.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "Jawad, manually in browser",
-      "checked_note": "Jawad saw in a browser: the link opens, the title, and the length 2:26:09."
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "alison_thinking_critically",
