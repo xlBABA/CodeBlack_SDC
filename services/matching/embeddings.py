@@ -14,6 +14,9 @@ Skill pairs listed under the catalogue's optional "not_equivalent" key
 (`[["java", "javascript"], ...]`) always return 0: they are known to be close
 but different, which names alone cannot tell apart.
 
+`interpret(texts)` maps free text that is not in the catalogue to the closest skill
+(see Matcher: it is credited as a partial, unconfirmed match).
+
 Pass `model=` (anything with `.encode(list[str])`) to use a different or fake model.
 """
 from __future__ import annotations
@@ -23,7 +26,11 @@ import math
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
+from .scoring import SIMILARITY_THRESHOLD
+
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+MAX_QUERY_CHARS = 200  # same limit as the RunPod worker
+MAX_QUERY_CACHE = 1000  # free texts kept in memory
 
 
 def _normalize(vec: Iterable[float]) -> list[float]:
@@ -64,6 +71,7 @@ class EmbeddingProvider:
         self._model = model
         self._cache_path = Path(cache_path) if cache_path else None
         self._vectors: dict[str, list[list[float]]] = {}
+        self._query_vectors: dict[str, list[float]] = {}  # free text -> vector (in memory only)
         self._load_cache()
 
     @classmethod
@@ -103,6 +111,52 @@ class EmbeddingProvider:
             for vb in self._vectors[skill_b]
         )
         return max(-1.0, min(1.0, best))
+
+    def interpret(
+        self, texts: Sequence[str], *, threshold: float = SIMILARITY_THRESHOLD
+    ) -> list[tuple[str, float] | None]:
+        """Map free text (not a skill_id) to the closest catalogue skill.
+
+        One entry per input: (skill_id, similarity) when the best max-cosine over
+        that skill's name and aliases is >= threshold, else None. A text is also
+        rejected as ambiguous when its best skill and another skill that passes the
+        threshold form a `not_equivalent` pair (a raw text has no skill_id of its
+        own, so the list can only be applied to the candidates). Blank text gives None.
+        """
+        cleaned = [(t or "").strip()[:MAX_QUERY_CHARS] for t in texts]
+        self.precompute()
+        vectors = self._embed_queries([t for t in cleaned if t])
+        return [self._nearest(vectors[t], threshold) if t else None for t in cleaned]
+
+    def _embed_queries(self, texts: Sequence[str]) -> dict[str, list[float]]:
+        """Normalised vectors for free texts; one model call for the uncached ones."""
+        todo = list(dict.fromkeys(t for t in texts if t not in self._query_vectors))
+        fresh: dict[str, list[float]] = {}
+        if todo:
+            encoded = list(self._get_model().encode(todo))
+            if len(encoded) != len(todo):
+                raise ValueError("embedding model returned the wrong number of vectors")
+            fresh = {text: _normalize(vec) for text, vec in zip(todo, encoded)}
+            for text, vec in fresh.items():
+                if len(self._query_vectors) < MAX_QUERY_CACHE:
+                    self._query_vectors[text] = vec
+        return {t: self._query_vectors.get(t) or fresh[t] for t in texts}
+
+    def _nearest(self, vec: list[float], threshold: float) -> tuple[str, float] | None:
+        scored = sorted(
+            (
+                (max(sum(x * y for x, y in zip(vec, v)) for v in vectors), sid)
+                for sid, vectors in self._vectors.items()
+            ),
+            key=lambda item: (-item[0], item[1]),
+        )
+        passing = [(min(1.0, s), sid) for s, sid in scored if s >= threshold]
+        if not passing:
+            return None
+        best_score, best_id = passing[0]
+        if any(frozenset((best_id, sid)) in self._not_equivalent for _, sid in passing[1:]):
+            return None
+        return best_id, best_score
 
     def _get_model(self):
         if self._model is None:

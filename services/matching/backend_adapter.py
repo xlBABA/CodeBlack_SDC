@@ -21,13 +21,11 @@ import time
 from typing import Any, Callable
 
 from . import scoring
-from .matcher import Matcher
+from .matcher import DEGRADED_CAVEAT, Matcher
 from .normalizer import SkillNormalizer
 from .runpod_client import RunPodEmbeddingProvider, runpod_configured
 
 logger = logging.getLogger(__name__)
-
-DEGRADED_CAVEAT = "Semantic matching unavailable; exact skill matching only (degraded)"
 
 
 def _to_dict(obj: Any) -> dict:
@@ -144,7 +142,8 @@ class HussainMatchingProvider:
         matches = data["matches"]
         if degraded:
             for m in matches:
-                m["caveats"].append(DEGRADED_CAVEAT)
+                if DEGRADED_CAVEAT not in m["caveats"]:
+                    m["caveats"].append(DEGRADED_CAVEAT)
         if self.result_model is not None:
             return [self.result_model(**m) for m in matches]
         return matches

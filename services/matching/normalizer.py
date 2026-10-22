@@ -6,8 +6,12 @@ reported back so the user can correct them.
 """
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
+from typing import Callable, Sequence
+
+logger = logging.getLogger(__name__)
 
 PROFICIENCY_ORDER = {None: 0, "beginner": 1, "intermediate": 2, "advanced": 3}
 
@@ -28,6 +32,24 @@ class NormalizedSkill:
     name: str | None
     confidence: float  # 1.0 for catalogue hit, 0.0 for unknown
     method: str  # "id" | "name" | "alias" | "unknown"
+
+
+@dataclass(frozen=True)
+class Interpretation:
+    """A skill name that is not in the catalogue, mapped to the closest catalogue skill."""
+    raw: str
+    skill_id: str
+    name: str
+    similarity: float
+    warning_index: int = -1  # internal: position of the replaced warning
+
+    def message(self) -> str:
+        return (f'Interpreted "{self.raw}" as {self.name} (similarity {self.similarity:.2f}), '
+                "partial credit; please confirm.")
+
+
+# names -> one (skill_id, similarity) or None per name
+Interpreter = Callable[[Sequence[str]], Sequence["tuple[str, float] | None"]]
 
 
 class SkillNormalizer:
@@ -87,8 +109,24 @@ class SkillNormalizer:
         Accepts contract SkillRef dicts. A valid skill_id wins; otherwise the
         name is normalized. Duplicates keep the highest proficiency.
         """
+        resolved, warnings, _ = self.interpret_profile_skills(skill_refs)
+        return resolved, warnings
+
+    def interpret_profile_skills(
+        self, skill_refs: list[dict], interpreter: Interpreter | None = None
+    ) -> tuple[dict[str, str | None], list[str], dict[str, Interpretation]]:
+        """Like normalize_profile_skills, but unknown names are offered to `interpreter`.
+
+        `interpreter(names)` returns one (skill_id, similarity) or None per name. A
+        mapped skill is added to the result and listed in the third return value
+        ({skill_id: Interpretation}) so the caller can give partial credit and
+        explain it. Catalogue hits always win over interpretations. If there is no
+        interpreter, nothing maps, or the interpreter raises, an unknown skill is
+        dropped with the usual warning.
+        """
         resolved: dict[str, str | None] = {}
-        warnings: list[str] = []
+        warnings: list[str | None] = []
+        pending: list[tuple[int, str, str | None]] = []  # (warning index, name, proficiency)
         for ref in skill_refs:
             sid = ref.get("skill_id")
             if not (sid and self.has(sid)):
@@ -96,6 +134,8 @@ class SkillNormalizer:
                 sid = result.skill_id
             if sid is None:
                 label = ref.get("name") or ref.get("skill_id") or "<empty>"
+                if ref.get("name"):
+                    pending.append((len(warnings), ref["name"], ref.get("proficiency")))
                 warnings.append(
                     f"Skill '{label}' is not in the supported catalogue and was "
                     "not used for matching. Please check the spelling or pick a "
@@ -110,7 +150,37 @@ class SkillNormalizer:
                 prof = None
             if sid not in resolved or PROFICIENCY_ORDER[prof] > PROFICIENCY_ORDER[resolved[sid]]:
                 resolved[sid] = prof
-        return resolved, warnings
+
+        interpreted: dict[str, Interpretation] = {}
+        if pending and interpreter is not None:
+            try:
+                results = list(interpreter([name for _, name, _ in pending]))
+                if len(results) != len(pending):
+                    raise ValueError("interpreter returned the wrong number of results")
+            except Exception as exc:  # any failure keeps the old behaviour
+                logger.warning("Skill interpretation unavailable (%s): %s", type(exc).__name__, exc)
+                results = [None] * len(pending)
+            interpreted_prof: dict[str, str | None] = {}
+            for (index, name, prof), hit in zip(pending, results):
+                if hit is None or not self.has(hit[0]):
+                    continue
+                sid, similarity = hit
+                if sid in resolved:  # the student already has it as a confirmed skill
+                    warnings[index] = None
+                    continue
+                if prof not in PROFICIENCY_ORDER:
+                    prof = None
+                known = interpreted.get(sid)
+                if known and known.similarity >= similarity:
+                    warnings[index] = None
+                    continue
+                if known:
+                    warnings[known.warning_index] = None
+                interpreted[sid] = Interpretation(name, sid, self.name_of(sid), similarity, index)
+                interpreted_prof[sid] = prof
+                warnings[index] = interpreted[sid].message()
+            resolved.update(interpreted_prof)
+        return resolved, [w for w in warnings if w is not None], interpreted
 
     def find_in_text(self, text: str) -> set[str]:
         """Skill_ids whose name or alias appears as a whole phrase in text."""

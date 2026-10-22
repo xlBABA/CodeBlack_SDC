@@ -100,6 +100,17 @@ fails, matching continues with exact skills only and every match gets the caveat
 (`retry_after_seconds`), so a down endpoint does not slow every request. An explicit `similarity=` argument overrides all of this.
 Pass `not_equivalent=[[id, id], ...]` to the adapter to apply the exclusion list.
 
+### Interpreting unknown skills
+A profile skill that is not in the catalogue (e.g. "Charts and graphs") is no longer simply dropped when the similarity provider can embed free text
+(`EmbeddingProvider.interpret()`, inherited by `RunPodEmbeddingProvider`). Its text is embedded once per request (one batch, cached in memory) and compared with every
+catalogue skill (max cosine over name and aliases). If the best score is >= `SIMILARITY_THRESHOLD` (0.60) the skill is treated as held, but at `RELATED_CREDIT` (0.5) of normal credit,
+in both the skills and transferable components, because it is an interpretation and not a confirmed skill. Exact catalogue matches always win.
+
+- Every match whose role uses the skill gets the caveat `Interpreted "Charts and graphs" as Data Visualization (similarity 0.61), partial credit; please confirm.`, and the same text is returned in `warnings`.
+- `not_equivalent`: free text has no skill_id, so the list is applied to the candidates. If the best skill and another skill above the threshold are a `not_equivalent` pair, the text is ambiguous and is not mapped.
+- Without a provider, with a plain similarity function, or if the embedding call fails, behaviour is unchanged: the skill is dropped with the usual "not in the supported catalogue" warning.
+- The explanation counts only confirmed skills ("2 of 4 core skills (plus 1 interpreted ...)").
+
 ### Threshold calibration
 Method: `python -m services.matching.calibrate_threshold` scores every pair in `calibration_pairs.json` (fictional, skill names only) with the real model. Pairs are labelled `synonyms` (should match), `unrelated` (clearly different) or `hard_negatives` (close but different skills that must not match). It prints each score and how candidate thresholds perform. It only reports; it never edits `scoring.py`. It scores raw similarity, before `not_equivalent` is applied.
 
