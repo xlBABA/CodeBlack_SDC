@@ -21,6 +21,14 @@ class RoleRequirement:
     skill_id: str
     name: str
     weight: float = 1.0
+    # Preserves the source data's required/optional distinction (e.g.
+    # Jawad's roles.json required_skills[].required). Defaults to True so
+    # the 4 existing fixture roles above are unaffected. Metadata only:
+    # app.services.matching_provider._skills_score does not read this field
+    # yet, so an optional skill a student lacks is still listed in
+    # missing_skills exactly like a required one until matching
+    # integration is updated to treat them differently.
+    required: bool = True
 
 
 @dataclass(frozen=True)
@@ -28,7 +36,13 @@ class RoleFixture:
     role_id: str
     role_title: str
     category: str
-    min_semester: int
+    # int for the 4 original fixture roles; None means "no semester
+    # prerequisite in the source data" (e.g. Jawad's cached O*NET-derived
+    # roles, which carry an empty prerequisites list) — never invented.
+    # app.services.matching_provider._prerequisites_score currently assumes
+    # a concrete int and will raise on None; a cached-catalog role must not
+    # be passed to FixtureMatchingProvider until that is resolved.
+    min_semester: int | None
     required_skills: tuple[RoleRequirement, ...]
     transferable_interests: tuple[str, ...]
     evidence_ids: tuple[str, ...]

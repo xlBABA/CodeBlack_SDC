@@ -1,0 +1,89 @@
+{
+  "data_mode": "cached",
+  "skills": [
+    {
+      "skill_id": "critical_thinking",
+      "name": "Critical Thinking",
+      "aliases": [],
+      "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "mathematics",
+      "name": "Mathematics",
+      "aliases": ["Math", "Quantitative Skills"],
+      "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "complex_problem_solving",
+      "name": "Complex Problem Solving",
+      "aliases": ["Problem Solving"],
+      "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "systems_analysis",
+      "name": "Systems Analysis",
+      "aliases": [],
+      "source_ids": ["onet_15_2051_01", "onet_17_2141_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "attention_to_detail",
+      "name": "Attention to Detail",
+      "aliases": [],
+      "source_ids": ["onet_13_2051_00"]
+    },
+    {
+      "skill_id": "excel",
+      "name": "Excel",
+      "aliases": ["Microsoft Excel", "MS Excel", "Spreadsheets"],
+      "source_ids": ["onet_15_2051_01", "onet_13_2051_00", "onet_17_2141_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "sql",
+      "name": "SQL",
+      "aliases": ["Structured Query Language", "Transact-SQL", "PL/SQL"],
+      "source_ids": ["onet_15_2051_01", "onet_13_2051_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "python",
+      "name": "Python",
+      "aliases": ["Python3", "Python 3"],
+      "source_ids": ["onet_17_2141_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "data_visualization",
+      "name": "Data Visualization",
+      "aliases": ["Power BI", "Microsoft Power BI", "Tableau", "Google Looker Analytics", "Dashboards"],
+      "source_ids": ["onet_15_2051_01", "onet_13_2051_00", "onet_19_1041_00"]
+    },
+    {
+      "skill_id": "cad_software",
+      "name": "CAD Software",
+      "aliases": ["SolidWorks", "Dassault Systemes SolidWorks", "AutoCAD", "Autodesk AutoCAD Civil 3D", "Revit", "Autodesk Revit", "Computer-Aided Design"],
+      "source_ids": ["onet_17_2141_00"]
+    },
+    {
+      "skill_id": "matlab",
+      "name": "MATLAB",
+      "aliases": ["The MathWorks MATLAB"],
+      "source_ids": ["onet_17_2141_00"]
+    },
+    {
+      "skill_id": "financial_analysis_software",
+      "name": "Financial Analysis Software",
+      "aliases": ["Oracle Hyperion Financial Management", "Moody's RiskCalc", "Oracle E-Business Suite Financials", "Delphi Technology"],
+      "source_ids": ["onet_13_2051_00"]
+    },
+    {
+      "skill_id": "analytical_scientific_software",
+      "name": "Analytical/Statistical Software",
+      "aliases": ["SPSS", "IBM SPSS Statistics", "SAS", "Stata", "StataCorp Stata"],
+      "source_ids": ["onet_13_2051_00"]
+    },
+    {
+      "skill_id": "vba",
+      "name": "VBA",
+      "aliases": ["Visual Basic for Applications", "Microsoft Visual Basic"],
+      "source_ids": ["onet_13_2051_00"]
+    }
+  ]
+}
