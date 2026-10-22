@@ -31,14 +31,16 @@ first build is the real test. Menu names below may differ slightly in the RunPod
 ### Option A: GitHub integration
 1. Push this repo (the `runpod-worker/` folder) to GitHub and make sure the branch is pushed.
 2. RunPod console, **Serverless**, **New Endpoint**, **GitHub Repo**. Connect GitHub and pick the repo and branch.
-3. Set the Dockerfile path to `runpod-worker/Dockerfile` and the build context to `runpod-worker`.
+3. Set the Dockerfile path to `runpod-worker/Dockerfile`. The integration builds with the **repo root** as the build context
+   (there is no build-context setting); the `Dockerfile` already uses paths relative to the root
+   (`COPY runpod-worker/requirements.txt`, `COPY runpod-worker/handler.py`), so nothing else needs to be set.
 4. Wait for the build to finish (the model download happens here).
 5. Pick a GPU (a small one is enough, for example a 16 GB class card), **Active workers 0**,
    **Max workers 1**, idle timeout about 5 seconds, and deploy.
 
 ### Option B: Docker image
 ```
-docker build -t <dockerhub-user>/futurepath-embeddings:1 runpod-worker
+docker build -f runpod-worker/Dockerfile -t <dockerhub-user>/futurepath-embeddings:1 .
 docker push <dockerhub-user>/futurepath-embeddings:1
 ```
 Then **Serverless**, **New Endpoint**, **Custom source / Docker image**, enter
