@@ -52,7 +52,7 @@ If a screen in the app isn't ready yet, show the same result from the terminal i
 - "We only link to datasets. We never copy them into the app."
 
 **7. Close (about 10 s)**
-- "Every source is in our source register with its date and licence. All 37 links were checked on 22 October 2026."
+- "Every source is in our source register with its date and licence. All 38 links were checked on 22 October 2026."
 - "Where something is our estimate, the app says so."
 
 ---

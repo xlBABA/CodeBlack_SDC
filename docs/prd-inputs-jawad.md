@@ -44,9 +44,9 @@ Ready-to-paste text for the data sections of the Mustaqbal AI PRD. Everything he
 | Onshape — CAD Basics (Learning Pathway) | CAD software | Free (stated; sign-in needed) | 2026-10-22 | Jawad, manually in browser |
 | Microsoft Learn — Introduction to Git | Git | Free (no charge observed) | 2026-10-22 | Jawad, manually in browser |
 | MDN Web Docs — Dynamic scripting with JavaScript | JavaScript | Free (no charge observed) | 2026-10-22 | Jawad, manually in browser |
-| Harvard — CS50x 2026 | Programming | Free (stated) | 2026-10-22 | Jawad, manually in browser |
+| Harvard — CS50x 2026 | Programming | Free (stated); licence CC BY-NC-SA 4.0 (we link only, never copy or redistribute); Week 0 to Week 10 = 11 weeks; no hours stated, so 110 h is a team estimate | 2026-10-22 | Jawad, manually in browser |
 | GnuCash — Tutorial and Concepts Guide | Accounting software | Free (stated) | 2026-10-22 | Jawad, manually in browser |
-| QGIS — Training Manual | GIS | Free (stated); licence not verified | 2026-10-22 | Jawad, manually in browser |
+| QGIS — Training Manual | GIS | Free (stated); no licence named on the page (footer: "© Copyright 2002-now, QGIS project"), so we link only and do not copy it | 2026-10-22 | Jawad, manually in browser |
 
 **Project datasets and tutorials** (linked, never copied into the app)
 
@@ -63,9 +63,9 @@ Ready-to-paste text for the data sections of the Mustaqbal AI PRD. Everything he
 | UCI — Concrete Compressive Strength | Civil Engineer project | CC BY 4.0 | 2026-10-22 | Jawad, manually in browser |
 | UCI — Beijing Multi-Site Air Quality | Environmental Scientist project | CC BY 4.0 | 2026-10-22 | Automated fetch (Claude Code) |
 | GnuCash Tutorial and Concepts Guide (tutorial) | Accountant project | GNU Free Documentation License (appendix in the guide) | 2026-10-22 | Jawad, manually in browser |
-| QGIS Training Manual (tutorial) | Civil Engineer and Environmental Scientist projects | Not stated on the page we read (not verified) | 2026-10-22 | Jawad, manually in browser |
+| QGIS Training Manual (tutorial) | Civil Engineer and Environmental Scientist projects | No licence named on the page (footer: "© Copyright 2002-now, QGIS project"); we link only and do not copy it | 2026-10-22 | Jawad, manually in browser |
 
-Checked and **not used**: UCI Air Quality (its page says research use only), Natural Earth, SEC Financial Statement Data Sets, Our World in Data COVID-19 repository and WHO Global Health Observatory (we could not read a licence for these). Every URL is re-checked by `services/catalog/check_links.py`; on 2026-10-22, all 37 URLs returned OK (`docs/link-check-report.md`).
+Checked and **not used**: UCI Air Quality (its page says research use only), Natural Earth, SEC Financial Statement Data Sets, Our World in Data COVID-19 repository and WHO Global Health Observatory (we could not read a licence for these). Every URL is re-checked by `services/catalog/check_links.py`; on 2026-10-22 (UTC), all 38 URLs returned OK (`docs/link-check-report.md` on `feat/jawad-video-links`).
 
 ---
 
@@ -96,5 +96,5 @@ Checked and **not used**: UCI Air Quality (its page says research use only), Nat
 - **Only 8 roles and 20 skills.** The goal is up to 30 roles. With 8, matches and roadmaps only cover those 8 jobs.
 - **O*NET is US-based.** It describes typical requirements in the US, not the needs of a specific employer or country. For Financial Analysts, O*NET says data collection is still underway, so that role uses only O*NET's tools and work-styles data.
 - **Team estimates.** These are our own choices, not source data: all tool importances, the required/optional split, 4 raised thinking-skill scores, learning hours where the provider gives none, all project hours, the SDG links and reasons, the 15% trend threshold, and the scenario multipliers (±10% moderate, ±25% fast).
-- **Not yet verified:** the QGIS Training Manual's licence, and the CS50x week count (11 weeks) behind its 110-hour team estimate.
+- **Licences we only link to:** CS50x is CC BY-NC-SA 4.0 (non-commercial), and Jawad checked its Week 0 to Week 10 (11 weeks) in a browser on 2026-10-22. CS50x states no hours, so its 110 h stays a team estimate. The QGIS Training Manual's page footer names no licence ("© Copyright 2002-now, QGIS project"). For both, we link only and never copy the material.
 - **No hiring prediction.** Scores are a skill-alignment estimate (`profile_alignment_estimate`), not a chance of getting hired.
