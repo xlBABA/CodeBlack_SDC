@@ -195,10 +195,10 @@
       "level": "beginner",
       "price": {"status": "no_charge_observed", "note": "No price shown; page opened without sign-in or payment."},
       "estimated_hours": 1.43,
-      "hours_source": "Provider-stated: 86 minutes (duration_in_minutes in Microsoft Learn's official catalog API).",
+      "hours_source": "Provider-stated: 86 minutes (duration_in_minutes in Microsoft Learn's official catalog API). Jawad saw \"1 hr 26 min\" on the page.",
       "prerequisites": {"text": "Page says: \"A GitHub account. Basic familiarity with using a command-line interface (CLI). A code editor, such as Visual Studio Code.\"", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "automated fetch (Claude Code)"
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "mdn_javascript_dynamic_scripting",
@@ -215,7 +215,7 @@
       "team_estimate_basis": "Team estimate: 23 lesson and challenge pages linked from the module (excluding the 'Test your skills' quizzes) at ~1 h each.",
       "prerequisites": {"text": "Page says: \"you don't need any previous JavaScript knowledge, but you should have worked through the previous modules\" (MDN's HTML and CSS modules).", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "automated fetch (Claude Code)"
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "cs50x_2026",
@@ -229,10 +229,10 @@
       "estimated_hours": null,
       "hours_source": "Not stated by provider in hours (the page lists eleven weeks of material).",
       "team_estimate_hours": 110,
-      "team_estimate_basis": "Team estimate: eleven weeks of material (Week 0 to Week 10, listed on the page), assumed ~10 h/week = ~110 h.",
+      "team_estimate_basis": "Team estimate: eleven weeks of material (Week 0 to Week 10, listed on the page), assumed ~10 h/week = ~110 h. The week count was read by an automated fetch and is not verified by Jawad; Jawad confirmed in a browser that the course is free and that no hours are stated.",
       "prerequisites": {"text": "Page says it is for students \"with or without prior programming experience\".", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "automated fetch (Claude Code)"
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "gnucash_tutorial_concepts_guide",
@@ -240,7 +240,7 @@
       "skill_ids": ["accounting_software"],
       "title": "GnuCash Tutorial and Concepts Guide",
       "provider": "GnuCash (official documentation)",
-      "url": "https://www.gnucash.org/docs/v5/C/gnucash-guide/",
+      "url": "https://www.gnucash.org/viewdoc.phtml?rev=5&lang=C&doc=guide",
       "level": "beginner to intermediate",
       "price": {"status": "free_stated", "note": "gnucash.org: \"GnuCash is personal and small-business financial-accounting software, freely licensed under the GNU GPL\"."},
       "estimated_hours": null,
@@ -249,7 +249,7 @@
       "team_estimate_basis": "Team estimate: 16 chapters listed in the guide's contents (from Overview to Importing Business Data) at ~45 min each = ~12 h.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "automated fetch (Claude Code)"
+      "checked_by": "Jawad, manually in browser"
     },
     {
       "resource_id": "qgis_training_manual",
@@ -263,10 +263,10 @@
       "estimated_hours": null,
       "hours_source": "Not stated by provider.",
       "team_estimate_hours": 14,
-      "team_estimate_basis": "Team estimate: the core modules 2-8 (Creating and Exploring a Basic Map to Completing the Analysis; 7 modules listed in the manual) at ~2 h each. Later modules are optional.",
+      "team_estimate_basis": "Team estimate: the core modules 2-8 (Creating and Exploring a Basic Map to Completing the Analysis; 7 modules listed in the manual) at ~2 h each. Later modules are optional. Jawad confirmed in a browser that the module list includes Vector Analysis and Forestry Application. The manual's licence is not verified.",
       "prerequisites": {"text": "None stated.", "skill_ids": []},
       "checked_at": "2026-10-22",
-      "checked_by": "automated fetch (Claude Code)"
+      "checked_by": "Jawad, manually in browser"
     }
   ],
   "skills_without_resource": {

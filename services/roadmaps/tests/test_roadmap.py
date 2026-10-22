@@ -28,6 +28,8 @@ def test_manually_checked_resources_are_labelled():
     assert manual == {
         "fcc_excel_beginners_full_course", "alison_thinking_critically",
         "onshape_cad_basics_pathway", "fcc_statistics_video_monika_wahi",
+        "mslearn_intro_to_git", "mdn_javascript_dynamic_scripting", "cs50x_2026",
+        "gnucash_tutorial_concepts_guide", "qgis_training_manual",
     }
 
 

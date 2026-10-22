@@ -23,7 +23,8 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | 2838340 | One command that runs all test suites; corrections to this file | `services/catalog/run_all_tests.py`, `docs/jawad-ai-usage.md` |
 | ab21a9c | Renamed the product to "Mustaqbal AI" in 4 docstrings and 2 User-Agent labels (no IDs changed) | `services/*/__init__.py`, `services/trends/github_client.py`, `services/catalog/check_links.py` |
 | ecdeee3 | 4 more verified roles from O*NET (Software Developer, Accountant, Civil Engineer, Environmental Scientist), 6 new skills, SDG mappings, trend coverage and first real GitHub snapshots for the new skills, learning resources, and 2 portfolio projects per new role | `data/*.json`, `data/trend_snapshots/*.json`, `docs/source-register.md`, `services/trends/queries.py`, `services/trends/README.md`, `services/catalog/tests/test_catalog.py`, `services/roadmaps/tests/test_roadmap.py`, `services/roadmaps/tests/test_projects.py` |
-| this commit | Updated link-check report and this file | `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| a5045cb | Updated link-check report and this file | `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| this commit | Recorded my browser checks for 5 resources and the UCI Concrete dataset; moved the GnuCash resource to its gnucash.org guide URL | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
@@ -53,10 +54,17 @@ These have `"checked_by": "Jawad, manually in browser"` in `data/resources.json`
 - freeCodeCamp *Microsoft Excel Tutorial for Beginners - Full Course*, embedded on KDnuggets: player length 2:26:10.
 - Onshape *CAD Basics (Learning Pathway)*: free sign-in, 7 topics, no stated duration.
 - The ExpertBeacon article on Monika Wahi's freeCodeCamp statistics course. I have not yet seen the video page itself.
+- Microsoft Learn, *Introduction to Git*: free, "1 hr 26 min".
+- MDN, *Dynamic scripting with JavaScript*: free.
+- Harvard CS50x 2026: free; no hours stated, so the 110 h stays a team estimate.
+- GnuCash *Tutorial and Concepts Guide*, at https://www.gnucash.org/viewdoc.phtml?rev=5&lang=C&doc=guide.
+- QGIS Training Manual: the module list includes Vector Analysis and Forestry Application.
+
+I also checked the UCI Concrete Compressive Strength dataset page: CC BY 4.0. This one is a project dataset, so it is noted in `docs/source-register.md`, not in `resources.json`.
 
 Everything else was checked by automated requests from Claude Code. See `docs/link-check-report.md`.
 
-Not yet checked by me (added 2026-10-22 by automated checks only): the resources and project sources for the 4 newer roles, including the UCI Beijing Multi-Site Air Quality dataset (CC BY 4.0).
+Not yet checked by me: the QGIS Training Manual's licence, the CS50x week count (11 weeks), the other new project datasets (including the UCI Beijing Multi-Site Air Quality dataset, CC BY 4.0) and the O*NET pages for the 4 newer roles.
 
 ## What is a team estimate (not from a source)
 - **Role importance numbers:** the cases where `roles.json` differs from O*NET's bucketed score (mostly mathematics), every tool-skill importance, and every `required: true/false` flag. See "Importance score methodology" in `docs/source-register.md`.
