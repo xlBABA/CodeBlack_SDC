@@ -64,7 +64,7 @@ Checked against the deployed backend API, https://mustaqbal-ai.replit.app, using
 | Microsoft Learn — Prepare and visualize data with Power BI | Data visualization | Free (no charge observed) | 2026-10-22 | Automated fetch (Claude Code) |
 | Microsoft Learn — Getting started with VBA in Office | VBA | Free (no charge observed) | 2026-10-22 | Automated fetch (Claude Code) |
 | MathWorks — MATLAB Onramp | MATLAB | Price not stated | 2026-10-22 | Automated fetch (Claude Code) |
-| freeCodeCamp.org — Statistics - A Full University Course on Data Science Basics (YouTube, https://youtu.be/xxpc-HPKN28; 8.25 h, video length shown on YouTube) | Mathematics | Free (stated) | 2026-10-22 | Jawad, manually in browser |
+| freeCodeCamp.org — Statistics - A Full University Course on Data Science Basics (YouTube, https://youtu.be/xxpc-HPKN28; 8.25 h, video length shown on YouTube; instructor Monika Wahi, confirmed in the YouTube description, checked by Jawad on 2026-10-22) | Mathematics | Free (stated) | 2026-10-22 | Jawad, manually in browser |
 | MIT OpenCourseWare — 18.05 Probability and Statistics | Mathematics (backup) | Free (stated) | 2026-10-22 | Automated fetch (Claude Code) |
 | SAS — SAS Programming 1: Essentials | Analytical/scientific software | Free (stated) | 2026-10-22 | Automated fetch (Claude Code) |
 | freeCodeCamp.org — Microsoft Excel Tutorial for Beginners - Full Course (YouTube, https://youtu.be/Vl0H-qTclOg; 2.44 h, video length shown on YouTube) | Excel | Free (stated) | 2026-10-22 | Jawad, manually in browser |
