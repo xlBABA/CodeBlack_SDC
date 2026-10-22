@@ -3,12 +3,11 @@
 feat/jawad-trends-data:data/resources.json as of commit 2838340 — see
 docs/source-register.md on that branch for provenance).
 
-Milestone 6D-2A scope: import and validation ONLY. This module loads and
-validates the data and returns plain validated dicts — it does NOT
-implement ResourceCatalogProvider, is NOT wired into any route or DI, and
-does not touch FixtureResourceCatalog. Provider integration (a
-CachedResourceCatalog class satisfying app.services.resource_catalog.
-ResourceCatalogProvider) is deferred to a later milestone.
+Milestone 6D-2A added import and validation (load_cached_resources(),
+skills_without_resource()). Milestone 6D-2B adds CachedResourceCatalog,
+satisfying app.services.resource_catalog.ResourceCatalogProvider —
+still not wired into any route or DI, and never mixes in anything from
+FixtureResourceCatalog (see CachedResourceCatalog's own docstring).
 
 Known, honestly-disclosed gaps, preserved rather than invented:
 - 4 of the 14 canonical skills have no verified resource yet
@@ -21,6 +20,7 @@ Known, honestly-disclosed gaps, preserved rather than invented:
 """
 from __future__ import annotations
 
+from app.services.resource_catalog import ResourceFixture
 from app.services.role_catalog_cached import CachedCatalogError, _load_json, _require_dict
 
 _REQUIRED_RESOURCE_FIELDS = {
@@ -128,3 +128,61 @@ def skills_without_resource() -> dict[str, str]:
     treated as covered."""
     doc = _load_json("resources.json")
     return doc.get("skills_without_resource") or {}
+
+
+def _provenance_text(resource: dict) -> str:
+    """Which number is used and why — never silently blended. If the
+    provider states a duration, hours_source already says so in full
+    ("Provider-stated: 345 minutes ..."); otherwise estimated_hours is
+    null and team_estimate_basis (required by _validate_resources
+    whenever estimated_hours is null) explains the team's own estimate.
+    A resource with a price status of "not_stated" (e.g.
+    mathworks_matlab_onramp) is not claimed as free — that nuance lives
+    only here in the text, since ResourceFixture.cost has no caller
+    today (RoadmapService never reads it) and no "unknown" state to
+    carry even if it did; see the 6D-2B report."""
+    if resource["estimated_hours"] is not None:
+        basis = resource["hours_source"]
+    else:
+        basis = resource.get("team_estimate_basis") or resource["hours_source"]
+    if resource["price"]["status"] == "not_stated":
+        basis = f"{basis} Price not stated by provider."
+    return basis
+
+
+def _to_resource_fixtures(resource: dict) -> list[ResourceFixture]:
+    """One ResourceFixture per skill_id — handles a resource covering
+    multiple skills without duplicating the underlying record (today
+    every cached resource lists exactly one skill_id, but the source
+    schema allows more; this fans out correctly either way)."""
+    hours = resource["estimated_hours"]
+    if hours is None:
+        hours = resource["team_estimate_hours"]
+    provenance = _provenance_text(resource)
+    return [
+        ResourceFixture(
+            resource_id=resource["resource_id"],
+            skill_id=skill_id,
+            title=resource["title"],
+            estimated_hours=float(hours),
+            cost=0.0,
+            verified=True,
+            url=resource["url"],
+            provenance=provenance,
+        )
+        for skill_id in resource["skill_ids"]
+    ]
+
+
+class CachedResourceCatalog:
+    """Satisfies app.services.resource_catalog.ResourceCatalogProvider
+    using Jawad's real, cached learning-resource dataset exclusively —
+    never mixes in anything from FixtureResourceCatalog. Loads and
+    validates on every call (same reasoning as CachedRoleCatalog: a bad
+    data file fails inside a request/test, not at interpreter startup).
+    Not wired into any route or FastAPI dependency yet (Milestone 6D-2B
+    scope: adapter implementation and testing only)."""
+
+    def list_resources(self) -> list[ResourceFixture]:
+        resources = load_cached_resources()
+        return [fixture for resource in resources for fixture in _to_resource_fixtures(resource)]

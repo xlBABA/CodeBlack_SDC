@@ -75,15 +75,23 @@ class RoadmapService:
                     f"'{skill.skill_id}'; this gap is omitted rather than fabricated."
                 )
                 continue
+            reason = (
+                f"Closes a missing skill for {role.role_title} "
+                f"(role-weighted priority {weight_by_skill.get(skill.skill_id, 0.0)})."
+            )
+            if resource.provenance:
+                # Milestone 6D-2B: discloses whether estimated_hours is
+                # provider-stated or a team estimate, using the only
+                # contract-compatible free-text field RoadmapStep has
+                # (no schema change). None for every FixtureResourceCatalog
+                # resource today, so this never changes existing output.
+                reason = f"{reason} {resource.provenance}"
             steps.append(
                 RoadmapStep(
                     skill_id=skill.skill_id,
                     resource_id=resource.resource_id,
                     estimated_hours=resource.estimated_hours,
-                    reason=(
-                        f"Closes a missing skill for {role.role_title} "
-                        f"(role-weighted priority {weight_by_skill.get(skill.skill_id, 0.0)})."
-                    ),
+                    reason=reason,
                 )
             )
 

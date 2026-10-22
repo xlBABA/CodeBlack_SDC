@@ -25,6 +25,15 @@ class ResourceFixture:
     estimated_hours: float
     cost: float = 0.0
     verified: bool = False
+    # Additive (Milestone 6D-2B): None for every existing fixture resource
+    # above, unchanged. CachedResourceCatalog (resource_catalog_cached.py)
+    # populates these from Jawad's real data. No frozen public DTO has a
+    # matching field — RoadmapStep is {skill_id, resource_id,
+    # estimated_hours, reason} only — so url is for future use and
+    # provenance is folded into RoadmapStep.reason by RoadmapService,
+    # never exposed as its own field.
+    url: str | None = None
+    provenance: str | None = None
 
 
 class ResourceCatalogProvider(Protocol):
