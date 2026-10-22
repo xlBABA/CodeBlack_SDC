@@ -65,7 +65,16 @@ def role_to_matcher_format(role: Any) -> dict:
         "role_id": r["role_id"],
         "role_title": r["role_title"],
         "verified": r.get("verified", True),
-        "data_mode": r.get("data_mode", "fixture"),
+        # Milestone 6C-2B fix: RoleFixture (ours AND Jawad's cached O*NET
+        # roles alike) has no data_mode field at all, so defaulting to
+        # "fixture" here asserted a provenance we don't actually know —
+        # matcher.py's "Fixture role for testing; not verified
+        # occupational data" caveat would then wrongly fire for genuinely
+        # cached roles too, contradicting the envelope-level cached-
+        # provenance disclosure. Omit rather than guess; accurate
+        # provenance is disclosed at the envelope level instead (see
+        # careers.py's catalog_provenance_warnings()/matching_mode_warning()).
+        "data_mode": r.get("data_mode"),
         "required_skills": [
             # Milestone 6C-2A fix: preserve RoleRequirement.required (added
             # in 6B-2 to carry Jawad's required/optional distinction)

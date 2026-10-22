@@ -54,11 +54,19 @@ class MatchingService:
         catalog: RoleCatalogProvider,
         matcher: MatchingProvider,
         trends: TrendProvider,
+        matching_mode_warning: str | None = None,
     ) -> None:
         self._profiles = profile_service
         self._catalog = catalog
         self._matcher = matcher
         self._trends = trends
+        # None preserves the original fixture-mode text below unchanged
+        # (every existing call site that doesn't pass this keeps today's
+        # exact behavior). A caller only needs to override it when the
+        # injected `matcher` isn't actually FixtureMatchingProvider, since
+        # otherwise this text becomes factually wrong (e.g. "real scoring
+        # pending teammate integration" while a real matcher is active).
+        self._matching_mode_warning = matching_mode_warning or _FIXTURE_WARNING
 
     def _resolve_profile(self, profile: StudentProfile) -> StudentProfile:
         if profile.profile_id:
@@ -85,7 +93,7 @@ class MatchingService:
             catalog_coverage=CatalogCoverage(verified=len(roles), total_target=TOTAL_TARGET_ROLES),
             methodology_version="v1",
         )
-        return MatchOutcome(payload=payload, warnings=[_FIXTURE_WARNING], profile=profile)
+        return MatchOutcome(payload=payload, warnings=[self._matching_mode_warning], profile=profile)
 
     def match_role(
         self, profile: StudentProfile, role_id: str, scenario_id: ScenarioId | None = None
@@ -114,5 +122,5 @@ class MatchingService:
         signals = self._trends.latest()
         matches = self._matcher.match(resolved_profile, [role], scenario_id, signals)
         return RoleMatchResolution(
-            profile=resolved_profile, role_match=matches[0], warnings=[_FIXTURE_WARNING]
+            profile=resolved_profile, role_match=matches[0], warnings=[self._matching_mode_warning]
         )

@@ -25,6 +25,26 @@ def test_catalog_mode_is_independent_of_enable_fixtures():
     assert settings.ENABLE_FIXTURES is False
 
 
+def test_matching_mode_defaults_to_fixture():
+    assert Settings(_env_file=None).MATCHING_MODE == "fixture"
+
+
+def test_matching_mode_accepts_hussain():
+    assert Settings(MATCHING_MODE="hussain", _env_file=None).MATCHING_MODE == "hussain"
+
+
+def test_invalid_matching_mode_is_rejected():
+    with pytest.raises(ValidationError):
+        Settings(MATCHING_MODE="live", _env_file=None)
+
+
+def test_matching_mode_is_independent_of_catalog_mode_and_enable_fixtures():
+    settings = Settings(MATCHING_MODE="hussain", CATALOG_MODE="cached", ENABLE_FIXTURES=False, _env_file=None)
+    assert settings.MATCHING_MODE == "hussain"
+    assert settings.CATALOG_MODE == "cached"
+    assert settings.ENABLE_FIXTURES is False
+
+
 def test_settings_load_without_ai_credentials(monkeypatch):
     for var in (
         "LLM_PROVIDER",

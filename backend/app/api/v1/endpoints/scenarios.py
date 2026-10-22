@@ -13,6 +13,7 @@ from app.api.v1.endpoints.careers import (
     get_matching_provider,
     get_role_catalog,
     get_trend_provider,
+    matching_mode_warning,
 )
 from app.core.config import Settings, get_settings
 from app.core.time import utc_now_iso
@@ -41,12 +42,14 @@ def get_scenario_service(
     catalog: RoleCatalogProvider = Depends(get_role_catalog),
     trends: TrendProvider = Depends(get_trend_provider),
     assumptions: ScenarioAssumptionProvider = Depends(get_scenario_assumptions),
+    settings: Settings = Depends(get_settings),
 ) -> ScenarioService:
     matching_service = MatchingService(
         profile_service=ProfileService(db),
         catalog=catalog,
         matcher=matcher,
         trends=trends,
+        matching_mode_warning=matching_mode_warning(settings),
     )
     return ScenarioService(matching_service, assumptions)
 

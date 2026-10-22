@@ -52,6 +52,17 @@ class Settings(BaseSettings):
     # Literal validation), never silently falls back to "fixture".
     CATALOG_MODE: Literal["fixture", "cached"] = "fixture"
 
+    # Which MatchingProvider get_matching_provider() selects. "hussain"
+    # selects the vendored, offline HussainMatchingProvider
+    # (app/services/hussain_matching) — semantic similarity/RunPod is
+    # never activated by this setting alone (see careers.py's explicit
+    # no-similarity wiring). Independent of CATALOG_MODE (role/skill data)
+    # and ENABLE_FIXTURES (whether any fixture-sourced data may be served
+    # at all — see get_matching_provider()'s fail-closed interaction with
+    # this setting). Any other value fails Settings() construction
+    # immediately, never silently falls back to "fixture".
+    MATCHING_MODE: Literal["fixture", "hussain"] = "fixture"
+
     # Reserved for a future real provider's own HTTP client to apply.
     # Nothing in this codebase enforces this today — no real provider
     # makes a blocking network call yet, so there's nothing to time out.
