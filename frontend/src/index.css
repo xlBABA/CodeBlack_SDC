@@ -1,0 +1,318 @@
+@import 'tailwindcss';
+@import './styles/tokens.css';
+
+/* `dark:` follows the data-theme attribute set by the theme toggle, not the OS. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Expose the tokens to Tailwind. shadcn/ui's semantic names map onto the same tokens so
+   generated components pick up both themes without edits. */
+@theme inline {
+  --font-sans: var(--font);
+  --font-serif: var(--serif);
+  --font-mono: var(--mono);
+
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--glass);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--raised);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--primary);
+  --color-primary-2: var(--primary-2);
+  --color-primary-foreground: var(--on-primary);
+  --color-secondary: var(--solid);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--solid);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--well);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--bad);
+  --color-border: var(--line);
+  --color-input: var(--line-2);
+  --color-ring: var(--primary);
+
+  --color-glass: var(--glass);
+  --color-glass-2: var(--glass-2);
+  --color-solid: var(--solid);
+  --color-raised: var(--raised);
+  --color-rim: var(--rim);
+  --color-well: var(--well);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-faint: var(--faint);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--on-ink);
+  --color-butter: var(--butter);
+  --color-butter-foreground: var(--on-butter);
+  --color-tomato: var(--tomato);
+  --color-tomato-foreground: var(--on-tomato);
+  --color-emerald: var(--emerald);
+  --color-sky: var(--sky);
+  --color-plum: var(--plum);
+  --color-teal: var(--teal);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-slate: var(--slate);
+
+  --radius-card: var(--r-card);
+  --radius-tile: var(--r-tile);
+  --radius-ctl: var(--r-ctl);
+  --shadow-card: var(--shadow);
+  --shadow-pop: var(--shadow-pop);
+  --ease-out-soft: var(--ease);
+
+  --text-2xs: var(--fs-2xs);
+  --text-xs: var(--fs-xs);
+  --text-sm: var(--fs-sm);
+  --text-md: var(--fs-md);
+  --text-base: var(--fs-base);
+  --text-lg: var(--fs-lg);
+  --text-xl: var(--fs-xl);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    color: var(--text);
+    background: var(--bg);
+    font: 500 var(--fs-md) / 1.5 var(--font);
+    -webkit-font-smoothing: antialiased;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  [data-page-title]:focus {
+    outline: none;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+/* App shell stays hidden until fonts are measured and the load timeline can run;
+   the pre-paint script adds .failsafe after 4 s in case JS never gets there. */
+html.js:not(.failsafe):not(.is-ready) [data-app] {
+  visibility: hidden;
+}
+
+/* Theme switch: the new snapshot is revealed by a circle animated from JS (lib/theme.ts). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+
+/* Fallback where View Transitions are missing: a short cross-fade while html.theming is set. */
+html.theming *,
+html.theming *::before,
+html.theming *::after {
+  transition:
+    background-color 0.4s var(--ease),
+    border-color 0.4s var(--ease),
+    color 0.4s var(--ease),
+    fill 0.4s var(--ease) !important;
+}
+
+@layer components {
+  /* masked character reveal used by page titles */
+  .split-word {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+    vertical-align: top;
+  }
+  .split-ch {
+    display: inline-block;
+    transform-origin: 0 100%;
+  }
+
+  .pill {
+    --c: var(--faint);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--c) var(--soft), transparent);
+    color: color-mix(in srgb, var(--c) 55%, var(--text));
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    line-height: 1.45;
+    white-space: nowrap;
+  }
+  .pill:not(:has(i)) {
+    padding-left: 10px;
+  }
+  .pill > i {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--c);
+  }
+  :root[data-theme='dark'] .pill {
+    color: color-mix(in srgb, var(--c) 72%, var(--text));
+  }
+
+  /* frosted panel (Rapport / Mender idea) */
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--rim);
+    box-shadow: var(--shadow);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+  }
+  :root[data-theme='dark'] .glass {
+    border-color: var(--line);
+  }
+
+  /* hatched fill for projected / stale values (Halden idea) */
+  .hatch {
+    background: repeating-linear-gradient(-45deg, var(--hatch) 0 2px, transparent 2px 7px);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hatch) 45%, transparent);
+  }
+
+  /* fine grid texture for the deep hero cards; drawn on an overlay so it never resizes the
+     host's own background (the host must be positioned) */
+  .grid-tex {
+    isolation: isolate;
+  }
+  .grid-tex::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image:
+      linear-gradient(#ffffff10 1px, transparent 1px),
+      linear-gradient(90deg, #ffffff10 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .serif {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--well);
+    border-radius: var(--r-ctl);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--raised) 70%, transparent), transparent);
+    animation: shimmer 1.4s var(--ease) infinite;
+  }
+  :root[data-theme='dark'] .skeleton::after {
+    background: linear-gradient(90deg, transparent, #ffffff0d, transparent);
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--c, var(--good));
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+
+  .is-flash {
+    animation: flash 0.9s var(--ease);
+  }
+
+  /* boot-sequence text (landing intro and the landing → app curtain) */
+  .boot-prompt {
+    color: #9fe3ec;
+  }
+  .boot-demo {
+    color: #efb547;
+  }
+  .boot-ok {
+    color: #52c79a;
+    font-weight: 700;
+  }
+  .boot-dim {
+    color: #e6f2f3a3;
+  }
+  .boot-cursor {
+    margin-left: 2px;
+    color: #9fe3ec;
+    animation: blink 1.1s steps(1) infinite;
+  }
+
+  .tooltip-in {
+    animation: tooltip-in 0.16s var(--ease);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c, var(--good)) 55%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+@keyframes flash {
+  from {
+    color: var(--coral);
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
