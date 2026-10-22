@@ -12,10 +12,8 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 **Decisions I made (not AI):**
 - Chose the 4 starter roles and the 4 extra roles, and confirmed their O*NET matches.
 - Chose GitHub as the trend source, with the 30-day windows, the 15% threshold, and "cached" or "unavailable" (never fake "live") on failure.
-- Caught that `data_mode` should be `cached`.
 - Swapped out unsuitable datasets: SEC, then UCI Air Quality because it is research-only.
 - Gave the direct YouTube links and video lengths for the statistics and Excel videos.
-- Chose the product name.
 
 **Not AI-decided:** no AI tool decides a student's score. Scores come from Hussain's fixed, documented formula.
 
