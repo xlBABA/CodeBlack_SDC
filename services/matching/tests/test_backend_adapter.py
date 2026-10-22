@@ -92,6 +92,44 @@ def test_jawad_alias_catalogue_is_used():
     assert [s["skill_id"] for s in out["matched_skills"]] == ["sql"]
 
 
+def test_not_equivalent_pair_with_unknown_skill_is_warned_about_and_skipped(caplog, monkeypatch):
+    from services.matching import backend_adapter
+
+    catalogue = [{"skill_id": "sql", "name": "SQL"}, {"skill_id": "python", "name": "Python"},
+                 {"skill_id": "javascript", "name": "JavaScript"}]
+    pairs = [["sql", "python"], ["java", "javascript"], ["sales", "marketing"], ["sql"]]
+    adapter = HussainMatchingProvider(not_equivalent=pairs)
+
+    with caplog.at_level("WARNING", logger=backend_adapter.logger.name):
+        assert adapter._applicable_pairs(catalogue) == [["sql", "python"]]
+    messages = [r.getMessage() for r in caplog.records]
+    assert any("['java', 'javascript']" in m and "java" in m.split("catalogue:")[-1] for m in messages)
+    assert any("['sales', 'marketing']" in m and "marketing, sales" in m for m in messages)
+    assert any("['sql']" in m and "not a pair" in m for m in messages)
+    assert not any("['sql', 'python']" in m for m in messages)
+
+    # and it is what the provider is built with
+    seen = {}
+
+    class FakeProvider:
+        @classmethod
+        def from_skills(cls, skills, **kwargs):
+            seen.update(kwargs)
+            return cls()
+
+        def precompute(self):
+            pass
+
+        def __call__(self, a, b):
+            return 0.0
+
+    monkeypatch.setattr(backend_adapter, "RunPodEmbeddingProvider", FakeProvider)
+    monkeypatch.setenv("RUNPOD_API_KEY", "k")
+    monkeypatch.setenv("RUNPOD_ENDPOINT_ID", "ep")
+    adapter.match(PROFILE, [DATA_ANALYST], None, [])
+    assert seen["not_equivalent"] == [["sql", "python"]]
+
+
 def test_real_backend_integration():
     backend = REPO_ROOT / "backend"
     if not (backend / "app").is_dir():

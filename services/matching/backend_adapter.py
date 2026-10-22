@@ -106,6 +106,23 @@ class HussainMatchingProvider:
         self._providers: dict[tuple, RunPodEmbeddingProvider] = {}
         self._down_until = 0.0
 
+    def _applicable_pairs(self, catalogue: list[dict]) -> list[list[str]]:
+        """not_equivalent pairs whose two skill_ids are both in the catalogue.
+
+        A pair that cannot be applied is skipped with a warning naming it, so a list
+        written for another catalogue does not silently protect nothing."""
+        ids = {s["skill_id"] for s in catalogue}
+        pairs = []
+        for pair in self.not_equivalent:
+            if len(pair) == 2 and set(pair) <= ids:
+                pairs.append(pair)
+            else:
+                unknown = sorted(set(pair) - ids) if len(pair) == 2 else []
+                reason = (f"skill_id(s) not in the catalogue: {', '.join(unknown)}" if unknown
+                          else "not a pair of two skill_ids")
+                logger.warning("Ignoring not_equivalent pair %s (%s)", list(pair), reason)
+        return pairs
+
     def _semantic_similarity(self, catalogue: list[dict]) -> tuple[scoring.SimilarityFn | None, bool]:
         """Return (similarity function or None, degraded flag)."""
         if self.similarity is not None:
@@ -116,9 +133,8 @@ class HussainMatchingProvider:
         key = tuple((s["skill_id"], s["name"], tuple(s.get("aliases", []))) for s in catalogue)
         provider = self._providers.get(key)
         if provider is None:
-            ids = {s["skill_id"] for s in catalogue}
-            pairs = [p for p in self.not_equivalent if len(p) == 2 and set(p) <= ids]
-            provider = RunPodEmbeddingProvider.from_skills(catalogue, not_equivalent=pairs)
+            provider = RunPodEmbeddingProvider.from_skills(
+                catalogue, not_equivalent=self._applicable_pairs(catalogue))
         try:
             provider.precompute()  # the only network call; later lookups are local
         except Exception as exc:  # any failure degrades to exact matching
