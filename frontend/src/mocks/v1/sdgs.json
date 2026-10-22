@@ -1,0 +1,52 @@
+{
+  "data": {
+    "role_sdg_mappings": [
+      {
+        "sdg_id": 8,
+        "reason": "Business intelligence/data analysis work directly supports organizations making productive, evidence-based decisions, matching SDG 8's focus on productivity and economic growth."
+      }
+    ],
+    "skill_sdg_mappings": [
+      {
+        "skill_id": "critical_thinking",
+        "sdg_id": 4,
+        "reason": "Core analytical competency built through education; a foundational learning outcome (SDG 4) that transfers across any evidence-based career."
+      },
+      {
+        "skill_id": "mathematics",
+        "sdg_id": 4,
+        "reason": "Quantitative literacy is a foundational education outcome (SDG 4) underlying STEM, finance, and health analysis work."
+      },
+      {
+        "skill_id": "complex_problem_solving",
+        "sdg_id": 4,
+        "reason": "A higher-order thinking skill developed through education (SDG 4), applicable across all four roles in this catalog."
+      },
+      {
+        "skill_id": "systems_analysis",
+        "sdg_id": 4,
+        "reason": "An analytical competency taught and strengthened through formal education and training (SDG 4)."
+      },
+      {
+        "skill_id": "excel",
+        "sdg_id": 8,
+        "reason": "A baseline digital workplace skill tied to employability, matching SDG target 8.6 on equipping youth with skills for employment."
+      },
+      {
+        "skill_id": "sql",
+        "sdg_id": 8,
+        "reason": "An in-demand technical skill directly tied to employability in data-driven roles (SDG target 8.6)."
+      },
+      {
+        "skill_id": "data_visualization",
+        "sdg_id": 8,
+        "reason": "A widely-demanded workplace tool skill that improves employability across analyst roles (SDG target 8.6)."
+      }
+    ]
+  },
+  "data_mode": "cached",
+  "generated_at": "2026-10-22T20:06:30Z",
+  "warnings": [
+    "CATALOG_MODE=cached: role and skill SDG mappings come from Jawad's verified, cached dataset — these role/skill identifiers and SDG rationale are real, not illustrative placeholders. This is still not a United Nations endorsement or official certification, and does not represent independently verified real-world impact."
+  ]
+}
