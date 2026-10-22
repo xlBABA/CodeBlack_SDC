@@ -1,4 +1,4 @@
-"""FuturePath AI trend signal service (owner: Jawad).
+"""Mustaqbal AI trend signal service (owner: Jawad).
 
 Ingests dated, updatable skill signals from the GitHub Search API and turns
 them into contract-shaped TrendSignal dicts. See README.md for the method

@@ -70,7 +70,7 @@ def classify(status: int | None, body: str = "", error: str | None = None) -> st
 
 
 def check(url: str, timeout: int = 20) -> tuple[int | None, str]:
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 futurepath-link-check"})
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 mustaqbal-link-check"})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             body = resp.read(20000).decode("utf-8", "replace")

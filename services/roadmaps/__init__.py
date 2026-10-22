@@ -1,4 +1,4 @@
-"""FuturePath AI learning roadmaps (owner: Jawad)."""
+"""Mustaqbal AI learning roadmaps (owner: Jawad)."""
 from .projects import get_projects
 from .roadmap import get_roadmap
 

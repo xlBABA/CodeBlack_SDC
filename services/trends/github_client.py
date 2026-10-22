@@ -107,7 +107,7 @@ class GitHubTrendClient:
         url = f"{SEARCH_URL}?q={urllib.parse.quote(query)}&per_page=1"
         headers = {
             "Accept": "application/vnd.github+json",
-            "User-Agent": "futurepath-ai-trends",
+            "User-Agent": "mustaqbal-ai-trends",
         }
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
