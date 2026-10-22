@@ -56,9 +56,12 @@ def role_to_matcher_format(role: Any) -> dict:
         "role_id": r["role_id"],
         "role_title": r["role_title"],
         "verified": r.get("verified", True),
-        "data_mode": r.get("data_mode", "fixture"),
+        # RoleFixture (ours and Jawad's cached roles) has no data_mode: omit rather than guess,
+        # so the matcher's "Fixture role for testing" caveat does not fire for cached roles.
+        "data_mode": r.get("data_mode"),
         "required_skills": [
-            {"skill_id": s["skill_id"], "importance": s.get("weight", 1.0), "required": True}
+            {"skill_id": s["skill_id"], "importance": s.get("weight", 1.0),
+             "required": s.get("required", True)}
             for s in r["required_skills"]
         ],
         "transferable_skills": list(r.get("transferable_skills") or []),
@@ -160,6 +163,16 @@ class HussainMatchingProvider:
             for m in matches:
                 if DEGRADED_CAVEAT not in m["caveats"]:
                     m["caveats"].append(DEGRADED_CAVEAT)
+        # skills_component() lists every unmatched role skill as missing (it only halves the weight of
+        # optional ones); an optional skill is not a mandatory gap, so it is not reported as missing.
+        optional_by_role = {
+            rd["role_id"]: {s["skill_id"] for s in rd["required_skills"] if not s.get("required", True)}
+            for rd in role_dicts
+        }
+        for m in matches:
+            optional = optional_by_role.get(m["role_id"])
+            if optional:
+                m["missing_skills"] = [s for s in m["missing_skills"] if s["skill_id"] not in optional]
         if self.result_model is not None:
             return [self.result_model(**m) for m in matches]
         return matches

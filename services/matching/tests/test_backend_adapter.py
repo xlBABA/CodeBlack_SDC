@@ -130,6 +130,53 @@ def test_not_equivalent_pair_with_unknown_skill_is_warned_about_and_skipped(capl
     assert seen["not_equivalent"] == [["sql", "python"]]
 
 
+@dataclass(frozen=True)
+class OptReq:  # RoleRequirement with the `required` flag (Jawad's required/optional distinction)
+    skill_id: str
+    name: str
+    weight: float = 1.0
+    required: bool = True
+
+
+def _opt_role(**extra):
+    return Role("analyst", "Analyst", "Technology & AI", 1,
+                (OptReq("sql", "SQL", 1.0), OptReq("python", "Python", 1.0),
+                 OptReq("excel", "Excel", 1.0, required=False)),
+                (), (), **extra)
+
+
+def test_required_flag_is_preserved_and_defaults_to_true():
+    converted = role_to_matcher_format(_opt_role())["required_skills"]
+    assert {s["skill_id"]: s["required"] for s in converted} == {"sql": True, "python": True, "excel": False}
+    assert role_to_matcher_format(DATA_ANALYST)["required_skills"][0]["required"] is True  # no flag on Req
+
+
+def test_data_mode_is_not_defaulted_to_fixture():
+    assert role_to_matcher_format(_opt_role())["data_mode"] is None
+    assert role_to_matcher_format({**role_to_matcher_format(_opt_role()), "data_mode": "fixture"})["data_mode"] == "fixture"
+
+
+def test_no_fixture_caveat_for_roles_without_data_mode():
+    (out,) = HussainMatchingProvider().match(PROFILE, [_opt_role()], None, [])
+    assert not any("Fixture role for testing" in c for c in out["caveats"])
+
+
+def test_unmatched_optional_skill_is_not_reported_as_missing():
+    profile = {**PROFILE, "skills": [{"skill_id": "sql", "name": "SQL"}]}
+    (out,) = HussainMatchingProvider().match(profile, [_opt_role()], None, [])
+    assert [s["skill_id"] for s in out["missing_skills"]] == ["python"]  # required gap stays, excel is optional
+    assert [s["skill_id"] for s in out["matched_skills"]] == ["sql"]
+
+
+def test_matched_optional_skill_stays_matched_and_score_is_unchanged_by_the_filter():
+    profile = {**PROFILE, "skills": [{"skill_id": "sql", "name": "SQL"}, {"skill_id": "excel", "name": "Excel"}]}
+    (out,) = HussainMatchingProvider().match(profile, [_opt_role()], None, [])
+    assert {s["skill_id"] for s in out["matched_skills"]} == {"sql", "excel"}
+    assert [s["skill_id"] for s in out["missing_skills"]] == ["python"]
+    # the optional skill still counts in the skills score (at half weight): 0.85*(1+0.5) / 2.5 = 51
+    assert out["score_breakdown"]["skills"] == round(100 * 0.85 * 1.5 / 2.5)
+
+
 def test_real_backend_integration():
     backend = REPO_ROOT / "backend"
     if not (backend / "app").is_dir():
