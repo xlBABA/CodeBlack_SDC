@@ -25,8 +25,10 @@ python -c "import sys; sys.path.insert(0, 'runpod-worker'); import handler; hand
 
 ## Deploy on RunPod Serverless
 
-The `Dockerfile` was not built on the machine this was written on (no Docker installed there), so the
-first build is the real test. Menu names below may differ slightly in the RunPod console.
+Status: deployed on RunPod on 2026-10-23 (proof in `docs/proof/runpod/`). The first GitHub build failed because the
+old `Dockerfile` used `COPY` paths relative to `runpod-worker/`, but the integration builds from the repo root. The build of
+commit `f4e03e8`, with root-relative `COPY` paths, completed. The `Dockerfile` has not been built locally (no Docker
+installed on the author's machine). Menu names below may differ slightly in the RunPod console.
 
 ### Option A: GitHub integration
 1. Push this repo (the `runpod-worker/` folder) to GitHub and make sure the branch is pushed.
