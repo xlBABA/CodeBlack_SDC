@@ -22,21 +22,33 @@ _TRANSFERABLE_WEIGHT = 0.10
 
 def _skills_score(
     profile_skill_ids: set[str], role: RoleFixture
-) -> tuple[float, list[SkillRef], list[SkillRef]]:
+) -> tuple[float, list[SkillRef], list[SkillRef], list[SkillRef]]:
+    # Score formula unchanged: every required_skills entry (required or
+    # optional) still contributes its weight to total_weight/matched_weight
+    # exactly as before. Only the unmatched-skill *presentation* below is
+    # new — split into real gaps vs. optional, not-yet-demonstrated skills.
     total_weight = sum(req.weight for req in role.required_skills) or 1.0
     matched_weight = 0.0
     matched: list[SkillRef] = []
     missing: list[SkillRef] = []
+    optional_missing: list[SkillRef] = []
 
     for req in role.required_skills:
         if req.skill_id in profile_skill_ids:
             matched_weight += req.weight
             matched.append(SkillRef(skill_id=req.skill_id, name=req.name))
-        else:
+        elif req.required:
             missing.append(SkillRef(skill_id=req.skill_id, name=req.name))
+        else:
+            # Unmatched but optional (RoleRequirement.required=False, e.g.
+            # Jawad's cached roles) — not a mandatory gap, so it must not
+            # appear in missing_skills (contracts/API_CONTRACT.md's
+            # RoleMatch has no field to tag it there as optional). Not
+            # discarded either: surfaced via a caveat in _caveats().
+            optional_missing.append(SkillRef(skill_id=req.skill_id, name=req.name))
 
     score = round(100 * matched_weight / total_weight, 1)
-    return score, matched, missing
+    return score, matched, missing, optional_missing
 
 
 def _experience_score(profile: StudentProfile) -> float:
@@ -46,6 +58,11 @@ def _experience_score(profile: StudentProfile) -> float:
 
 
 def _prerequisites_score(profile: StudentProfile, role: RoleFixture) -> float:
+    if role.min_semester is None:
+        # No semester prerequisite in the source data (e.g. Jawad's cached
+        # catalog roles, whose prerequisites list is empty) — nothing to
+        # satisfy, never an invented semester number.
+        return 100.0
     if profile.semester is None:
         return 50.0  # unknown standing — neutral, not penalized
     if profile.semester >= role.min_semester:
@@ -74,12 +91,18 @@ def _explanation(matched: list[SkillRef], total_required: int) -> str:
     )
 
 
-def _caveats(scenario_id: str | None) -> list[str]:
+def _caveats(scenario_id: str | None, optional_missing: list[SkillRef]) -> list[str]:
     caveats = [
         "Fixture role catalog and deterministic matching logic; pending "
         "Jawad's verified 30-role dataset and Hussain's real scoring model.",
         "Score is an estimated profile alignment, not a hiring probability.",
     ]
+    if optional_missing:
+        names = ", ".join(skill.name for skill in optional_missing)
+        caveats.append(
+            f"Optional (not required) skills not yet demonstrated: {names}. "
+            "Not counted as missing-skill gaps."
+        )
     if scenario_id:
         caveats.append(
             f"scenario_id '{scenario_id}' was accepted but not yet applied to "
@@ -102,10 +125,11 @@ class FixtureMatchingProvider:
         results: list[RoleMatch] = []
 
         for role in roles:
-            skills_score, matched, missing = _skills_score(profile_skill_ids, role)
+            skills_score, matched, missing, optional_missing = _skills_score(profile_skill_ids, role)
             experience_score = _experience_score(profile)
             prerequisites_score = _prerequisites_score(profile, role)
             transferable_score = _transferable_score(profile, role)
+            required_skill_count = sum(1 for req in role.required_skills if req.required)
 
             overall = round(
                 _SKILLS_WEIGHT * skills_score
@@ -129,8 +153,8 @@ class FixtureMatchingProvider:
                         transferable=transferable_score,
                     ),
                     evidence_ids=list(role.evidence_ids),
-                    explanation=_explanation(matched, len(role.required_skills)),
-                    caveats=_caveats(scenario),
+                    explanation=_explanation(matched, required_skill_count),
+                    caveats=_caveats(scenario, optional_missing),
                 )
             )
 

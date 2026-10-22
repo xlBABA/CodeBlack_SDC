@@ -74,6 +74,23 @@ def test_unknown_role_id_behavior():
     assert next((r for r in roles if r.role_id == "no_such_role"), None) is None
 
 
+def test_canonical_cached_role_ids_remain_unchanged():
+    """Milestone 6B-2 compatibility mapping, pinned as a regression test:
+    Jawad's 4 canonical role_ids must never be silently renamed to match
+    our fixture catalog's vocabulary. 2 overlap (data_analyst,
+    financial_analyst); 2 do not (mechanical_engineer vs. our
+    mechanical_design_engineer; public_health_analyst vs. our
+    sustainability_coordinator) — see role_catalog_cached.py / the 6B-2
+    report for what this means once cached mode is ever activated."""
+    cached_ids = {role.role_id for role in load_cached_roles()}
+    fixture_ids = {role.role_id for role in FixtureRoleCatalog().list_roles()}
+
+    assert cached_ids == EXPECTED_ROLE_IDS
+    assert cached_ids & fixture_ids == {"data_analyst", "financial_analyst"}
+    assert cached_ids - fixture_ids == {"mechanical_engineer", "public_health_analyst"}
+    assert fixture_ids - cached_ids == {"mechanical_design_engineer", "sustainability_coordinator"}
+
+
 def test_cached_role_catalog_satisfies_the_role_catalog_provider_protocol():
     catalog = CachedRoleCatalog()
     roles = catalog.list_roles()
