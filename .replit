@@ -1,0 +1,32 @@
+modules = ["python-3.11"]
+
+[[ports]]
+localPort = 8000
+externalPort = 80
+
+[nix]
+
+[workflows]
+
+[[workflows.workflow]]
+name = "Start Backend"
+mode = "sequential"
+author = 23956635
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && DATABASE_URL=sqlite:///./futurepath.db python start.py"
+
+[userenv]
+
+[userenv.shared]
+ENVIRONMENT = "production"
+CATALOG_MODE = "cached"
+MATCHING_MODE = "hussain"
+ENABLE_FIXTURES = "false"
+CORS_ORIGINS = "http://localhost:5173"
+
+[deployment]
+build = "python -m venv .venv && PIP_USER=false PIP_CONFIG_FILE=/dev/null .venv/bin/python -m pip install -r backend/requirements.txt"
+run = "cd backend && DATABASE_URL=sqlite:///./futurepath.db ../.venv/bin/python start.py"
+deploymentTarget = "cloudrun"
