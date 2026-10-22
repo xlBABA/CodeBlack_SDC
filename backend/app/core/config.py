@@ -1,6 +1,6 @@
 """Typed environment configuration for the FuturePath AI backend."""
 from functools import lru_cache
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,6 +41,16 @@ class Settings(BaseSettings):
     # (PROVIDER_UNAVAILABLE) rather than silently serving fixture output,
     # since no real MatchingProvider implementation exists yet.
     ENABLE_FIXTURES: bool = True
+
+    # Which RoleCatalogProvider get_role_catalog() selects — independent of
+    # ENABLE_FIXTURES (that gates the *scoring* provider; this gates the
+    # *role/skill data* provider). "cached" selects Jawad's validated
+    # O*NET-derived catalog (app/services/role_catalog_cached.py); matching
+    # itself still runs through FixtureMatchingProvider either way until
+    # Hussain's provider is integrated. Any value other than the two
+    # listed below fails Settings() construction immediately (pydantic
+    # Literal validation), never silently falls back to "fixture".
+    CATALOG_MODE: Literal["fixture", "cached"] = "fixture"
 
     # Reserved for a future real provider's own HTTP client to apply.
     # Nothing in this codebase enforces this today — no real provider

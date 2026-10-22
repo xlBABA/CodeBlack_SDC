@@ -7,7 +7,14 @@ one new, independently overridable dependency: get_scenario_assumptions.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.careers import get_matching_provider, get_role_catalog, get_trend_provider
+from app.api.v1.endpoints.careers import (
+    catalog_data_mode,
+    catalog_provenance_warnings,
+    get_matching_provider,
+    get_role_catalog,
+    get_trend_provider,
+)
+from app.core.config import Settings, get_settings
 from app.core.time import utc_now_iso
 from app.db.session import get_db
 from app.schemas.scenarios import ScenarioRequest, ScenarioResponse
@@ -48,12 +55,13 @@ def get_scenario_service(
 def simulate_scenario(
     payload: ScenarioRequest,
     service: ScenarioService = Depends(get_scenario_service),
+    settings: Settings = Depends(get_settings),
 ) -> ScenarioResponse:
     outcome = service.simulate(payload)
 
     return ScenarioResponse(
         data=outcome.payload,
-        data_mode="fixture",
+        data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings,
+        warnings=outcome.warnings + catalog_provenance_warnings(settings),
     )

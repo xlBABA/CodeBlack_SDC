@@ -7,7 +7,14 @@ adds one new, independently overridable dependency: get_resource_catalog.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.careers import get_matching_provider, get_role_catalog, get_trend_provider
+from app.api.v1.endpoints.careers import (
+    catalog_data_mode,
+    catalog_provenance_warnings,
+    get_matching_provider,
+    get_role_catalog,
+    get_trend_provider,
+)
+from app.core.config import Settings, get_settings
 from app.core.time import utc_now_iso
 from app.db.session import get_db
 from app.schemas.roadmaps import RoadmapResponse, RoleProfileRequest
@@ -45,12 +52,13 @@ def get_roadmap_service(
 def generate_roadmap(
     payload: RoleProfileRequest,
     service: RoadmapService = Depends(get_roadmap_service),
+    settings: Settings = Depends(get_settings),
 ) -> RoadmapResponse:
     outcome = service.generate(payload)
 
     return RoadmapResponse(
         data=outcome.payload,
-        data_mode="fixture",
+        data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings,
+        warnings=outcome.warnings + catalog_provenance_warnings(settings),
     )

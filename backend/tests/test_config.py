@@ -1,4 +1,28 @@
+import pytest
+from pydantic import ValidationError
+
 from app.core.config import Settings
+
+
+def test_catalog_mode_defaults_to_fixture():
+    assert Settings(_env_file=None).CATALOG_MODE == "fixture"
+
+
+def test_catalog_mode_accepts_cached():
+    assert Settings(CATALOG_MODE="cached", _env_file=None).CATALOG_MODE == "cached"
+
+
+def test_invalid_catalog_mode_is_rejected():
+    with pytest.raises(ValidationError):
+        Settings(CATALOG_MODE="live", _env_file=None)
+
+
+def test_catalog_mode_is_independent_of_enable_fixtures():
+    """Two separate settings: one gates the scoring provider, the other
+    the role/skill data provider. Neither implies the other."""
+    settings = Settings(CATALOG_MODE="cached", ENABLE_FIXTURES=False, _env_file=None)
+    assert settings.CATALOG_MODE == "cached"
+    assert settings.ENABLE_FIXTURES is False
 
 
 def test_settings_load_without_ai_credentials(monkeypatch):

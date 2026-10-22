@@ -8,7 +8,14 @@ get_project_catalog.
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.careers import get_matching_provider, get_role_catalog, get_trend_provider
+from app.api.v1.endpoints.careers import (
+    catalog_data_mode,
+    catalog_provenance_warnings,
+    get_matching_provider,
+    get_role_catalog,
+    get_trend_provider,
+)
+from app.core.config import Settings, get_settings
 from app.core.time import utc_now_iso
 from app.db.session import get_db
 from app.schemas.projects import (
@@ -64,14 +71,15 @@ def get_project_simulation_service(
 def recommend_projects(
     payload: RoleProfileRequest,
     service: ProjectRecommendationService = Depends(get_project_recommendation_service),
+    settings: Settings = Depends(get_settings),
 ) -> ProjectRecommendationResponse:
     outcome = service.recommend(payload)
 
     return ProjectRecommendationResponse(
         data=ProjectRecommendationPayload(projects=outcome.projects),
-        data_mode="fixture",
+        data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings,
+        warnings=outcome.warnings + catalog_provenance_warnings(settings),
     )
 
 
@@ -79,12 +87,13 @@ def recommend_projects(
 def simulate_project(
     payload: ProjectSimulationRequest,
     service: ProjectSimulationService = Depends(get_project_simulation_service),
+    settings: Settings = Depends(get_settings),
 ) -> ProjectSimulationResponse:
     outcome = service.simulate(payload)
 
     return ProjectSimulationResponse(
         data=outcome.payload,
-        data_mode="fixture",
+        data_mode=catalog_data_mode(settings),
         generated_at=utc_now_iso(),
-        warnings=outcome.warnings,
+        warnings=outcome.warnings + catalog_provenance_warnings(settings),
     )
