@@ -28,7 +28,10 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | 86bdcb5 | Pointed the statistics and Excel resources at their direct freeCodeCamp YouTube videos, with video lengths I saw (statistics hours now provider-stated, 8.25 h) | `data/resources.json`, `docs/source-register.md`, `services/roadmaps/tests/test_roadmap.py`, `services/catalog/tests/test_check_links.py`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 3bae8f4 | Recorded my browser checks of the CS50x licence (CC BY-NC-SA 4.0) and week count, and that the QGIS manual names no licence | `docs/source-register.md`, `data/resources.json` (note text only), `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | 72e7ebc | Moved the two video notes (what I saw in the browser; instructor name from a third-party article) into the existing `url_note` field, so the data fits Rehan's cached importer with no new fields; added a test for his allowed field list | `data/resources.json`, `services/roadmaps/tests/test_roadmap.py`, `docs/jawad-ai-usage.md` |
-| this commit | Recorded that the statistics video's instructor (Monika Wahi) is confirmed in its YouTube description, as I checked in a browser (text only, in the existing `url_note`) | `data/resources.json`, `docs/source-register.md`, `docs/jawad-ai-usage.md` |
+| 1dce89f | Recorded that the statistics video's instructor (Monika Wahi) is confirmed in its YouTube description, as I checked in a browser (text only, in the existing `url_note`) | `data/resources.json`, `docs/source-register.md`, `docs/jawad-ai-usage.md` |
+| 2957c71 | Added Python to Data Analyst (importance 3, required; team estimate) after I found it listed on O*NET 15-2051.01, and replaced the wrong "NOT found" note | `data/roles.json`, `data/skills.json`, `docs/source-register.md`, `services/catalog/tests/test_catalog.py` |
+| 94d1719 | Added `data/skill_not_equivalent.json` (12 close-but-different skill pairs for Hussain's matcher) with a reason for each in the source register | `data/skill_not_equivalent.json`, `docs/source-register.md`, `services/catalog/tests/test_catalog.py` |
+| this commit | Corrected the O*NET licence from "Public domain" to CC BY 4.0 (attribution required), as the O*NET page footer says; updated the link-check report and this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
@@ -50,6 +53,7 @@ It did not write any files in the repo.
 - Replaced the SEC project with the UCI credit-card dataset, kept the diabetes project with a data note, and accepted a tutorial as the CAD project's source.
 - Chose the official product name "Mustaqbal AI".
 - Chose the 4 extra roles and confirmed their O*NET mappings: Accountant = "Accountants and Auditors", Environmental Scientist = "Environmental Scientists and Specialists, Including Health".
+- Asked for Python to be added to Data Analyst after checking O*NET, and approved (with Hussain) the 12 `not_equivalent` skill pairs.
 - Dropped the UCI Air Quality dataset, because its page says it is for research use only and this repo is public under Apache-2.0. Required the replacement to be CC BY, CC0 or public domain, with the licence read from the dataset's own page.
 
 ## What I checked myself in my browser (2026-10-22)
@@ -64,9 +68,13 @@ These have `"checked_by": "Jawad, manually in browser"` in `data/resources.json`
 - GnuCash *Tutorial and Concepts Guide*, at https://www.gnucash.org/viewdoc.phtml?rev=5&lang=C&doc=guide.
 - QGIS Training Manual: the module list includes Vector Analysis and Forestry Application. The page footer says only "© Copyright 2002-now, QGIS project" and names no licence, so we record "licence not stated" and link only.
 
+On 2026-10-23 I checked https://www.onetonline.org/link/tt/15-2051.01/43232405 in my browser: Python (and R and Jupyter Notebook) is listed for Business Intelligence Analysts under "Object or component oriented development software", and is not marked as a Hot Technology.
+
 I also checked the UCI Concrete Compressive Strength dataset page: CC BY 4.0. This one is a project dataset, so it is noted in `docs/source-register.md`, not in `resources.json`.
 
 Everything else was checked by automated requests from Claude Code. See `docs/link-check-report.md`.
+
+The O*NET licence (CC BY 4.0, from the page footer) was read by an automated fetch by Claude Code on 2026-10-23, not by me in a browser.
 
 Not yet checked by me: the other new project datasets (including the UCI Beijing Multi-Site Air Quality dataset, CC BY 4.0) and the O*NET pages for the 4 newer roles.
 
