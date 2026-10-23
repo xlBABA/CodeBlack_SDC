@@ -16,6 +16,11 @@ TOTAL_TARGET_ROLES = 30
 SIGNAL_TYPE_LABELS = {
     "developer_activity": "GitHub developer-activity (not job demand)",
 }
+LIMITED_COVERAGE_CAVEAT = (
+    "Limited skills coverage: part of what this role asks for is not in our skill catalogue, "
+    "so this score reflects only the skills we can assess."
+)
+NO_SKILLS_CAVEAT = "No recognised skills in the profile; skill coverage is 0."
 DEGRADED_CAVEAT = "Semantic matching unavailable; exact skill matching only (degraded)"
 
 
@@ -120,6 +125,10 @@ class Matcher:
                 "Scenario adjusted the weight of: " + ", ".join(names)
                 + f" (based on dated {' and '.join(kinds)} signals; an assumption, not a forecast)."
             )
+        if role.get("skills_coverage") == "limited":
+            caveats.append(LIMITED_COVERAGE_CAVEAT)
+        if not profile_skills:
+            caveats.append(NO_SKILLS_CAVEAT)
         if role.get("data_mode") == "fixture":
             caveats.append("Fixture role for testing; not verified occupational data.")
 

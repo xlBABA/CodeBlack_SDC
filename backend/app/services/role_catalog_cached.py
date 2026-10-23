@@ -99,6 +99,15 @@ def _validate_roles(roles: list, skill_names: dict[str, str]) -> None:
             raise CachedCatalogError(f"{role['role_id']}: no evidence_ids (unverifiable provenance)")
         if not role.get("required_skills"):
             raise CachedCatalogError(f"{role['role_id']}: no required_skills")
+        # Milestone 13C-7: skills_coverage was already an allowed optional
+        # metadata field (see _ALLOWED_ROLE_METADATA_FIELDS) but had no
+        # value-level check — a typo ("Limited", "partial") would have
+        # silently done nothing once the matcher started reading it.
+        if "skills_coverage" in role and role["skills_coverage"] not in (None, "limited"):
+            raise CachedCatalogError(
+                f"{role['role_id']}: skills_coverage must be 'limited' or absent, "
+                f"got {role['skills_coverage']!r}"
+            )
         for index, raw_skill in enumerate(role["required_skills"]):
             skill = _require_dict(raw_skill, f"{role['role_id']}.required_skills[{index}]")
             missing_skill_keys = _REQUIRED_ROLE_SKILL_ENTRY_FIELDS - skill.keys()
@@ -142,6 +151,11 @@ def _to_role_fixture(role: dict, skill_names: dict[str, str]) -> RoleFixture:
         transferable_interests=tuple(role["transferable_interests"]),
         evidence_ids=tuple(role["evidence_ids"]),
         verified=role["verified"],
+        # Milestone 13C-7: optional metadata (already in
+        # _ALLOWED_ROLE_METADATA_FIELDS) — Hussain's review of the
+        # 30-role data found 4 roles flagged "limited" with no caveat
+        # reaching the student; this is the missing propagation step.
+        skills_coverage=role.get("skills_coverage"),
     )
 
 
