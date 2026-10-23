@@ -28,7 +28,7 @@ const HOURS_PER_WEEK = 8
 
 function DashboardSkeleton() {
   return (
-    <div role="status" aria-label="Loading your overview" className="grid gap-4 lg:grid-cols-12">
+    <div role="status" aria-label="Loading your dashboard" className="grid gap-4 lg:grid-cols-12">
       <Skeleton className="h-[330px] rounded-card lg:col-span-7" />
       <div className="grid grid-cols-2 gap-3 lg:col-span-5">
         {Array.from({ length: 4 }, (_, i) => (
@@ -43,7 +43,7 @@ function DashboardSkeleton() {
 }
 
 /**
- * Overview. Layout ideas: header with KPI chips and solid role tiles (Rapport), a deep hero
+ * Dashboard. Layout ideas: header with KPI chips and solid role tiles (Rapport), a deep hero
  * card, hatched bars, "next up" and an assist card (Halden), a dotted-connector board (Mender).
  * Every number on this page comes from the API envelopes; nothing is scored here.
  */
@@ -67,8 +67,7 @@ export default function Dashboard() {
 
   return (
     <Page
-      title="Career overview"
-      docTitle="Overview"
+      title="Dashboard"
       subtitle="Where your skills point today, how developer activity on GitHub is moving for them, and what to learn next. It informs your choice; it does not make it."
       meta={
         <>

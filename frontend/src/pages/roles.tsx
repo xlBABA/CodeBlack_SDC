@@ -23,7 +23,7 @@ export default function Roles() {
   return (
     <Page
       title="Future roles"
-      crumbs={[{ label: 'Workspace', to: '/dashboard' }, { label: 'Roles' }]}
+      crumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Roles' }]}
       subtitle="The verified roles your profile lines up with, ranked by alignment estimate. Open one to see its trends, scenarios, roadmap, projects and SDG links."
       meta={
         env && (

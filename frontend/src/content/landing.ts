@@ -8,7 +8,7 @@ export type BootSegment = { text: string; kind?: 'prompt' | 'demo' | 'ok' | 'dim
 export const CURTAIN_LINES = {
   demo: [
     [{ text: '>', kind: 'prompt' }, { text: ' loading demo student... ' }, { text: '[fixture]', kind: 'demo' }],
-    [{ text: '>', kind: 'prompt' }, { text: ' preparing your overview... ' }, { text: 'ok', kind: 'ok' }],
+    [{ text: '>', kind: 'prompt' }, { text: ' preparing your dashboard... ' }, { text: 'ok', kind: 'ok' }],
   ],
   profile: [[{ text: '>', kind: 'prompt' }, { text: ' opening profile builder... ' }, { text: 'ok', kind: 'ok' }]],
   dashboard: [[{ text: '>', kind: 'prompt' }, { text: ' opening your dashboard... ' }, { text: 'ok', kind: 'ok' }]],

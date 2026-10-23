@@ -276,7 +276,7 @@ export default function Start() {
   return (
     <Page
       title="Build your profile"
-      crumbs={[{ label: 'Workspace', to: '/dashboard' }, { label: 'Profile' }]}
+      crumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Profile' }]}
       subtitle={
         cvPath
           ? 'Upload a PDF, check what we read, then confirm. Nothing about your age, gender or background is used.'
