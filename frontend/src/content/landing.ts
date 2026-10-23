@@ -56,16 +56,28 @@ export const CINEMA = {
   offer: ['Alignment estimates, with caveats', 'GitHub activity signals, with sources', 'A roadmap, with hours', 'SDG links, with reasons'],
 }
 
-/**
- * DEMO figures: placeholders for layout only. Every one is labelled DEMO in the UI and
- * will be replaced by cited statistics before the final submission.
- */
-export type DemoStat = { value: number; format: CountFormat; label: string }
-export const DEMO_STATS: DemoStat[] = [
-  { value: 62, format: 'percent', label: 'of sample job ads mention AI tools' },
-  { value: 30, format: 'int', label: 'future roles in the catalogue' },
-  { value: 120, format: 'hours', label: 'median roadmap to close one gap' },
-  { value: 17, format: 'int', label: 'UN SDGs linked to roles & skills' },
+const HAYS = 'https://sea.peoplemattersglobal.com/article/strategic-hr/ai-in-malaysian-workplaces-a-strategic-outlook-46436'
+
+/** Published figures, each shown with its source; the last is our own SDG scope. */
+export type Stat = { value: number; format: CountFormat; label: string; source: string; href: string }
+export const STATS: Stat[] = [
+  { value: 56, format: 'percent', label: 'of professionals in Malaysia already use AI tools at work', source: 'Hays Asia Salary Guide 2025', href: HAYS },
+  { value: 26, format: 'percent', label: 'have received any formal AI training', source: 'Hays Asia Salary Guide 2025', href: HAYS },
+  {
+    value: 600_000,
+    format: 'plus',
+    label: 'workers in Malaysia must reskill within three to five years',
+    source: 'Ministry of Science, Technology and Innovation, Jan 2025',
+    href: 'https://www.malaymail.com/news/malaysia/2025/01/07/mosti-ai-disruption-looms-in-malaysia-600000-workers-must-reskill-in-three-to-five-years/162368',
+  },
+  {
+    value: 39,
+    format: 'percent',
+    label: 'of key skills in the job market are expected to change by 2030',
+    source: 'World Economic Forum, Future of Jobs Report 2025',
+    href: 'https://www.weforum.org/stories/2025/01/future-of-jobs-report-2025-jobs-of-the-future-and-the-skills-you-need-to-get-them',
+  },
+  { value: 5, format: 'int', label: 'UN Sustainable Development Goals this tool is built around', source: 'Goals 4, 8, 9, 5 and 10 · United Nations', href: SDG_SOURCE },
 ]
 
 export const QUOTE = 'AI should widen your options, not narrow them.'

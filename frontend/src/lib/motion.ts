@@ -106,7 +106,8 @@ export function drawRings(targets: Targets, delay = 0) {
 export const COUNT_FORMATS = {
   int: (v: number) => Math.round(v).toLocaleString('en-MY'),
   percent: (v: number) => `${Math.round(v)}%`,
-  hours: (v: number) => `${Math.round(v)} h`,
+  /** a published floor, e.g. "600,000+" */
+  plus: (v: number) => `${Math.round(v).toLocaleString('en-MY')}+`,
   /** for hour totals the API returns with a decimal, e.g. 19.2 */
   hours1: (v: number) => `${v.toFixed(1)} h`,
   decimal: (v: number) => v.toFixed(1),
