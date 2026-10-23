@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, FileUp, LoaderCircle, Plus, Sparkles } from 'lucide-react'
+import { Check, FileUp, Link2, LoaderCircle, Plus, Sparkles } from 'lucide-react'
 import { ErrorNotice } from '@/components/api-states'
 import { DataModeBadge } from '@/components/data-mode-badge'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import type { APIEnvelope, CvParsePayload, SkillRef, StudentProfile } from '@/types/api'
 import { field, labelCls } from './form'
 import { ProjectsEditor } from './projects-editor'
-import { SkillPicker } from './skill-picker'
+import { SkillPicker, SkillSearch } from './skill-picker'
 
 type Review = {
   education_level: string
@@ -52,6 +52,56 @@ function FromCv({ items }: { items: string[] }) {
   )
 }
 
+type MapToCatalogProps = {
+  raw: string
+  skills: SkillRef[]
+  mappedTo?: SkillRef
+  onMap: (skill: { skill_id: string; name: string }) => void
+  onUndo: () => void
+}
+
+/** Lets the student point a skill we could not match at a catalogue skill. Only catalogue ids can come out of it. */
+function MapToCatalog({ raw, skills, mappedTo, onMap, onUndo }: MapToCatalogProps) {
+  const [open, setOpen] = useState(false)
+  if (mappedTo) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge tone="good" enter={false}>
+          <Check className="size-3.5" aria-hidden />
+          Mapped to {mappedTo.name}
+        </Badge>
+        <Button type="button" variant="ghost" size="sm" onClick={onUndo}>
+          Undo
+        </Button>
+      </div>
+    )
+  }
+  if (!open) {
+    return (
+      <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)}>
+        <Link2 />
+        Map to a catalog skill
+      </Button>
+    )
+  }
+  return (
+    <div className="grid w-full basis-full gap-2">
+      <SkillSearch
+        label={`Catalogue skill that means the same as “${raw}”`}
+        exclude={new Set(skills.map((k) => k.skill_id))}
+        autoFocus
+        onPick={(skill) => {
+          onMap(skill)
+          setOpen(false)
+        }}
+      />
+      <Button type="button" variant="ghost" size="sm" className="justify-self-start" onClick={() => setOpen(false)}>
+        Cancel
+      </Button>
+    </div>
+  )
+}
+
 type CvReviewProps = {
   result: APIEnvelope<CvParsePayload>
   onConfirm: (profile: StudentProfile) => Promise<void>
@@ -60,8 +110,9 @@ type CvReviewProps = {
 
 /**
  * Editable review of a parsed CV ("ok" status). Only catalogue skills can be added; skills the
- * parser could not back with a quote start unchecked, and nothing is saved until the student
- * confirms. The draft stays in memory only.
+ * parser could not back with a quote start unchecked, and skills outside the catalogue are
+ * never sent unless the student maps one to a catalogue skill. Nothing is saved until the
+ * student confirms. The draft stays in memory only.
  */
 export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
   const { draft } = result.data
@@ -74,6 +125,8 @@ export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
     projects: [...suggested.projects],
     experience_summary: suggested.experience_summary ?? '',
   }))
+  // CV skill text → the catalogue skill_id the student mapped it to
+  const [mapped, setMapped] = useState<Record<string, string>>({})
   const [confirmed, setConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
@@ -82,9 +135,27 @@ export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
   useEffect(() => heading.current?.focus(), [])
 
   const set = (patch: Partial<Review>) => setReview((r) => ({ ...r, ...patch }))
-  const evidence = Object.fromEntries(draft.mapped_skills.map((s) => [s.skill_id, s.evidence]))
+  const evidence = Object.fromEntries([
+    ...draft.unmapped_skills.filter((u) => mapped[`u:${u.raw_text}`]).map((u) => [mapped[`u:${u.raw_text}`], u.evidence]),
+    ...draft.mapped_skills.map((s) => [s.skill_id, s.evidence]),
+  ])
   const needsReview = draft.skills_requiring_review ?? []
   const ready = review.education_level !== '' && review.skills.length > 0
+
+  const mappedTo = (key: string) => review.skills.find((k) => k.skill_id === mapped[key])
+  const mapSkill = (key: string, skill: { skill_id: string; name: string }) => {
+    setMapped((m) => ({ ...m, [key]: skill.skill_id }))
+    set({ skills: [...review.skills, { ...skill, proficiency: null }] })
+  }
+  const unmap = (key: string) => {
+    set({ skills: review.skills.filter((k) => k.skill_id !== mapped[key]) })
+    setMapped((m) => {
+      const next = { ...m }
+      delete next[key]
+      return next
+    })
+  }
+  const mapControl = (key: string, raw: string) => <MapToCatalog raw={raw} skills={review.skills} mappedTo={mappedTo(key)} onMap={(skill) => mapSkill(key, skill)} onUndo={() => unmap(key)} />
 
   const confirm = async () => {
     setSubmitting(true)
@@ -166,7 +237,10 @@ export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
       </Section>
 
       {needsReview.length > 0 && (
-        <Section title="Skills that need your confirmation" hint="Your CV named these, but we couldn’t find a quote that backs them up, so they were not added. Add one only if it is accurate.">
+        <Section
+          title="Skills that need your confirmation"
+          hint="Your CV named these, but we couldn’t find a quote that backs them up, so they were not added. Add or map one only if it is accurate."
+        >
           <ul className="grid gap-2">
             {needsReview.map((s) => {
               const match = SKILL_CATALOG.find((c) => c.name.toLowerCase() === s.name.trim().toLowerCase())
@@ -178,9 +252,7 @@ export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
                     <span className="block text-sm text-muted-foreground">{s.reason}</span>
                   </div>
                   {!match ? (
-                    <Badge tone="faint" enter={false}>
-                      Not in the skill catalogue
-                    </Badge>
+                    mapControl(`r:${s.name}`, s.name)
                   ) : added ? (
                     <Badge tone="good" enter={false}>
                       <Check className="size-3.5" aria-hidden />
@@ -200,12 +272,18 @@ export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
       )}
 
       {draft.unmapped_skills.length > 0 && (
-        <Section title="Not in our skill catalogue" hint="Found in your CV, but they don’t match any catalogue skill, so they can’t count toward a role yet and won’t be sent.">
+        <Section
+          title="Not in our skill catalogue"
+          hint="Found in your CV, but they don’t match any catalogue skill, so they won’t be sent. If one means the same as a catalogue skill, map it and it counts as that skill."
+        >
           <ul className="grid gap-2">
             {draft.unmapped_skills.map((s) => (
-              <li key={s.raw_text} className="rounded-tile border border-dashed border-line-2 p-3 pl-4">
-                <b>{s.raw_text}</b>
-                <span className="block text-xs text-muted-foreground">From your CV: “{s.evidence}”</span>
+              <li key={s.raw_text} className="flex flex-wrap items-center gap-3 rounded-tile border border-dashed border-line-2 p-3 pl-4">
+                <div className="min-w-[12rem] flex-1">
+                  <b>{s.raw_text}</b>
+                  <span className="block text-xs text-muted-foreground">From your CV: “{s.evidence}”</span>
+                </div>
+                {mapControl(`u:${s.raw_text}`, s.raw_text)}
               </li>
             ))}
           </ul>
