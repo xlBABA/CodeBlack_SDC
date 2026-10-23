@@ -3,13 +3,12 @@ import { ArrowLeft, ArrowRight, Check, FileUp, GraduationCap, Heart, ListChecks,
 import { useLocation, useNavigate } from 'react-router'
 import { ErrorNotice } from '@/components/api-states'
 import { Page } from '@/components/page/page'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import { STORAGE_PREFIX } from '@/config/product'
 import { DEMO_PROFILE } from '@/content/demo-profile'
-import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill, SKILL_CATALOG, slugSkill } from '@/content/skills'
+import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill, SKILL_CATALOG } from '@/content/skills'
 import { ApiError } from '@/lib/api'
 import { gsap } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -43,7 +42,7 @@ const fromProfile = (p: StudentProfile): Draft => ({
   education_level: p.education_level ?? '',
   degree: p.degree ?? '',
   semester: p.semester ? String(p.semester) : '',
-  skills: p.skills.map((s) => ({ ...s, proficiency: s.proficiency ?? 'beginner' })),
+  skills: p.skills.filter((s) => isCatalogSkill(s.skill_id)).map((s) => ({ ...s, proficiency: s.proficiency ?? 'beginner' })),
   projects: [...p.projects],
   experience_summary: p.experience_summary ?? '',
   interests: [...p.interests],
@@ -62,7 +61,10 @@ const toProfile = (d: Draft): StudentProfile => ({
 function initialDraft(): Draft {
   try {
     const saved = sessionStorage.getItem(DRAFT_KEY)
-    if (saved) return { ...EMPTY, ...(JSON.parse(saved) as Draft) }
+    if (saved) {
+      const draft = { ...EMPTY, ...(JSON.parse(saved) as Draft) }
+      return { ...draft, skills: draft.skills.filter((s) => isCatalogSkill(s.skill_id)) }
+    }
   } catch {
     // ignore unreadable drafts
   }
@@ -97,7 +99,6 @@ function SkillsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) => 
   const chosen = new Set(draft.skills.map((s) => s.skill_id))
   const q = query.trim().toLowerCase()
   const matches = SKILL_CATALOG.filter((s) => !chosen.has(s.skill_id) && (!q || s.name.toLowerCase().includes(q)))
-  const custom = q && !SKILL_CATALOG.some((s) => s.name.toLowerCase() === q) && !chosen.has(slugSkill(query))
 
   const add = (s: { skill_id: string; name: string }) => {
     set({ skills: [...draft.skills, { ...s, proficiency: 'beginner' }] })
@@ -122,21 +123,18 @@ function SkillsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) => 
             if (e.key !== 'Enter') return
             e.preventDefault()
             if (matches[0]) add(matches[0])
-            else if (custom) add({ skill_id: slugSkill(query), name: query.trim() })
           }}
         />
         <div className="mt-3 flex flex-wrap gap-2" aria-label="Suggestions">
-          {matches.slice(0, 14).map((s) => (
+          {matches.map((s) => (
             <Chip key={s.skill_id} active={false} onClick={() => add(s)}>
               {s.name}
             </Chip>
           ))}
-          {custom && (
-            <Chip active={false} onClick={() => add({ skill_id: slugSkill(query), name: query.trim() })}>
-              Add “{query.trim()}”
-            </Chip>
-          )}
         </div>
+        {q && !SKILL_CATALOG.some((s) => s.name.toLowerCase().includes(q)) && (
+          <p className="mt-2 text-sm text-muted-foreground">No catalogue skill matches “{query.trim()}”. Only catalogue skills count toward a role.</p>
+        )}
       </div>
 
       <div>
@@ -148,11 +146,6 @@ function SkillsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) => 
             {draft.skills.map((s) => (
               <li key={s.skill_id} data-enter="item" className="flex flex-wrap items-center gap-3 rounded-tile bg-well p-2 pl-4">
                 <b className="min-w-[9rem] flex-1">{s.name}</b>
-                {!isCatalogSkill(s.skill_id) && (
-                  <Badge tone="warn" enter={false} className="text-2xs" title="Not in the role catalogue yet; it may not count toward any role">
-                    not in catalogue yet
-                  </Badge>
-                )}
                 <div role="radiogroup" aria-label={`${s.name} level`} className="flex rounded-full border border-line-2 bg-raised p-0.5">
                   {LEVELS.map((l) => (
                     <button
