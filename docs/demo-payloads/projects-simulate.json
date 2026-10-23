@@ -1,0 +1,27 @@
+{
+  "profile": {
+    "education_level": "undergraduate",
+    "degree": "Computer Science",
+    "semester": 5,
+    "interests": [
+      "web development"
+    ],
+    "skills": [
+      {
+        "skill_id": "python",
+        "name": "Python"
+      },
+      {
+        "skill_id": "javascript",
+        "name": "JavaScript"
+      },
+      {
+        "skill_id": "database_querying",
+        "name": "Database Querying"
+      }
+    ],
+    "projects": []
+  },
+  "role_id": "software_developer",
+  "project_id": "sd_wdi_web_dashboard"
+}
