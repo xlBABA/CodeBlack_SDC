@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { INTRO_LINES } from '@/content/landing'
 import { PRODUCT_NAME } from '@/config/product'
 import { typeLines } from '@/lib/boot-type'
@@ -36,7 +36,6 @@ export function LandingIntro({ onLift, onDone }: { onLift: () => void; onDone: (
       const decrypt = () => {
         const t = gsap.timeline()
         chars.forEach((ch, i) => {
-          if (!finals[i].trim()) return
           const at = 0.05 + i * 0.06
           const proxy = { p: 0 }
           t.fromTo(ch, { opacity: 0, yPercent: 26, scale: 1.3, filter: 'blur(10px)' }, { opacity: 1, yPercent: 0, scale: 1, filter: 'blur(0px)', duration: 0.5, ease: 'power3.out' }, at).to(
@@ -111,10 +110,18 @@ export function LandingIntro({ onLift, onDone }: { onLift: () => void; onDone: (
       <div className="mx-auto w-full max-w-4xl">
         <div ref={linesRef} className="boot-lines mb-10 min-h-[7.5em] font-mono text-sm leading-[1.9] sm:text-md" aria-live="polite" />
         <p className="wm relative inline-block font-extrabold tracking-[-0.04em] text-[clamp(2.6rem,1rem+7vw,6.5rem)] leading-none" aria-label={PRODUCT_NAME}>
-          {Array.from(PRODUCT_NAME).map((ch, i) => (
-            <span key={i} className="wm-ch inline-block opacity-0" aria-hidden>
-              {ch === ' ' ? ' ' : ch}
-            </span>
+          {PRODUCT_NAME.split(' ').map((word, w) => (
+            <Fragment key={w}>
+              {w > 0 && ' '}
+              {/* letters stay together: a word never breaks across lines */}
+              <span className="inline-block whitespace-nowrap">
+                {Array.from(word).map((ch, i) => (
+                  <span key={i} className="wm-ch inline-block opacity-0" aria-hidden>
+                    {ch}
+                  </span>
+                ))}
+              </span>
+            </Fragment>
           ))}
           <span className="wm-scan pointer-events-none absolute top-[-6%] bottom-[-6%] w-[2px] bg-[#9fe3ec] opacity-0 shadow-[0_0_18px_4px_#9fe3ec]" aria-hidden />
         </p>
