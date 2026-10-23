@@ -17,7 +17,7 @@ export const CURTAIN_LINES = {
 export const HERO = {
   eyebrow: 'Career planning for Malaysian students and fresh graduates',
   // a word wrapped in *stars* is set in the italic serif
-  lines: ['Your *future*,', 'mapped from today.'],
+  lines: ['Your *future*,', 'mapped for the AI era.'],
   body: 'See which roles fit the skills you have now, how GitHub developer activity is moving for those skills, and what to learn next, with hours for each step.',
 }
 
