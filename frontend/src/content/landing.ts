@@ -1,14 +1,8 @@
 // Landing copy and figures in one place so they can be edited without touching layout.
 import type { CountFormat } from '@/lib/motion'
 
-/** Boot lines typed by the landing intro. Segments are coloured by kind. */
+/** One run of a boot line, coloured by kind. */
 export type BootSegment = { text: string; kind?: 'prompt' | 'demo' | 'ok' | 'dim' }
-export const INTRO_LINES: BootSegment[][] = [
-  [{ text: '>', kind: 'prompt' }, { text: ' reading GitHub developer-activity signals... ' }, { text: '[demo]', kind: 'demo' }],
-  [{ text: '>', kind: 'prompt' }, { text: ' mapping skills to future roles... ' }, { text: '30 roles, 8 verified', kind: 'dim' }],
-  [{ text: '>', kind: 'prompt' }, { text: ' linking every role to the UN SDGs... ' }, { text: '17 goals', kind: 'dim' }],
-  [{ text: '>', kind: 'prompt' }, { text: ' ready', kind: 'ok' }],
-]
 
 /** Lines typed while the landing hands you over to the app. */
 export const CURTAIN_LINES = {
