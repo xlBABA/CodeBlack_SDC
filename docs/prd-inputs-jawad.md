@@ -38,16 +38,18 @@ Checked against the deployed backend API, https://mustaqbal-ai.replit.app, using
 
 **Role and skill requirements (O*NET OnLine, US Department of Labor)**
 
+O*NET licence: each O*NET OnLine page footer says its content "is licensed under a Creative Commons Attribution 4.0 International License" (read on 2026-10-23), so O*NET-derived data must credit O*NET and the U.S. Department of Labor, Employment and Training Administration.
+
 | Source | What we use it for | Licence | Source's own update date / when we checked | Who checked |
 |---|---|---|---|---|
-| O*NET — Business Intelligence Analysts (15-2051.01) | Skills and tools for the Data Analyst role | Public domain (US Dept. of Labor; free to use with attribution) | Updated 2026-10-06 / checked 2026-10-21 | Automated fetch (Claude Code) |
-| O*NET — Financial and Investment Analysts (13-2051.00) | Tools and work styles for the Financial Analyst role (O*NET says its other sections are still being collected) | Public domain | 2026-10-06 / 2026-10-21 | Automated fetch (Claude Code) |
-| O*NET — Mechanical Engineers (17-2141.00) | Skills and tools for the Mechanical Engineer role | Public domain | 2026-10-06 / 2026-10-21 | Automated fetch (Claude Code) |
-| O*NET — Epidemiologists (19-1041.00) | Skills and tools for the Public Health Analyst role (closest O*NET match) | Public domain | 2026-10-06 / 2026-10-21 | Automated fetch (Claude Code) |
-| O*NET — Software Developers (15-1252.00) | Skills and tools for the Software Developer role | Public domain | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
-| O*NET — Accountants and Auditors (13-2011.00) | Skills, work styles and tools for the Accountant role | Public domain | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
-| O*NET — Civil Engineers (17-2051.00) | Skills and tools for the Civil Engineer role | Public domain | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
-| O*NET — Environmental Scientists and Specialists, Including Health (19-2041.00) | Skills and tools for the Environmental Scientist role | Public domain | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
+| O*NET — Business Intelligence Analysts (15-2051.01) | Skills and tools for the Data Analyst role | CC BY 4.0, attribution required (U.S. Department of Labor, Employment and Training Administration) | Updated 2026-10-06 / checked 2026-10-21 | Automated fetch (Claude Code) |
+| O*NET — Financial and Investment Analysts (13-2051.00) | Tools and work styles for the Financial Analyst role (O*NET says its other sections are still being collected) | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-21 | Automated fetch (Claude Code) |
+| O*NET — Mechanical Engineers (17-2141.00) | Skills and tools for the Mechanical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-21 | Automated fetch (Claude Code) |
+| O*NET — Epidemiologists (19-1041.00) | Skills and tools for the Public Health Analyst role (closest O*NET match) | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-21 | Automated fetch (Claude Code) |
+| O*NET — Software Developers (15-1252.00) | Skills and tools for the Software Developer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
+| O*NET — Accountants and Auditors (13-2011.00) | Skills, work styles and tools for the Accountant role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
+| O*NET — Civil Engineers (17-2051.00) | Skills and tools for the Civil Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
+| O*NET — Environmental Scientists and Specialists, Including Health (19-2041.00) | Skills and tools for the Environmental Scientist role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
 
 **Trend signal**
 

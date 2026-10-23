@@ -21,7 +21,7 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 
 | Source | Used for | Licence / terms |
 |---|---|---|
-| O*NET OnLine (US Dept. of Labor), 8 occupation pages plus 1 Software Skills CSV export | Role skills, 0-100 importance scores and technology tools | Public domain, with attribution |
+| O*NET OnLine (US Dept. of Labor), 8 occupation pages plus 1 Software Skills CSV export | Role skills, 0-100 importance scores and technology tools | CC BY 4.0, attribution required (page footer: "licensed under a Creative Commons Attribution 4.0 International License") |
 | GitHub REST API — Search Repositories | Trend signal: new repositories per skill topic, 30 days vs the previous 30 | GitHub Terms of Service. 12 saved snapshots (retrieved 2026-10-21 and 2026-10-22) exist as data and in my standalone `services/trends`. The demo makes no live GitHub request. **Not shown in the app:** the deployed `/api/v1/trends` returns placeholder data labelled `fixture`. |
 | Microsoft Learn: catalog API, 4 learning paths and modules, and 1 VBA documentation page | Learning resources; provider-stated hours from the catalog API's `duration_in_minutes` | Free to access |
 | MathWorks MATLAB Onramp, MIT OpenCourseWare 18.05, SAS Programming 1, Alison, MDN, GnuCash guide, 2 freeCodeCamp.org videos on YouTube | Learning resources | Free to access (see `docs/source-register.md`) |
