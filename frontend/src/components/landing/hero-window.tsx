@@ -18,7 +18,7 @@ const CHIPS = [
 ]
 
 function Chip({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-[18px] border border-white/20 bg-white/12 px-4 py-3 text-[#f6faf8] shadow-[0_20px_40px_-20px_#0008] backdrop-blur-md">{children}</div>
+  return <div className="rounded-[18px] border border-white/20 bg-white/12 px-4 py-3 text-on-deep shadow-[0_20px_40px_-20px_#0008] backdrop-blur-md">{children}</div>
 }
 function ChipRole() {
   return (
@@ -35,7 +35,7 @@ function ChipTrend() {
   return (
     <Chip>
       <span className="flex items-center gap-2 font-bold">
-        <Activity className="size-4 text-[#9fe3ec]" aria-hidden /> Developer activity
+        <Activity className="size-4 text-deep-glow" aria-hidden /> Developer activity
       </span>
       <small className="block text-xs opacity-70">GitHub signals, dated · not job demand</small>
     </Chip>
@@ -45,10 +45,10 @@ function ChipSkill() {
   return (
     <Chip>
       <span className="flex items-center gap-2 text-sm font-semibold">
-        <i className="size-2 rounded-full bg-[#ffb38f]" /> Excel · advanced
+        <i className="size-2 rounded-full bg-deep-warm" /> Excel · advanced
       </span>
       <span className="mt-1 flex items-center gap-2 text-sm font-semibold">
-        <i className="size-2 rounded-full bg-[#9fe3ec]" /> Python · intermediate
+        <i className="size-2 rounded-full bg-deep-glow" /> Python · intermediate
       </span>
     </Chip>
   )
@@ -155,7 +155,7 @@ export function HeroWindow({ ready }: { ready: boolean }) {
         >
           <div data-mark className="absolute inset-0 grid place-items-center">
             <div className="relative">
-              <span className="absolute inset-[-40%] rounded-full bg-[radial-gradient(closest-side,#f0c64a55,transparent)] blur-2xl" />
+              <span className="absolute inset-[-40%] rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--node)_33%,transparent),transparent)] blur-2xl" />
               {/* on the deep backdrop the mark sits on a glass plate so its tile never blends in */}
               <span className="relative grid place-items-center rounded-[30%] border border-white/25 bg-white/10 p-4 sm:p-5 shadow-[0_30px_60px_-20px_#000a] backdrop-blur-md">
                 <BrandMark className="size-[clamp(120px,19vw,224px)]" />
@@ -167,8 +167,8 @@ export function HeroWindow({ ready }: { ready: boolean }) {
               {c.body}
             </div>
           ))}
-          <p data-caption className="absolute bottom-[7%] left-1/2 w-[min(92%,720px)] -translate-x-1/2 text-center text-[clamp(1.3rem,0.9rem+1.6vw,2.4rem)] leading-tight font-bold text-[#f6faf8]">
-            One student. Thirty possible futures. <span className="serif text-[#9fe3ec]">Four verified</span> so far.
+          <p data-caption className="absolute bottom-[7%] left-1/2 w-[min(92%,720px)] -translate-x-1/2 text-center text-[clamp(1.3rem,0.9rem+1.6vw,2.4rem)] leading-tight font-bold text-on-deep">
+            One student. Thirty possible futures. <span className="serif text-deep-glow">Four verified</span> so far.
           </p>
         </div>
       </div>

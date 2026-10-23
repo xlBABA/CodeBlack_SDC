@@ -42,7 +42,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {state?.undo && (
           <button
             type="button"
-            className="pointer-events-auto rounded-full bg-tomato px-3 py-1.5 font-bold text-white"
+            className="pointer-events-auto rounded-full bg-tomato px-3 py-1.5 font-bold text-tomato-foreground"
             onClick={() => {
               state.undo?.()
               gsap.to(el.current, { opacity: 0, y: 10, duration: dur(0.25), onComplete: () => gsap.set(el.current, { visibility: 'hidden' }) })

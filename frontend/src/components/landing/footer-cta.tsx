@@ -25,24 +25,24 @@ export function FooterCta() {
   return (
     <footer ref={root} className="relative mt-10 overflow-hidden">
       <div data-bg aria-hidden className="grid-tex absolute inset-0 bg-[radial-gradient(100%_80%_at_50%_100%,var(--deep-a),var(--deep-b)_50%,color-mix(in_srgb,var(--deep-b)_55%,#000))]" />
-      <div className="relative mx-auto max-w-[1440px] px-[var(--gutter)] pt-28 pb-10 text-center text-[#f6faf8]">
+      <div className="relative mx-auto max-w-[1440px] px-[var(--gutter)] pt-28 pb-10 text-center text-on-deep">
         <BrandMark className="mx-auto size-16" />
         <h2 data-final-title className="mt-8 text-[clamp(3.2rem,1rem+8vw,10rem)] leading-[0.9] font-extrabold tracking-[-0.06em]">
           <CharText text={FOOTER_LINE} />
         </h2>
-        <p data-final-rise className="mx-auto mt-6 max-w-[46ch] text-lg text-[#f6faf8c4]">
+        <p data-final-rise className="mx-auto mt-6 max-w-[46ch] text-lg text-on-deep/77">
           Walk through the whole flow with a demo student, or start your own profile.
         </p>
         <div data-final-rise className="mt-8 flex justify-center">
           <HeroCtas onDark />
         </div>
-        <div className="mt-24 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-sm text-[#f6faf8b3]">
-          <span className="flex items-center gap-2 text-[#f6faf8]">
+        <div className="mt-24 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-sm text-on-deep/70">
+          <span className="flex items-center gap-2 text-on-deep">
             <Wordmark className="text-sm" /> · SDC Hackathon 2026 · Domain 1 · Sponsor: Aiversecity
           </span>
           <span className="flex items-center gap-4">
             Prototype with demo data
-            <Link to="/methodology" className="font-semibold text-[#f6faf8] hover:underline">
+            <Link to="/methodology" className="font-semibold text-on-deep hover:underline">
               Methodology
             </Link>
           </span>

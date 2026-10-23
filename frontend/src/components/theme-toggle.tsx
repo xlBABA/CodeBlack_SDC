@@ -47,7 +47,7 @@ export function ThemeToggle({
         className,
       )}
     >
-      <span ref={knob} aria-hidden className={cn('absolute top-1 left-1 size-9 rounded-full shadow-[0_6px_14px_-6px_#0006]', onDark ? 'bg-[#f6faf8]' : 'bg-ink')} />
+      <span ref={knob} aria-hidden className={cn('absolute top-1 left-1 size-9 rounded-full shadow-[0_6px_14px_-6px_#0006]', onDark ? 'bg-on-deep' : 'bg-ink')} />
       {OPTIONS.map(({ value, label, Icon }, i) => (
         <button
           key={value}
@@ -57,7 +57,7 @@ export function ThemeToggle({
           onClick={(e) => setTheme(value, e.currentTarget)}
           className={cn(
             'relative grid size-9 place-items-center rounded-full transition-colors duration-200',
-            index === i ? (onDark ? 'text-[#16201c]' : 'text-ink-foreground') : onDark ? 'text-white/60 hover:text-white' : 'text-muted-foreground hover:text-foreground',
+            index === i ? (onDark ? 'text-deep-ink' : 'text-ink-foreground') : onDark ? 'text-white/60 hover:text-white' : 'text-muted-foreground hover:text-foreground',
           )}
         >
           <Icon className="size-[17px]" aria-hidden />
