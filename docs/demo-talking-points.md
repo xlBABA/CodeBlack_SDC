@@ -5,18 +5,17 @@
 Say this out loud. Every app claim here was checked on the deployed API (https://mustaqbal-ai.replit.app) with GET requests.
 
 > "My part is the data behind Mustaqbal AI.
-> Our catalog has 30 career roles and 20 skills, all from O*NET, the US Department of Labor's job database.
+> Our prepared catalog has 30 career roles and 20 skills, all from O*NET, the US Department of Labor's job database.
 > Each role has free learning resources; the first 8 have portfolio projects.
 > Every one has a dated, registered source.
 > Every role and skill links to a UN Sustainable Development Goal, with a reason.
-> The app shows the first 8 roles, labelled cached.
-> Trends are different.
+> The deployed app still shows only the first 8 roles, labelled cached.
 > The app's trend data is a placeholder, labelled fixture, not live.
-> Our GitHub snapshots exist, but are not connected yet.
+> Our GitHub snapshots are not connected yet.
 > And GitHub activity is not job demand."
 
 **What each sentence rests on:**
-- **30 roles, 20 skills:** counted in our data on `feat/jawad-30-roles` (standalone). The 22 newer roles are not in the app yet.
+- **30 roles, 20 skills (prepared):** counted in our data on `feat/jawad-30-roles` (standalone; validated, not merged). The deployed app still shows only the first 8 roles until Rehan's integration testing and a Replit Republish. Never say all 30 roles are live. The 22 newer O*NET titles and codes were checked by Jawad in a browser on 2026-10-24.
 - **SDGs, "cached" label:** on 2026-10-22, `GET /api/v1/sdgs/{role_id}` returned `data_mode: "cached"` for the 8 role IDs the app had, covering 20 distinct skills. Every mapping matched our data.
 - **Trends are "fixture":** `GET /api/v1/trends` returns `data_mode: "fixture"` and the warning "No real trend source is connected yet".
 - **Resources and projects:** in our data (16 resources, 17 projects for the first 8 roles, each with a dated, registered source). The app's roadmap and project endpoints are POST, so we did not check them.
@@ -35,7 +34,7 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 *[Terminal: list the 30 roles.]*
 - "Our data has 30 career roles in 4 industry groups: 9 in Technology and AI, 8 in Business and Finance, 7 in Engineering and 6 in Healthcare and Sustainability."
 - "Each role comes from a real occupation in O*NET, the US Department of Labor's job database."
-- "We didn't invent any roles or skills. The app still shows the first 8; the other 22 are in our data and not connected yet."
+- "We didn't invent any roles or skills. The other 22 roles are prepared and tested, but the deployed app still shows only the first 8 until our integration testing and the next Replit Republish."
 
 **2. One role's skills (about 25 s): Standalone**
 *[Terminal: Data Analyst skills with importance.]*
@@ -86,8 +85,12 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 
 ---
 
+**Presenter rule:** Do not state a role's rank or score. Show matches only as example output; rankings change when the catalog or data changes (for example, Data Analyst moved from 3rd to 6th for a Python+SQL profile after 22 roles were added).
+
 **Don't say:**
 - "trending", "live data" or "you will get hired"
+- that all 30 roles are live in the app
+- a role's rank or match score
 - that GitHub activity shows job demand
 - that a standalone number is what the app shows
 - any number not shown on screen

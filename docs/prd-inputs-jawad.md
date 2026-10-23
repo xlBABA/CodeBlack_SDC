@@ -15,6 +15,8 @@ Ready-to-paste text for the data sections of the Mustaqbal AI PRD.
 | Trend snapshots (cached) | 12 |
 | Role-to-SDG links / skill-to-SDG links | 39 / 20 |
 
+**Status of the 30-role dataset: PREPARED, not live.** The 30 roles are on branch `feat/jawad-30-roles` (pushed, not merged). They are validated: all 8 of Jawad's test suites pass, and Rehan's cached-data validators accept them (checked read-only on his branches `feature/12b-team-integration` and `feature/13b-release-candidate`). The **deployed app still shows only the first 8 roles** until Rehan's integration testing and a Replit Republish. Do not claim that all 30 roles are live. The 20-skill catalog and the original 8 roles are unchanged.
+
 ## What is shown in the deployed app today
 
 Checked against the deployed backend API, https://mustaqbal-ai.replit.app, using **GET requests only**. The responses' `generated_at` was 2026-10-22T18:34Z (UTC). The API's OpenAPI document lists 3 GET endpoints: `/api/v1/health`, `/api/v1/trends` and `/api/v1/sdgs/{role_id}`.
@@ -40,6 +42,10 @@ Checked against the deployed backend API, https://mustaqbal-ai.replit.app, using
 
 O*NET licence: each O*NET OnLine page footer says its content "is licensed under a Creative Commons Attribution 4.0 International License" (read on 2026-10-23), so O*NET-derived data must credit O*NET and the U.S. Department of Labor, Employment and Training Administration.
 
+Attribution line (use wherever O*NET-derived data is shown): "Source: O*NET OnLine by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)."
+
+Jawad checked the titles and codes of the 22 newer O*NET pages in a browser on 2026-10-24 (MYT); all matched. He also spot-checked 3 mathematics scores on their Details pages (Statistician 97, Data Scientist 85, Actuary 85). Their other skill scores and tool lists were fetched automatically by Claude Code and not checked by hand.
+
 | Source | What we use it for | Licence | Source's own update date / when we checked | Who checked |
 |---|---|---|---|---|
 | O*NET — Business Intelligence Analysts (15-2051.01) | Skills and tools for the Data Analyst role | CC BY 4.0, attribution required (U.S. Department of Labor, Employment and Training Administration) | Updated 2026-10-06 / checked 2026-10-21 | Automated fetch (Claude Code) |
@@ -50,28 +56,28 @@ O*NET licence: each O*NET OnLine page footer says its content "is licensed under
 | O*NET — Accountants and Auditors (13-2011.00) | Skills, work styles and tools for the Accountant role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
 | O*NET — Civil Engineers (17-2051.00) | Skills and tools for the Civil Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
 | O*NET — Environmental Scientists and Specialists, Including Health (19-2041.00) | Skills and tools for the Environmental Scientist role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-22 | Automated fetch (Claude Code) |
-| O*NET — Data Scientists (15-2051.00) | Skills and tools for the Data Scientist role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Statisticians (15-2041.00) | Skills and tools for the Statistician role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Operations Research Analysts (15-2031.00) | Skills and tools for the Operations Research Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Web Developers (15-1254.00) | Skills and tools for the Web Developer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Database Administrators (15-1242.00) | Skills and tools for the Database Administrator role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Information Security Analysts (15-1212.00) | Skills and tools for the Information Security Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Computer Systems Analysts (15-1211.00) | Skills and tools for the Computer Systems Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Electrical Engineers (17-2071.00) | Skills and tools for the Electrical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Industrial Engineers (17-2112.00) | Skills and tools for the Industrial Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Chemical Engineers (17-2041.00) | Skills and tools for the Chemical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Aerospace Engineers (17-2011.00) | Skills and tools for the Aerospace Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Surveyors (17-1022.00) | Skills and tools for the Surveyor role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Environmental Engineers (17-2081.00) | Skills and tools for the Environmental Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Bioengineers and Biomedical Engineers (17-2031.00) | Skills and tools for the Biomedical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Urban and Regional Planners (19-3051.00) | Skills and tools for the Urban and Regional Planner role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Hydrologists (19-2043.00) | Skills and tools for the Hydrologist role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Management Analysts (13-1111.00) | Skills and tools for the Management Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Budget Analysts (13-2031.00) | Skills and tools for the Budget Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Financial Risk Specialists (13-2054.00) | Skills and tools for the Financial Risk Specialist role (O*NET says its other sections are still being collected) | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Actuaries (15-2011.00) | Skills and tools for the Actuary role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Market Research Analysts and Marketing Specialists (13-1161.00) | Skills and tools for the Market Research Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
-| O*NET — Logisticians (13-1081.00) | Skills and tools for the Logistician role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); **not yet checked by Jawad in a browser** |
+| O*NET — Data Scientists (15-2051.00) | Skills and tools for the Data Scientist role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title, code and mathematics score checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Statisticians (15-2041.00) | Skills and tools for the Statistician role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title, code and mathematics score checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Operations Research Analysts (15-2031.00) | Skills and tools for the Operations Research Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Web Developers (15-1254.00) | Skills and tools for the Web Developer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Database Administrators (15-1242.00) | Skills and tools for the Database Administrator role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Information Security Analysts (15-1212.00) | Skills and tools for the Information Security Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Computer Systems Analysts (15-1211.00) | Skills and tools for the Computer Systems Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Electrical Engineers (17-2071.00) | Skills and tools for the Electrical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Industrial Engineers (17-2112.00) | Skills and tools for the Industrial Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Chemical Engineers (17-2041.00) | Skills and tools for the Chemical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Aerospace Engineers (17-2011.00) | Skills and tools for the Aerospace Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Surveyors (17-1022.00) | Skills and tools for the Surveyor role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Environmental Engineers (17-2081.00) | Skills and tools for the Environmental Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Bioengineers and Biomedical Engineers (17-2031.00) | Skills and tools for the Biomedical Engineer role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Urban and Regional Planners (19-3051.00) | Skills and tools for the Urban and Regional Planner role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Hydrologists (19-2043.00) | Skills and tools for the Hydrologist role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Management Analysts (13-1111.00) | Skills and tools for the Management Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Budget Analysts (13-2031.00) | Skills and tools for the Budget Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Financial Risk Specialists (13-2054.00) | Skills and tools for the Financial Risk Specialist role (O*NET says its other sections are still being collected) | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Actuaries (15-2011.00) | Skills and tools for the Actuary role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title, code and mathematics score checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Market Research Analysts and Marketing Specialists (13-1161.00) | Skills and tools for the Market Research Analyst role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
+| O*NET — Logisticians (13-1081.00) | Skills and tools for the Logistician role | CC BY 4.0, attribution required | 2026-10-06 / 2026-10-24 | Automated fetch (Claude Code); title and code checked by Jawad in a browser, 2026-10-24 |
 
 **Trend signal**
 
@@ -129,6 +135,9 @@ Checked and **not used**: UCI Air Quality (its page says research use only), Nat
 - For thinking skills (like critical thinking or mathematics), O*NET gives a score from 0 to 100. We turn it into 1 to 5: 70 or more = 5, 60s = 4, 50s = 3, 40s = 2, below 40 = 1. In 4 cases (all in the first 8 roles) we raised mathematics or problem solving by one step, and we mark those as team estimates. The 22 newer roles use the rule exactly.
 - For tools (like Excel, SQL or GIS), O*NET only says the tool is used, not how important it is. So every tool importance is a team estimate.
 - Whether a skill is "required" or "optional" is also our own choice.
+- **Team estimates, not source data:** tool importances, required/optional flags, the inclusion rules (which O*NET skills a role gets: thinking skills only with an O*NET score of 50 or more, Attention to Detail only with a Work Style score of 100) and the SDG links and reasons.
+
+**Limited coverage** (fewer of our 20 skills fit these roles): `financial_analyst` and `financial_risk_specialist` (O*NET has not yet published their skills data); `information_security_analyst` and `logistician` (our 20 skills lack their main tools).
 
 **Trend signals.**
 - **How a signal is made:** for 12 of our 20 skills there is a clear GitHub topic. For each one, we count the new GitHub repositories with that topic in the last 30 days and compare them with the 30 days before. More than 15% up is "rising", more than 15% down is "falling", anything else is "stable". If a request fails, the result is "unknown". Each result is saved as a dated snapshot.
@@ -155,7 +164,7 @@ Checked and **not used**: UCI Air Quality (its page says research use only), Nat
 
 **Planned, not implemented:**
 - Connecting our cached trend snapshots to the app's `/trends` route.
-- Putting the 30-role data into the app. Our data has 30 roles; the backend's cached copy and the deployed app still have the first 8.
+- Putting the 30-role data into the app. The 30 roles are prepared and validated on `feat/jawad-30-roles`; the deployed app still shows the first 8 until Rehan's integration testing and a Replit Republish.
 
 ---
 
@@ -166,13 +175,14 @@ Checked and **not used**: UCI Air Quality (its page says research use only), Nat
 - **Cached, not live.** Our trend data is 12 saved snapshots from 2026-10-21 and 2026-10-22. The standalone `services/trends` labels them "cached" with their dates. Nothing is refreshed live in the demo.
 - **Trends are not in the app.** The deployed `/api/v1/trends` returns placeholder data labelled `fixture`. Our snapshots can only be shown standalone, from `services/trends`.
 - **App output not fully checked.** We checked only the deployed GET endpoints. Matching, roadmap and project outputs come from POST endpoints we did not call, so app roadmap hours are not confirmed. Our hour figures are standalone.
-- **30 roles and 20 skills in our data, 8 in the app.** The 22 newer roles are not in the app yet. They have no portfolio projects, and some of their skills have no learning resource yet (the roadmap says so).
-- **O*NET is US-based.** It describes typical requirements in the US, not the needs of a specific employer or country. For Financial Analysts and Financial Risk Specialists, O*NET says data collection is still underway, so those roles use only O*NET's tools and work-styles data.
-- **Team estimates.** These are our own choices, not source data: all tool importances, the required/optional split, 4 raised thinking-skill scores, learning hours where the provider gives none, all project hours, the SDG links and reasons, the 15% trend threshold, and the scenario multipliers (±10% moderate, ±25% fast).
+- **30 roles prepared, 8 live.** The 30-role dataset is prepared and validated but not merged; the deployed app still shows the first 8 roles. The 22 newer roles are not in the app yet. They have no portfolio projects, and some of their skills have no learning resource yet (the roadmap says so).
+- **O*NET is US-based.** It describes typical requirements in the US, not the needs of a specific employer or country.
+- **Limited coverage** (fewer of our 20 skills fit these roles): `financial_analyst` and `financial_risk_specialist` (O*NET has not yet published their skills data); `information_security_analyst` and `logistician` (our 20 skills lack their main tools).
+- **Team estimates.** These are our own choices, not source data: all tool importances, the required/optional split, the rules for which O*NET skills a role includes, 4 raised thinking-skill scores, learning hours where the provider gives none, all project hours, the SDG links and reasons, the 15% trend threshold, and the scenario multipliers (±10% moderate, ±25% fast).
 - **Licences we only link to:**
   - CS50x is CC BY-NC-SA 4.0 (non-commercial). Jawad checked its Week 0 to Week 10 (11 weeks) in a browser on 2026-10-22. It states no hours, so its 110 h stays a team estimate.
   - The QGIS Training Manual's page footer names no licence ("© Copyright 2002-now, QGIS project").
   - Onshape's CAD course is under Onshape's own terms of use.
   - For all three, we link only and never copy the material.
-- **Not checked by Jawad in a browser:** every source marked "Automated fetch" in the tables above, including all 30 O*NET pages (the 22 added on 2026-10-24 were fetched by Claude Code only), 7 learning resources and every project dataset except UCI Concrete. These were checked by automated fetches only.
+- **Not checked by Jawad in a browser:** every source marked "Automated fetch" in the tables above, including the first 8 O*NET pages, the skill scores and tool lists of the 22 newer O*NET pages (only their titles, codes and 3 mathematics scores were checked by Jawad, on 2026-10-24), 7 learning resources and every project dataset except UCI Concrete. These were checked by automated fetches only.
 - **No hiring prediction.** Scores are a skill-alignment estimate (`profile_alignment_estimate`), not a chance of getting hired.
