@@ -44,14 +44,56 @@ def test_all_thirty_roles_are_verified_and_unique():
     assert all(re.fullmatch(r"[a-z]+(_[a-z]+)*", i) for i in ids)
 
 
-def test_first_eight_roles_are_byte_identical_to_the_base():
-    # base = feat/jawad-data-fixes @ 9817054, the commit this branch started from
-    base = subprocess.run(["git", "show", "98170543e1210c57d21d3f19d96ab44247810ea1:data/roles.json"],
+def _git_roles(commit):
+    return subprocess.run(["git", "show", f"{commit}:data/roles.json"],
                           cwd=ROOT, capture_output=True, check=True).stdout.replace(b"\r\n", b"\n")
+
+
+def _record_bytes(text, role_id):
+    """The exact text of one role record ("  {" ... "  }") in roles.json."""
+    start = text.index(b'    "role_id": "%s",' % role_id.encode()) - len(b"  {\n")
+    return text[start: text.index(b"\n  }", start) + len(b"\n  }")]
+
+
+# Approved exception: public_health_analyst was rebuilt on 2026-10-24 with the 22-role
+# O*NET rule ("Option C", approved by Rehan and Hussain), so it is no longer byte-identical.
+APPROVED_REBUILDS = {"public_health_analyst"}
+
+
+def test_first_eight_roles_are_byte_identical_to_the_base():
+    # base = feat/jawad-data-fixes @ 9817054, where the 8 original roles were last changed
+    base = _git_roles("98170543e1210c57d21d3f19d96ab44247810ea1")
     now = (ROOT / "data" / "roles.json").read_bytes().replace(b"\r\n", b"\n")
-    old_records = base[: base.rindex(b"\n]")]  # everything before the closing bracket
-    assert now.startswith(old_records + b",\n"), "an old role record changed"
-    assert json.loads(now)[:8] == json.loads(base)
+    assert [r["role_id"] for r in json.loads(now)[:8]] == [r["role_id"] for r in json.loads(base)]
+    for r in json.loads(base):
+        if r["role_id"] in APPROVED_REBUILDS:
+            continue
+        assert _record_bytes(now, r["role_id"]) == _record_bytes(base, r["role_id"]), r["role_id"]
+    assert {r["role_id"] for r in json.loads(base)} - APPROVED_REBUILDS == set(ORIGINAL_4 + ADDED_4) - {"public_health_analyst"}
+
+
+def test_public_health_analyst_rebuilt_with_the_22_role_rule():
+    ph = get_role("public_health_analyst")
+    got = {s["skill_id"]: (s["importance"], s["required"]) for s in ph["required_skills"]}
+    # O*NET 19-1041.00 Details, fetched 2026-10-24: every catalog cognitive skill scoring 50 or more
+    onet_ge50 = {"critical_thinking": 81, "complex_problem_solving": 81, "science": 78, "systems_analysis": 75, "mathematics": 69}
+    bucket = lambda x: 5 if x >= 70 else 4 if x >= 60 else 3
+    for sid, score in onet_ge50.items():
+        assert got.get(sid) == (bucket(score), True), sid  # present, bucket-derived, required (bucket >= 4)
+    assert {"complex_problem_solving", "science", "systems_analysis"} <= set(got)
+    assert "attention_to_detail" not in got and "programming" not in got  # Work Style 90; Programming 16
+    assert got["python"][1] is False and got["sql"][1] is False
+    assert ph["skills_coverage"] == "limited" and "Biology (82)" in ph["notes"] and "team estimates" in ph["notes"]
+
+
+def test_every_other_role_record_is_unchanged_since_7c17db1():
+    base = _git_roles("7c17db1794c4ae7d196f739eaf0dda6aa552d6c7")
+    now = (ROOT / "data" / "roles.json").read_bytes().replace(b"\r\n", b"\n")
+    ids = [r["role_id"] for r in json.loads(base)]
+    assert ids == [r["role_id"] for r in json.loads(now)]
+    for rid in ids:
+        if rid not in APPROVED_REBUILDS:
+            assert _record_bytes(now, rid) == _record_bytes(base, rid), rid
 
 
 def test_every_role_has_four_skills_a_required_one_and_its_own_onet_source():
