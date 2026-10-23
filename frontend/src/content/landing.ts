@@ -37,8 +37,23 @@ export const JOURNEY: JourneyStep[] = [
   { kind: 'trends', title: 'Dated signals', body: 'How many new GitHub projects use each skill, with the source and dates. Developer activity, not job demand.' },
   { kind: 'roles', title: 'Roles that fit', body: 'Alignment estimates with matched skills, gaps and a caveat beside every score.' },
   { kind: 'path', title: 'A path with hours', body: 'Learning steps in order, with hours, and projects that show the skill.' },
-  { kind: 'sdg', title: 'Impact you can name', body: 'Every role and skill tied to the UN Sustainable Development Goals, with reasons.' },
+  { kind: 'sdg', title: 'Impact you can name', body: 'Built for UN Goal 4, Quality Education, and four goals that depend on it.' },
 ]
+
+/** The SDGs of our domain (Aiversecity, Future-Ready Workforce). Icons are the official UN web set in public/sdg. */
+export type DomainSdg = { goal: number; name: string; line: string }
+export const DOMAIN_SDGS: { main: DomainSdg; related: DomainSdg[] } = {
+  main: { goal: 4, name: 'Quality Education', line: 'Skills for decent jobs (target 4.4) and lifelong learning (4.3), through personal reskilling paths built from free or low-cost courses.' },
+  related: [
+    { goal: 8, name: 'Decent Work and Economic Growth', line: 'Matches students to future-ready roles (targets 8.2, 8.5).' },
+    { goal: 9, name: 'Industry, Innovation and Infrastructure', line: 'Skills for technology- and AI-driven industries.' },
+    { goal: 5, name: 'Gender Equality', line: 'Matching never asks for or uses gender.' },
+    { goal: 10, name: 'Reduced Inequalities', line: 'Ranking never uses age or family background. Courses are free or low-cost.' },
+  ],
+}
+export const SDG_SOURCE = 'https://www.un.org/sustainabledevelopment'
+export const UN_DISCLAIMER =
+  'The content of this publication has not been approved by the United Nations and does not reflect the views of the United Nations or its officials or Member States.'
 
 export const CINEMA = {
   intro: 'One profile. Every role compared.',

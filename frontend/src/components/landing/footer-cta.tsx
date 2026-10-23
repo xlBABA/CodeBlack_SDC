@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { Link } from 'react-router'
 import { BrandMark, Wordmark } from '@/components/brand'
 import { CharText } from '@/components/page/char-text'
-import { FOOTER_LINE } from '@/content/landing'
+import { FOOTER_LINE, SDG_SOURCE, UN_DISCLAIMER } from '@/content/landing'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HeroCtas } from './hero-ctas'
@@ -47,6 +47,13 @@ export function FooterCta() {
             </Link>
           </span>
         </div>
+        <p className="mt-4 text-left text-xs text-on-deep/70">
+          SDG icons from the{' '}
+          <a href={SDG_SOURCE} target="_blank" rel="noreferrer" className="font-semibold text-on-deep underline underline-offset-2">
+            United Nations Sustainable Development Goals
+          </a>
+          . {UN_DISCLAIMER}
+        </p>
       </div>
     </footer>
   )

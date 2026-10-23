@@ -10,7 +10,7 @@ function Panel({ i }: { i: number }) {
   return (
     <article
       data-panel
-      className="glass relative grid h-full w-[min(86vw,1020px)] flex-none grid-rows-[auto_minmax(0,1fr)] gap-[clamp(16px,2.6vw,40px)] overflow-hidden rounded-card p-[clamp(20px,min(3vw,4.5svh),40px)] md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:grid-rows-1 md:items-center"
+      className="glass relative grid h-full w-[172vw] flex-none grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] items-center gap-[clamp(16px,2.6vw,40px)] overflow-hidden rounded-card p-[clamp(20px,min(3vw,4.5svh),40px)] md:w-[min(86vw,1020px)]"
     >
       <span data-ghost aria-hidden className="pointer-events-none absolute -right-6 -bottom-16 text-[clamp(9rem,20vw,18rem)] leading-none font-extrabold tracking-[-0.06em] text-foreground opacity-[0.04]">
         0{i + 1}
@@ -26,7 +26,7 @@ function Panel({ i }: { i: number }) {
           {s.body}
         </p>
       </div>
-      <div data-photo className="relative min-h-0 rounded-tile bg-solid p-4 shadow-card max-md:overflow-hidden md:p-5">
+      <div data-photo className="relative rounded-tile bg-solid p-4 shadow-card md:p-5">
         <div data-par>
           <JourneyArt kind={s.kind} />
         </div>
@@ -35,11 +35,15 @@ function Panel({ i }: { i: number }) {
   )
 }
 
+const PHOTO_FROM = { opacity: 0, scale: 0.82, rotation: -8, y: 60 }
+const PHOTO_TO = { opacity: 1, scale: 1, rotation: 0, y: 0, duration: 0.9, ease: 'back.out(1.4)' }
+
 /**
  * Five steps on a horizontal track, at every screen size: the section pins and scrolls
  * sideways (Lando/Mango technique), each panel's parts enter as it slides in
- * (containerAnimation) and its art drifts against the track. Widths and distances are
- * functions, so ScrollTrigger re-measures them on every resize and orientation change.
+ * (containerAnimation) and its art drifts against the track. On phones a panel is two
+ * screens wide, text then art, so neither is squeezed. Widths and distances are functions,
+ * so ScrollTrigger re-measures them on every resize and orientation change.
  * Only reduced motion gets a plain vertical list.
  */
 export function Journey() {
@@ -51,7 +55,8 @@ export function Journey() {
       if (reduced) return
       const mm = gsap.matchMedia(root.current!)
       mm.add({ wide: '(min-width: 768px)', narrow: 'not all and (min-width: 768px)' }, (ctx) => {
-        const drift = ctx.conditions?.wide ? '2.5rem' : '0.75rem'
+        const wide = ctx.conditions?.wide
+        const drift = wide ? '2.5rem' : '0.75rem'
         const track = root.current!.querySelector<HTMLElement>('[data-track]')!
         const distance = () => track.scrollWidth - innerWidth
         const slide = gsap.to(track, {
@@ -63,12 +68,15 @@ export function Journey() {
 
         gsap.utils.toArray<HTMLElement>('[data-panel]').forEach((panel, i) => {
           const trigger = i === 0 ? { trigger: root.current, start: 'top 60%', once: true } : { trigger: panel, containerAnimation: slide, start: 'left 70%', once: true }
-          gsap
+          const photo = panel.querySelector('[data-photo]')
+          const tl = gsap
             .timeline({ scrollTrigger: trigger })
             .fromTo(panel.querySelector('[data-circle]'), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, ease: 'back.out(1.6)' }, 0)
             .fromTo(panel.querySelectorAll('.split-ch'), { yPercent: 115 }, { yPercent: 0, duration: 0.7, stagger: 0.025, ease: 'expo.out' }, 0.1)
-            .fromTo(panel.querySelector('[data-photo]'), { opacity: 0, scale: 0.82, rotation: -8, y: 60 }, { opacity: 1, scale: 1, rotation: 0, y: 0, duration: 0.9, ease: 'back.out(1.4)' }, 0.2)
             .fromTo(panel.querySelector('[data-note]'), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out' }, 0.45)
+          // on phones the art is a screen further along, so it enters on its own
+          if (wide) tl.fromTo(photo, PHOTO_FROM, PHOTO_TO, 0.2)
+          else gsap.fromTo(photo, PHOTO_FROM, { ...PHOTO_TO, scrollTrigger: { trigger: photo, containerAnimation: slide, start: 'left 85%', once: true } })
           const parallax = { trigger: panel, containerAnimation: slide, start: 'left right', end: 'right left', scrub: true }
           gsap.fromTo(panel.querySelector('[data-par]'), { x: `-${drift}` }, { x: drift, ease: 'none', scrollTrigger: parallax })
           gsap.fromTo(panel.querySelector('[data-ghost]'), { xPercent: 18 }, { xPercent: -18, ease: 'none', scrollTrigger: parallax })
