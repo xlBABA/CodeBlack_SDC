@@ -244,6 +244,12 @@ def test_glm_timeout_or_network_failure_falls_back_to_manual_review(client: Test
 
 
 def test_malformed_glm_json_falls_back_to_manual_review_not_a_crash(client: TestClient):
+    """Milestone 12C-8E: this payload has no usable field anywhere (a
+    garbage top-level key, and a 'skills' value that isn't even a list)
+    — after normalization it cleans down to a totally empty extraction,
+    which is treated the same as an outright schema failure (never a
+    falsely-reassuring "ok" with a blank draft and no text to fall back
+    on) — see _is_effectively_empty."""
     with patch(
         "app.services.cv_extraction_service.extract_cv_fields",
         return_value=GlmExtractionResult(raw_json={"this_is": "not the expected shape at all", "skills": "not a list"}),
@@ -253,7 +259,23 @@ def test_malformed_glm_json_falls_back_to_manual_review_not_a_crash(client: Test
     assert response.status_code == 200
     body = response.json()
     assert body["data"]["status"] == "manual_review"
-    assert "did not match the expected format" in " ".join(body["warnings"])
+    assert "did not contain any usable fields" in " ".join(body["warnings"])
+
+
+def test_glm_output_with_no_recognizable_fields_at_all_falls_back_to_manual_review(client: TestClient):
+    """An empty JSON object: syntactically valid, schema-valid (every
+    field is Optional/defaults empty), but contains nothing at all —
+    must still degrade to manual_review, not a hollow "ok"."""
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json={}),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "manual_review"
+    assert body["data"]["extracted_text_preview"] == VALID_CV_TEXT
 
 
 def test_glm_output_with_only_unexpected_extra_keys_is_still_usable(client: TestClient):
@@ -270,10 +292,14 @@ def test_glm_output_with_only_unexpected_extra_keys_is_still_usable(client: Test
     assert response.json()["data"]["status"] == "ok"
 
 
-def test_skills_items_that_are_plain_strings_instead_of_objects_fall_back_to_manual_review(client: TestClient):
+def test_legacy_plain_string_skill_entries_are_isolated_not_fatal(client: TestClient):
     """Milestone 11E changed skills from `list[str]` to a list of
-    {name, evidence} objects. A GLM deployment still answering in the
-    old plain-string shape must degrade safely, not crash."""
+    {name, evidence} objects. Milestone 12C-8E: a real GLM deployment
+    answering in the old plain-string shape for some/all skills must no
+    longer discard the ENTIRE extraction — each plain-string skill is
+    normalized to {name, evidence: None} (never inventing a quote that
+    was never given) and goes through the normal "missing evidence"
+    review path, exactly like every other field GLM got right."""
     glm_json = {**FAKE_GLM_JSON, "skills": ["Python", "SQL"]}
     with patch(
         "app.services.cv_extraction_service.extract_cv_fields",
@@ -282,7 +308,188 @@ def test_skills_items_that_are_plain_strings_instead_of_objects_fall_back_to_man
         response = _post_cv(client, VALID_PDF)
 
     assert response.status_code == 200
-    assert response.json()["data"]["status"] == "manual_review"
+    body = response.json()
+    assert body["data"]["status"] == "ok"
+    draft = body["data"]["draft"]
+    assert draft["name"] == "Jane Student"  # the rest of the extraction survives intact
+    assert draft["mapped_skills"] == []
+    assert draft["unmapped_skills"] == []
+    assert {r["name"] for r in draft["skills_requiring_review"]} == {"Python", "SQL"}
+    assert draft["suggested_profile"]["skills"] == []
+
+
+# --- Milestone 12C-8E: isolating malformed entries, never a wholesale failure
+
+
+def test_one_malformed_skill_entry_is_dropped_while_valid_skills_still_extract(client: TestClient):
+    """The core regression test for the production bug: ONE bad skill
+    entry (evidence of the wrong type) must not take down the whole
+    response — every other valid skill still gets mapped."""
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "skills": [
+            {"name": "Python", "evidence": "Python"},
+            {"name": "Broken", "evidence": ["not", "a", "string"]},  # malformed
+            {"name": "SQL", "evidence": "SQL"},
+        ],
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "ok"
+    draft = body["data"]["draft"]
+    assert {s["skill_id"] for s in draft["mapped_skills"]} == {"python", "sql"}
+    # The malformed entry's name survives (evidence alone was dropped, not invented)
+    # and correctly lands in skills_requiring_review for lack of evidence.
+    assert any(r["name"] == "Broken" for r in draft["skills_requiring_review"])
+
+
+def test_one_malformed_certification_entry_is_dropped_while_rest_of_extraction_survives(client: TestClient):
+    """Requirement 7 applies beyond skills too: a malformed entry in any
+    list field is isolated, not fatal to the whole response."""
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "certifications": [
+            {"name": "AWS Certified", "issuer": "Amazon", "year": "2025"},
+            {"issuer": "Missing Name Inc"},  # malformed: "name" is required
+        ],
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "ok"
+    draft = body["data"]["draft"]
+    assert [c["name"] for c in draft["certifications"]] == ["AWS Certified"]
+    assert {s["skill_id"] for s in draft["mapped_skills"]} == {"python", "sql"}  # unaffected
+
+
+def test_omitted_optional_top_level_fields_are_not_fatal(client: TestClient):
+    """GLM may simply not include a key at all (vs. an explicit null) for
+    a section the CV lacks — this must behave exactly like an empty list."""
+    glm_json = {
+        "name": "Jane Student",
+        "skills": [{"name": "Python", "evidence": "Python"}],
+        # summary, education, projects, experience, certifications: all omitted entirely
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "ok"
+    draft = body["data"]["draft"]
+    assert draft["summary"] is None
+    assert draft["education"] == []
+    assert draft["projects"] == []
+    assert draft["experience"] == []
+    assert draft["certifications"] == []
+    assert {s["skill_id"] for s in draft["mapped_skills"]} == {"python"}
+
+
+def test_explicit_null_lists_are_treated_as_empty_not_fatal(client: TestClient):
+    """GLM may send JSON `null` for a section instead of `[]` or omitting
+    the key — must normalize to empty, never crash the whole response."""
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "education": None,
+        "projects": None,
+        "experience": None,
+        "certifications": None,
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "ok"
+    draft = body["data"]["draft"]
+    assert draft["education"] == []
+    assert draft["projects"] == []
+    assert draft["experience"] == []
+    assert draft["certifications"] == []
+    # Skills (a separate top-level field, untouched by this test) still extract normally.
+    assert {s["skill_id"] for s in draft["mapped_skills"]} == {"python", "sql"}
+
+
+def test_null_skills_list_is_treated_as_empty_not_fatal(client: TestClient):
+    glm_json = {**FAKE_GLM_JSON, "skills": None}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "ok"  # name/summary/projects still present
+    draft = body["data"]["draft"]
+    assert draft["mapped_skills"] == []
+    assert draft["unmapped_skills"] == []
+    assert draft["skills_requiring_review"] == []
+
+
+def test_skill_with_overlong_evidence_keeps_the_name_and_requests_manual_review(client: TestClient):
+    """An evidence quote that exceeds even the widened schema bound is
+    dropped (never truncated/invented) — the skill's name survives and
+    is routed to skills_requiring_review, not the whole response."""
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "skills": [{"name": "Python", "evidence": "Python " * 100}],  # far over the bound
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["status"] == "ok"
+    draft = body["data"]["draft"]
+    assert draft["mapped_skills"] == []
+    assert any(r["name"] == "Python" for r in draft["skills_requiring_review"])
+
+
+def test_diagnostic_log_never_includes_raw_cv_text_or_evidence(client: TestClient, caplog):
+    """Requirement 4: a dropped malformed entry logs only safe loc/type
+    diagnostics — never the actual CV text, evidence quotes, or any
+    other field value from the request, even though a drop-and-log path
+    is genuinely exercised here (a certification missing its required
+    "name", with a secret-looking value in a different field)."""
+    secret_text = "SuperSecretStudentNameZZZ999 confidential evidence snippet"
+    glm_json = {
+        "name": "Jane",
+        "skills": [{"name": "Python", "evidence": "Python"}],
+        "certifications": [{"issuer": secret_text}],  # missing required "name" -> dropped + logged
+    }
+    with caplog.at_level("INFO"):
+        with patch(
+            "app.services.cv_extraction_service.extract_cv_fields",
+            return_value=GlmExtractionResult(raw_json=glm_json),
+        ):
+            response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    log_text = caplog.text
+    assert "certifications" in log_text  # the drop was actually logged, not silently skipped
+    assert secret_text not in log_text
+    assert VALID_CV_TEXT not in log_text
 
 
 # --- Evidence validation (Milestone 11E) ------------------------------------

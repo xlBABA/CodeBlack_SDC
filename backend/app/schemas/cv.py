@@ -63,7 +63,17 @@ class GlmSkillEntry(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     name: str = Field(max_length=200)
-    evidence: str | None = Field(default=None, max_length=300)
+    # Milestone 12C-8E: widened from 300 — the prompt asks for a "short"
+    # quote but gives GLM no hard character limit, and a real model's
+    # idea of "short" can run a little longer than one line. This is a
+    # bound, not a trust boundary: an overlong-but-genuine quote is still
+    # independently substring-checked against the actual CV text later
+    # (cv_extraction_service._evidence_is_supported) before it can ever
+    # reach mapped_skills/unmapped_skills. Isolated per-item handling in
+    # cv_extraction_service._coerce_skill_entry means even a quote that
+    # still exceeds this bound only drops that one skill's evidence
+    # (never the whole extraction).
+    evidence: str | None = Field(default=None, max_length=500)
 
 
 class GlmCvExtraction(BaseModel):
