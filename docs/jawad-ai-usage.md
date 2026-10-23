@@ -1,6 +1,6 @@
 # AI usage — Jawad (data, catalog, trends, roadmaps, SDGs)
 
-Disclosure for the SDC Hackathon 2026 submission. Tool: **Claude Code** (Anthropic), run from my own prompts during the hacking window (2026-10-21 to 2026-10-22). Models: Claude Sonnet 5 at first, then Claude Opus 5.5 (the `Co-Authored-By` lines on each commit show which). I gave the instructions and rules, and approved each step before files were written. Claude Code ran the tests during development. I re-ran all suites myself with the single command below and saw them pass:
+Disclosure for the SDC Hackathon 2026 submission. Tool: **Claude Code** (Anthropic), run from my own prompts during the hacking window (2026-10-21 to 2026-10-24). Models: Claude Sonnet 5 at first, then Claude Opus 5.5 (the `Co-Authored-By` lines on each commit show which). I gave the instructions and rules, and approved each step before files were written. Claude Code ran the tests during development. I re-ran all suites myself with the single command below and saw them pass:
 
 ```
 C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.catalog.run_all_tests
@@ -31,7 +31,14 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | 1dce89f | Recorded that the statistics video's instructor (Monika Wahi) is confirmed in its YouTube description, as I checked in a browser (text only, in the existing `url_note`) | `data/resources.json`, `docs/source-register.md`, `docs/jawad-ai-usage.md` |
 | 2957c71 | Added Python to Data Analyst (importance 3, required; team estimate) after I found it listed on O*NET 15-2051.01, and replaced the wrong "NOT found" note | `data/roles.json`, `data/skills.json`, `docs/source-register.md`, `services/catalog/tests/test_catalog.py` |
 | 94d1719 | Added `data/skill_not_equivalent.json` (12 close-but-different skill pairs for Hussain's matcher) with a reason for each in the source register | `data/skill_not_equivalent.json`, `docs/source-register.md`, `services/catalog/tests/test_catalog.py` |
-| this commit | Corrected the O*NET licence from "Public domain" to CC BY 4.0 (attribution required), as the O*NET page footer says; updated the link-check report and this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| 76d6b7d | Corrected the O*NET licence from "Public domain" to CC BY 4.0 (attribution required), as the O*NET page footer says; updated the link-check report and this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| 5fd95c4 | Removed two inaccurate "decisions" bullets from this file | `docs/jawad-ai-usage.md` |
+| d4d3acd | Added the O*NET attribution line and the Data Analyst mapping note | `docs/source-register.md` |
+| 9817054 | Added 6 CV skill aliases (CAD, QGIS, Microsoft SQL Server, MySQL, PostgreSQL, Advanced Excel) and a no-collision test | `data/skills.json`, `services/catalog/tests/test_catalog.py` |
+| cbf3012 | Added 22 roles from O*NET to reach 30 roles. Claude Code fetched the O*NET pages, parsed the skill scores and tool lists, and wrote the records | `data/roles.json`, `data/skills.json` (source ids only), `docs/source-register.md` |
+| 9f7425a | SDG rows with reasons for the 22 new roles (team estimates, written by Claude Code) | `data/sdg_mappings.json` |
+| d5b0535 | Tests for the 30-role catalog; the two tests that hardcoded 8 roles now check 30 | `services/catalog/tests/test_catalog.py`, `services/roadmaps/tests/test_projects.py` |
+| this commit | 30-role section in the source register, link-check report (85 URLs, all OK), this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
@@ -51,6 +58,7 @@ It did not write any files in the repo.
 - Chose GitHub as the trend source, and set its rules: compare new repos in the last 30 days with the previous 30, use a >15% threshold, show `cached` or `unavailable` on failure (never fake `live`), and cover only skills with a clear topic.
 - Replaced the SEC project with the UCI credit-card dataset, kept the diabetes project with a data note, and accepted a tutorial as the CAD project's source.
 - Chose the 4 extra roles and confirmed their O*NET mappings: Accountant = "Accountants and Auditors", Environmental Scientist = "Environmental Scientists and Specialists, Including Health".
+- Gave the list of 22 candidate O*NET occupations and 5 alternates for the 30-role catalog (in my prompt). Claude Code checked each code and title, and replaced Epidemiologists (already used by Public Health Analyst) with the first alternate, Hydrologists.
 - Asked for Python to be added to Data Analyst after checking O*NET, and approved (with Hussain) the 12 `not_equivalent` skill pairs.
 - Dropped the UCI Air Quality dataset, because its page says it is for research use only and this repo is public under Apache-2.0. Required the replacement to be CC BY, CC0 or public domain, with the licence read from the dataset's own page.
 
@@ -76,10 +84,12 @@ The O*NET licence (CC BY 4.0, from the page footer) was read by an automated fet
 
 Not yet checked by me: the other new project datasets (including the UCI Beijing Multi-Site Air Quality dataset, CC BY 4.0) and the O*NET pages for the 4 newer roles.
 
+Also not yet checked by me in a browser (automated fetch by Claude Code on 2026-10-24 only): the 22 O*NET pages for the roles added in cbf3012 (summary, details and Software Skills CSV), and the UN SDG target wording used in their SDG reasons. Each O*NET URL is listed in `docs/source-register.md`.
+
 ## What is a team estimate (not from a source)
-- **Role importance numbers:** the cases where `roles.json` differs from O*NET's bucketed score (mostly mathematics), every tool-skill importance, and every `required: true/false` flag. See "Importance score methodology" in `docs/source-register.md`.
+- **Role importance numbers:** the cases where `roles.json` differs from O*NET's bucketed score (mostly mathematics), every tool-skill importance, and every `required: true/false` flag. For the 22 roles added on 2026-10-24, also which listed tools each role uses, and the rules for which cognitive skills are included (O*NET score 50 or more) and when attention_to_detail is included (Work Style impact 100). See "Importance score methodology" in `docs/source-register.md`.
 - **Learning hours** where the provider states none: VBA doc 1.5 h, MATLAB Onramp 3 h, MIT 18.05 112 h, SAS Programming 1 21 h, Onshape CAD Basics 7 h, MDN JavaScript 23 h, CS50x 110 h, GnuCash guide 12 h, QGIS manual 14 h.
 - **All project hours.** Each is the sum of per-milestone estimates.
-- **SDG mappings.** The SDG chosen for each role and skill, and its reason, are our own judgment.
+- **SDG mappings.** The SDG chosen for each role and skill, and its reason, are our own judgment. The 28 rows for the 22 new roles end with "Team estimate."
 - **Trend rules.** The 15% threshold, which skills get a GitHub topic, and the exclusion of 8 skills.
 - **Scenario multipliers** (±10% moderate, ±25% fast). These are Hussain's team assumptions, not forecasts.
