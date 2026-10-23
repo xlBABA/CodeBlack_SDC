@@ -15,9 +15,18 @@ from app.core.config import Settings, get_settings
 from app.main import app
 from app.services.role_catalog import RoleCatalogProvider
 
+# Milestone 13C-4: Jawad's catalog expanded from the original 8 verified
+# roles to the full 30-role target (TOTAL_TARGET_ROLES in matcher.py) —
+# the original 8 are unchanged, 22 new O*NET occupations were added.
 CACHED_ROLE_IDS = {
-    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
-    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    "accountant", "actuary", "aerospace_engineer", "biomedical_engineer", "budget_analyst",
+    "chemical_engineer", "civil_engineer", "computer_systems_analyst", "data_analyst",
+    "data_scientist", "database_administrator", "electrical_engineer", "environmental_engineer",
+    "environmental_scientist", "financial_analyst", "financial_risk_specialist", "hydrologist",
+    "industrial_engineer", "information_security_analyst", "logistician", "management_analyst",
+    "market_research_analyst", "mechanical_engineer", "operations_research_analyst",
+    "public_health_analyst", "software_developer", "statistician", "surveyor",
+    "urban_regional_planner", "web_developer",
 }
 OVERLAP_ROLE_IDS = {"data_analyst", "financial_analyst"}
 CACHED_ONLY_ROLE_IDS = {"mechanical_engineer", "public_health_analyst"}

@@ -14,9 +14,18 @@ from app.services.role_catalog_cached import (
     load_cached_roles,
 )
 
+# Milestone 13C-4: Jawad's catalog expanded from the original 8 verified
+# roles to the full 30-role target — the original 8 are unchanged, 22
+# new O*NET occupations were added.
 EXPECTED_ROLE_IDS = {
-    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
-    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    "accountant", "actuary", "aerospace_engineer", "biomedical_engineer", "budget_analyst",
+    "chemical_engineer", "civil_engineer", "computer_systems_analyst", "data_analyst",
+    "data_scientist", "database_administrator", "electrical_engineer", "environmental_engineer",
+    "environmental_scientist", "financial_analyst", "financial_risk_specialist", "hydrologist",
+    "industrial_engineer", "information_security_analyst", "logistician", "management_analyst",
+    "market_research_analyst", "mechanical_engineer", "operations_research_analyst",
+    "public_health_analyst", "software_developer", "statistician", "surveyor",
+    "urban_regional_planner", "web_developer",
 }
 
 
@@ -26,7 +35,7 @@ def test_loads_exactly_jawads_eight_canonical_roles():
     role_ids are unchanged, 4 new ones were added, none removed."""
     roles = load_cached_roles()
     assert {role.role_id for role in roles} == EXPECTED_ROLE_IDS
-    assert len(roles) == 8
+    assert len(roles) == 30  # Milestone 13C-4: the full 30-role catalog, up from 8
 
 
 def test_role_ids_and_skill_ids_are_unique():
@@ -111,10 +120,11 @@ def test_canonical_cached_role_ids_remain_unchanged():
 
     assert cached_ids == EXPECTED_ROLE_IDS
     assert cached_ids & fixture_ids == {"data_analyst", "financial_analyst"}
-    assert cached_ids - fixture_ids == {
-        "mechanical_engineer", "public_health_analyst",
-        "software_developer", "accountant", "civil_engineer", "environmental_scientist",
-    }
+    # Milestone 13C-4: the non-overlapping side now holds all 28
+    # non-fixture roles (30 total minus the 2 overlapping ones) —
+    # derived from EXPECTED_ROLE_IDS itself rather than re-listed, so
+    # this can never drift out of sync with it again.
+    assert cached_ids - fixture_ids == EXPECTED_ROLE_IDS - {"data_analyst", "financial_analyst"}
     assert fixture_ids - cached_ids == {"mechanical_design_engineer", "sustainability_coordinator"}
 
 

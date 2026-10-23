@@ -54,6 +54,146 @@
       "role_id": "environmental_scientist",
       "sdg_id": 12,
       "reason": "Tracking and reducing pollutants and hazardous materials supports SDG target 12.4 on the sound management of chemicals and wastes."
+    },
+    {
+      "role_id": "data_scientist",
+      "sdg_id": 9,
+      "reason": "O*NET describes this work as applying data mining, data modeling and machine learning to large datasets; building that analytic capability supports SDG target 9.5 (enhance scientific research and upgrade technological capabilities). Team estimate."
+    },
+    {
+      "role_id": "statistician",
+      "sdg_id": 17,
+      "reason": "Statisticians collect, organize and interpret numerical data to provide usable information (O*NET), the statistical capacity that SDG targets 17.18 (high-quality, timely and reliable data) and 17.19 (statistical capacity-building) call for. Team estimate."
+    },
+    {
+      "role_id": "operations_research_analyst",
+      "sdg_id": 8,
+      "reason": "O*NET describes this work as mathematical modeling and optimizing methods that help management decide, including optimal time, cost or logistics networks; that efficiency supports SDG target 8.2 (higher economic productivity through technological upgrading and innovation). Team estimate."
+    },
+    {
+      "role_id": "web_developer",
+      "sdg_id": 9,
+      "reason": "Web developers build the websites and web applications people use to reach information and services online, matching SDG target 9.c (increase access to information and communications technology). Team estimate."
+    },
+    {
+      "role_id": "database_administrator",
+      "sdg_id": 9,
+      "reason": "Database administrators keep databases reliable, scalable and secure (O*NET), part of the reliable digital infrastructure behind SDG target 9.1 (quality, reliable, sustainable and resilient infrastructure). Team estimate."
+    },
+    {
+      "role_id": "information_security_analyst",
+      "sdg_id": 9,
+      "reason": "O*NET says this role safeguards digital files and 'vital electronic infrastructure' against security risks, which keeps the infrastructure in SDG target 9.1 (quality, reliable, sustainable and resilient infrastructure) working. Team estimate."
+    },
+    {
+      "role_id": "computer_systems_analyst",
+      "sdg_id": 9,
+      "reason": "Computer systems analysts improve existing computer systems and solve data processing problems for organizations (O*NET), upgrading their technological capabilities as in SDG target 9.5. Team estimate."
+    },
+    {
+      "role_id": "electrical_engineer",
+      "sdg_id": 7,
+      "reason": "O*NET tasks for this occupation include developing systems that produce electricity from renewable sources (wind, solar, biofuels) and designing systems that minimize electric energy requirements, which is the work of SDG 7 (affordable and clean energy). Team estimate."
+    },
+    {
+      "role_id": "electrical_engineer",
+      "sdg_id": 9,
+      "reason": "Electrical engineers design and supervise the installation of electrical equipment and systems for commercial and industrial use, supporting SDG target 9.1 (reliable, resilient infrastructure). Team estimate."
+    },
+    {
+      "role_id": "industrial_engineer",
+      "sdg_id": 9,
+      "reason": "Industrial engineers design integrated systems for managing production processes, quality control and material flow (O*NET), supporting SDG target 9.4 (increased resource-use efficiency in industry). Team estimate."
+    },
+    {
+      "role_id": "industrial_engineer",
+      "sdg_id": 12,
+      "reason": "Better inventory control, logistics and material flow in production (O*NET) cuts wasted materials, matching SDG target 12.5 (substantially reduce waste generation). Team estimate."
+    },
+    {
+      "role_id": "chemical_engineer",
+      "sdg_id": 9,
+      "reason": "Chemical engineers design plant equipment and processes for manufacturing chemicals and products (O*NET), the industrial processes SDG target 9.4 asks to make cleaner and more resource-efficient. Team estimate."
+    },
+    {
+      "role_id": "chemical_engineer",
+      "sdg_id": 12,
+      "reason": "Designing how chemicals are manufactured and handled matches SDG target 12.4 (environmentally sound management of chemicals and wastes throughout their life cycle). Team estimate."
+    },
+    {
+      "role_id": "aerospace_engineer",
+      "sdg_id": 9,
+      "reason": "Aerospace engineers design, build and test aircraft and spacecraft and conduct applied research on materials (O*NET), the engineering research and innovation in SDG target 9.5. Team estimate."
+    },
+    {
+      "role_id": "surveyor",
+      "sdg_id": 11,
+      "reason": "Surveyors make exact measurements and determine property boundaries for construction and land evaluation (O*NET), the base data for SDG target 11.3 (sustainable human settlement planning and management). Team estimate."
+    },
+    {
+      "role_id": "surveyor",
+      "sdg_id": 9,
+      "reason": "Survey data on land shape, location and elevation is used for engineering and construction (O*NET), supporting SDG target 9.1 (quality, reliable infrastructure). Team estimate."
+    },
+    {
+      "role_id": "environmental_engineer",
+      "sdg_id": 6,
+      "reason": "O*NET describes this work as preventing, controlling and remediating environmental hazards, including waste treatment and pollution control, which matches SDG target 6.3 (improve water quality by reducing pollution and untreated wastewater). Team estimate."
+    },
+    {
+      "role_id": "environmental_engineer",
+      "sdg_id": 11,
+      "reason": "Waste treatment and pollution control technology reduce the environmental impact of cities, matching SDG target 11.6 (air quality and municipal and other waste management). Team estimate."
+    },
+    {
+      "role_id": "biomedical_engineer",
+      "sdg_id": 3,
+      "reason": "Biomedical engineers design and evaluate medical diagnostic and clinical equipment, prostheses and health care delivery systems (O*NET), directly supporting SDG 3 (good health and well-being). Team estimate."
+    },
+    {
+      "role_id": "urban_regional_planner",
+      "sdg_id": 11,
+      "reason": "Urban and regional planners develop comprehensive plans for the use of land and facilities in towns, cities and metropolitan areas (O*NET), the core of SDG target 11.3 (sustainable urbanization and settlement planning). Team estimate."
+    },
+    {
+      "role_id": "hydrologist",
+      "sdg_id": 6,
+      "reason": "Hydrologists produce the information used in water resource management decisions and promote conservation of water resources (O*NET), matching SDG target 6.5 (integrated water resources management). Team estimate."
+    },
+    {
+      "role_id": "hydrologist",
+      "sdg_id": 13,
+      "reason": "O*NET tasks include studying flood and drought risks and evaluating flood control planning and flood warning systems, which supports SDG target 13.1 (resilience to climate-related hazards and natural disasters). Team estimate."
+    },
+    {
+      "role_id": "management_analyst",
+      "sdg_id": 8,
+      "reason": "Management analysts study organizations and design systems and procedures to help them operate more efficiently and effectively (O*NET), supporting SDG target 8.2 (higher economic productivity). Team estimate."
+    },
+    {
+      "role_id": "budget_analyst",
+      "sdg_id": 16,
+      "reason": "Budget analysts examine budget estimates for completeness, accuracy and conformance with procedures and regulations (O*NET), which helps make institutions accountable and transparent as in SDG target 16.6. Team estimate."
+    },
+    {
+      "role_id": "financial_risk_specialist",
+      "sdg_id": 8,
+      "reason": "Financial risk specialists measure exposure to credit and market risk that threatens an organization's assets and recommend ways to limit it (O*NET), helping financial institutions stay strong as in SDG target 8.10. Team estimate."
+    },
+    {
+      "role_id": "actuary",
+      "sdg_id": 8,
+      "reason": "Actuaries forecast risk and set the insurance rates and cash reserves needed to pay future benefits (O*NET), supporting SDG target 8.10 (strengthen financial institutions and expand access to insurance and financial services). Team estimate."
+    },
+    {
+      "role_id": "market_research_analyst",
+      "sdg_id": 8,
+      "reason": "Market research analysts study customer needs and factors affecting product demand (O*NET), helping businesses plan products and stay productive, a part of SDG 8 (decent work and economic growth). Team estimate."
+    },
+    {
+      "role_id": "logistician",
+      "sdg_id": 12,
+      "reason": "O*NET says logisticians manage a product's entire life cycle, including distribution, delivery and final disposal of resources, which connects to SDG target 12.5 (reduce waste generation through prevention, reduction, recycling and reuse). Team estimate."
     }
   ],
   "skill_sdg_mappings": [

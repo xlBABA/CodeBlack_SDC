@@ -26,9 +26,34 @@ from app.services.matching_provider import FixtureMatchingProvider
 
 EMPTY_PROFILE = {"interests": [], "skills": [], "projects": []}
 SQL_PROFILE = {"interests": [], "skills": [{"skill_id": "sql", "name": "SQL"}], "projects": []}
+# Milestone 13C-4: data_analyst's own required skills minus the optional
+# "excel" and "sql" (kept deliberately unheld, matching the original
+# EMPTY_PROFILE-based test's intent of leaving at least one mandatory
+# skill genuinely missing) — needed because with 30 roles in the
+# catalog, an actually-empty profile's alphabetical tie-break no longer
+# guarantees data_analyst appears in a limit-bounded top-N response.
+# Verified empirically (see Milestone 13C-4 report) to rank data_analyst
+# #1 of 30 roles, comfortably inside any limit from 1 to 6.
+DATA_ANALYST_PARTIAL_PROFILE = {
+    "interests": [], "projects": [],
+    "skills": [
+        {"skill_id": sid, "name": sid}
+        for sid in ("critical_thinking", "mathematics", "complex_problem_solving",
+                    "data_visualization", "systems_analysis", "python")
+    ],
+}
+# Milestone 13C-4: Jawad's catalog expanded from the original 8 verified
+# roles to the full 30-role target — the original 8 are unchanged, 22
+# new O*NET occupations were added.
 CACHED_ROLE_IDS = {
-    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
-    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    "accountant", "actuary", "aerospace_engineer", "biomedical_engineer", "budget_analyst",
+    "chemical_engineer", "civil_engineer", "computer_systems_analyst", "data_analyst",
+    "data_scientist", "database_administrator", "electrical_engineer", "environmental_engineer",
+    "environmental_scientist", "financial_analyst", "financial_risk_specialist", "hydrologist",
+    "industrial_engineer", "information_security_analyst", "logistician", "management_analyst",
+    "market_research_analyst", "mechanical_engineer", "operations_research_analyst",
+    "public_health_analyst", "software_developer", "statistician", "surveyor",
+    "urban_regional_planner", "web_developer",
 }
 
 
@@ -341,9 +366,14 @@ def test_unknown_skill_is_interpreted_via_runpod_with_partial_credit(client: Tes
         "skills": [{"skill_id": "database_querying", "name": "Database Querying"}],
         "projects": [],
     }
+    # Milestone 13C-4: limit raised from 4 to 6 (the contract's max) —
+    # with only interpreted/partial sql credit and 30 roles now in the
+    # catalog, data_analyst ranks 6th rather than comfortably top-4 as
+    # it did among the original 8 roles (verified empirically; not a
+    # knife's-edge tie — rank 5 and 6 are a full point apart).
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
-        response = client.post("/api/v1/careers/match", json={"profile": profile, "limit": 4})
+        response = client.post("/api/v1/careers/match", json={"profile": profile, "limit": 6})
     finally:
         _clear_override()
 
@@ -671,7 +701,7 @@ def test_all_eight_roles_match_without_crashing_in_hussain_mode(monkeypatch):
 
         provider = get_matching_provider(settings)
         results = provider.match(StudentProfile(**EMPTY_PROFILE), roles, None, [])
-        assert len(results) == 8
+        assert len(results) == 30  # Milestone 13C-4: the full 30-role catalog, up from 8
         for match in results:
             assert 0.0 <= match.score <= 100.0
             assert 0.0 <= match.score_breakdown.prerequisites <= 100.0
@@ -681,10 +711,20 @@ def test_all_eight_roles_match_without_crashing_in_hussain_mode(monkeypatch):
 
 def test_optional_skills_never_appear_as_missing_in_hussain_mode_via_api(client: TestClient):
     """End-to-end through the real endpoint: data_analyst's optional
-    "excel" must never be presented as a mandatory missing-skill gap."""
+    "excel" must never be presented as a mandatory missing-skill gap.
+
+    Milestone 13C-4: uses DATA_ANALYST_PARTIAL_PROFILE, not EMPTY_PROFILE
+    — with the catalog now at 30 roles, an empty profile's alphabetical
+    score tie-break no longer guarantees data_analyst lands in a
+    limit=4 response (it previously did, by coincidence, among only 8
+    tied roles). The replacement profile still deliberately omits "sql"
+    (so a genuinely-missing required skill is still exercised) and
+    "excel" (optional, the actual thing under test)."""
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
-        response = client.post("/api/v1/careers/match", json={"profile": EMPTY_PROFILE, "limit": 4})
+        response = client.post(
+            "/api/v1/careers/match", json={"profile": DATA_ANALYST_PARTIAL_PROFILE, "limit": 4}
+        )
     finally:
         _clear_override()
 
@@ -921,11 +961,13 @@ def test_get_matching_provider_fixture_mode_still_returns_fixture_matching_provi
 # --- Milestone 6D-2A Extension: 8-role catalog regression tests ----------
 
 
-def test_matching_service_returns_top_6_of_8_cached_roles(db_session):
+def test_matching_service_returns_top_6_of_30_cached_roles(db_session):
     """MatchingService.match()'s existing matches[:request.limit] truncation,
-    unmodified by the catalog expansion, applied to the real 8-role
-    cached catalog — catalog_coverage.verified must report 8, not a
-    stale hardcoded 4."""
+    unmodified by the catalog expansion, applied to the real, now
+    30-role cached catalog — catalog_coverage.verified must report 30
+    (and, as of Milestone 13C-4, verified == total_target for the first
+    time: the project's long-standing 30-role target is now fully met,
+    not just declared)."""
     from app.schemas.matching import MatchRequest
     from app.services.matching_service import MatchingService
     from app.services.profile_service import ProfileService
@@ -942,7 +984,7 @@ def test_matching_service_returns_top_6_of_8_cached_roles(db_session):
     outcome = service.match(MatchRequest(profile=profile))
 
     assert len(outcome.payload.matches) == 6
-    assert outcome.payload.catalog_coverage.verified == 8
+    assert outcome.payload.catalog_coverage.verified == 30
     assert outcome.payload.catalog_coverage.total_target == 30
 
 
