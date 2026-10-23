@@ -57,14 +57,14 @@ export function LandingHeader({ ready, lenis }: { ready: boolean; lenis: RefObje
         <Link to="/" aria-label="Home" className="rounded-full">
           <Brand />
         </Link>
-        <nav aria-label="Sections" className="mx-auto hidden items-center gap-1 md:flex">
+        <nav aria-label="Sections" className="mx-auto hidden items-center gap-1 min-[900px]:flex">
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} onClick={(e) => jump(e, l.href)} className="rounded-full px-3.5 py-2 font-semibold text-muted-foreground transition-colors hover:bg-well hover:text-foreground">
               {l.label}
             </a>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
+        <div className="ml-auto flex items-center gap-2 min-[900px]:ml-0">
           <ThemeToggle />
           <Link
             to="/dashboard"
