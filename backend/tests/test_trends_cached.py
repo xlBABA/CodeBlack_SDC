@@ -134,7 +134,9 @@ def test_trends_cached_mode_filters_by_a_real_role_id(client: TestClient):
     signals = body["data"]["signals"]
     assert signals
     assert all("data_analyst" in s["role_ids"] for s in signals)
-    assert {s["skill_id"] for s in signals} <= {"sql", "data_visualization", "excel"}
+    # Milestone 13B-8: Jawad added "python" as a required data_analyst
+    # skill (roles.json), so its trend signal now carries this role_id too.
+    assert {s["skill_id"] for s in signals} <= {"sql", "data_visualization", "excel", "python"}
     assert body["data"]["source_status"] == "stale"
 
 

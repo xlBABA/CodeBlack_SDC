@@ -239,13 +239,18 @@ def test_loader_returns_only_the_inner_array_not_the_envelope(monkeypatch, tmp_p
     assert not isinstance(result, dict)
 
 
-# --- Not wired into production matching -------------------------------------
+# --- Wired into production matching (Milestone 13B-8) ----------------------
 
 
-def test_module_is_not_imported_by_careers_endpoint():
-    """This loader must not be wired into HussainMatchingProvider/
-    careers.py until Jawad's reviewed PR lands."""
+def test_module_is_now_wired_into_careers_endpoint():
+    """Milestone 13B-8: Jawad's real skill_not_equivalent.json has landed
+    and is reviewed, so this loader is now wired into
+    HussainMatchingProvider via careers.py's _get_shared_hussain_provider()
+    — see test_skill_exclusions_matching.py for the actual
+    enforcement/fallback/exact-match regression coverage. This test only
+    pins the wiring point itself: the loader's name must appear in
+    careers.py's namespace (previously asserted absent, before Jawad's
+    file existed)."""
     import app.api.v1.endpoints.careers as careers_module
 
-    assert "skill_not_equivalent_cached" not in vars(careers_module)
-    assert "load_skill_not_equivalent_pairs" not in vars(careers_module)
+    assert "load_skill_not_equivalent_pairs" in vars(careers_module)

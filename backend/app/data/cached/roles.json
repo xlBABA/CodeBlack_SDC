@@ -14,13 +14,14 @@
       { "skill_id": "data_visualization", "importance": 5, "required": true },
       { "skill_id": "systems_analysis", "importance": 3, "required": true },
       { "skill_id": "sql", "importance": 3, "required": true },
+      { "skill_id": "python", "importance": 3, "required": true },
       { "skill_id": "excel", "importance": 3, "required": false }
     ],
     "transferable_skills": [],
     "transferable_interests": [],
     "prerequisites": [],
     "evidence_ids": ["onet_15_2051_01"],
-    "notes": "O*NET has no exact 'Data Analyst' code; closest verified match is Business Intelligence Analysts (15-2051.01). SQL added from the occupation's full Technology Skills list (Database user interface and query software: Transact-SQL, PL/SQL) - not one of its highlighted 'Hot Technologies'. Python checked and NOT found anywhere in this occupation's technology skills, so it is deliberately not included."
+    "notes": "O*NET has no exact 'Data Analyst' code; closest verified match is Business Intelligence Analysts (15-2051.01). SQL added from the occupation's full Technology Skills list (Database user interface and query software: Transact-SQL, PL/SQL) - not one of its highlighted 'Hot Technologies'. Python is listed for this occupation under 'Object or component oriented development software' (https://www.onetonline.org/link/tt/15-2051.01/43232405, checked by Jawad in a browser on 2026-10-23) and is not marked as a Hot Technology. Its importance (3) and required flag (true) are team estimates, on the same basis as SQL."
   },
   {
     "role_id": "financial_analyst",

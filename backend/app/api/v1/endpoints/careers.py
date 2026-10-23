@@ -29,7 +29,8 @@ from app.services.matching_provider import FixtureMatchingProvider
 from app.services.matching_service import MatchingService
 from app.services.profile_service import ProfileService
 from app.services.role_catalog import FixtureRoleCatalog, RoleCatalogProvider
-from app.services.role_catalog_cached import CachedCatalogError, CachedRoleCatalog
+from app.services.role_catalog_cached import CachedCatalogError, CachedRoleCatalog, _load_json
+from app.services.skill_not_equivalent_cached import load_skill_not_equivalent_pairs
 from app.services.trend_provider import NullTrendProvider
 from app.services.trend_signal_provider import CachedTrendSignalProvider
 
@@ -79,6 +80,7 @@ router = APIRouter()
 # for the entire process lifetime.
 _shared_hussain_provider: HussainMatchingProvider | None = None
 _shared_hussain_provider_credentials: tuple[str, str] | None = None
+_shared_hussain_provider_catalog_mode: str | None = None
 _shared_hussain_provider_created_at: float = 0.0
 _SHARED_PROVIDER_MAX_AGE_SECONDS = 30 * 60  # 30 minutes — a deployment tuning choice, not a contract
 
@@ -87,18 +89,72 @@ def _current_runpod_credentials() -> tuple[str, str]:
     return (os.environ.get("RUNPOD_API_KEY", ""), os.environ.get("RUNPOD_ENDPOINT_ID", ""))
 
 
-def _get_shared_hussain_provider() -> HussainMatchingProvider:
-    global _shared_hussain_provider, _shared_hussain_provider_credentials, _shared_hussain_provider_created_at
+def _get_shared_hussain_provider(catalog_mode: str = "fixture") -> HussainMatchingProvider:
+    """Milestone 13B-9: `catalog_mode` now also gates staleness —
+    CATALOG_MODE=cached and CATALOG_MODE=fixture must never share one
+    cached instance, because the skills_catalogue below is only valid
+    for Jawad's real roles (see the real-data-only note further down).
+    In production CATALOG_MODE is a fixed deployment setting that never
+    changes mid-process, so this only matters for a test suite that
+    exercises both values against the same shared global within one
+    pytest session (e.g. test_matching_mode.py's full matrix)."""
+    global _shared_hussain_provider, _shared_hussain_provider_credentials
+    global _shared_hussain_provider_catalog_mode, _shared_hussain_provider_created_at
     now = time.monotonic()
     current_credentials = _current_runpod_credentials()
     stale = (
         _shared_hussain_provider is None
         or current_credentials != _shared_hussain_provider_credentials
+        or catalog_mode != _shared_hussain_provider_catalog_mode
         or (now - _shared_hussain_provider_created_at) >= _SHARED_PROVIDER_MAX_AGE_SECONDS
     )
     if stale:
-        _shared_hussain_provider = HussainMatchingProvider(result_model=RoleMatch)
+        # Milestone 13B-8: Jawad's skill_not_equivalent.json (optional —
+        # [] if it hasn't landed yet) tells HussainMatchingProvider's
+        # semantic-similarity path which skill pairs are related but NOT
+        # interchangeable (e.g. python/javascript), so RunPod embeddings
+        # never award partial credit for one when the other is required.
+        # Never touches SkillNormalizer's exact/alias matching (a separate
+        # code path) — an exact or aliased skill match is unaffected.
+        # Harmless to pass unconditionally (even under CATALOG_MODE=
+        # fixture): an inapplicable pair is just skipped with a warning
+        # by HussainMatchingProvider._applicable_pairs(), never an error.
+        try:
+            not_equivalent = load_skill_not_equivalent_pairs()
+        except CachedCatalogError as exc:
+            raise provider_unavailable("MatchingProvider (hussain)", str(exc)) from exc
+
+        # Milestone 13B-9: skills_catalogue is the real, full
+        # app/data/cached/skills.json skill list (skill_id/name/aliases),
+        # the same one cv_extraction_service.py already uses for CV
+        # parsing. Without this, HussainMatchingProvider.catalogue_from_roles()
+        # derives its catalogue purely from each role's required_skills
+        # and always sets aliases=[] — so a CV alias like "QGIS"/"CAD"/
+        # "Microsoft SQL Server" matched during CV upload would NOT be
+        # recognized by exact-match catalogue matching here, only by
+        # (optional, RunPod-dependent) semantic similarity.
+        #
+        # ONLY wired when CATALOG_MODE=cached (i.e. only alongside Jawad's
+        # real roles): CATALOG_MODE=fixture's placeholder catalog
+        # (app/services/role_catalog.py) has its own, unrelated fixture
+        # skill_ids — one of them, literally "cad", collides with the
+        # real catalog's new "CAD" alias for "cad_software" and makes
+        # SkillNormalizer raise "Ambiguous alias" at construction time.
+        # Fixture roles were never meant to share a skill namespace with
+        # Jawad's real catalog, so this stays scoped to CATALOG_MODE=
+        # cached rather than papering over that collision.
+        skills_catalogue: list[dict] | None = None
+        if catalog_mode == "cached":
+            try:
+                skills_catalogue = _load_json("skills.json")["skills"]
+            except (OSError, ValueError, KeyError) as exc:
+                raise provider_unavailable("MatchingProvider (hussain)", str(exc)) from exc
+
+        _shared_hussain_provider = HussainMatchingProvider(
+            result_model=RoleMatch, skills_catalogue=skills_catalogue, not_equivalent=not_equivalent
+        )
         _shared_hussain_provider_credentials = current_credentials
+        _shared_hussain_provider_catalog_mode = catalog_mode
         _shared_hussain_provider_created_at = now
     return _shared_hussain_provider
 
@@ -109,9 +165,11 @@ def reset_shared_hussain_provider_for_tests() -> None:
     circuit-breaker state, undoing the cross-request sharing this module
     intentionally introduces for production. Never called from
     application code."""
-    global _shared_hussain_provider, _shared_hussain_provider_credentials, _shared_hussain_provider_created_at
+    global _shared_hussain_provider, _shared_hussain_provider_credentials
+    global _shared_hussain_provider_catalog_mode, _shared_hussain_provider_created_at
     _shared_hussain_provider = None
     _shared_hussain_provider_credentials = None
+    _shared_hussain_provider_catalog_mode = None
     _shared_hussain_provider_created_at = 0.0
 
 
@@ -170,7 +228,7 @@ def get_matching_provider(settings: Settings = Depends(get_settings)) -> Matchin
         # Milestone 10B: the shared, process-lifetime instance (see
         # module-level comment above) — not a fresh one per request, so
         # its RunPod circuit-breaker actually persists across requests.
-        return _get_shared_hussain_provider()
+        return _get_shared_hussain_provider(settings.CATALOG_MODE)
 
     # ENABLE_FIXTURES=False signals "I expect real inference." No real
     # MatchingProvider implementation exists yet (Hussain's), so that case

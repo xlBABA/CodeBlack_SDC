@@ -1,17 +1,17 @@
-"""Milestone 12B-4/12B-5: strict loader/validator for a FUTURE,
-not-yet-delivered backend/app/data/cached/skill_not_equivalent.json file —
-Jawad's upcoming "these two skills are related but not equivalent"
-exclusion list for Hussain's semantic matcher
-(app.services.hussain_matching.backend_adapter.HussainMatchingProvider's
-`not_equivalent` constructor parameter).
+"""Milestone 12B-4/12B-5/13B-8: strict loader/validator for
+backend/app/data/cached/skill_not_equivalent.json — Jawad's "these two
+skills are related but not equivalent" exclusion list for Hussain's
+semantic matcher (app.services.hussain_matching.backend_adapter.
+HussainMatchingProvider's `not_equivalent` constructor parameter).
 
-SCOPE / RESTRICTIONS:
-- The file does not exist in this repo yet. This module ONLY validates and
-  loads it IF present; it is NOT imported or wired into careers.py or
-  HussainMatchingProvider — see careers.py's own docstring / the 12B-4/
-  12B-5 reports for the exact minimal wiring change to make once Jawad's
-  actual reviewed PR lands. Importing this module today has zero effect
-  on production matching behavior.
+SCOPE:
+- Milestone 13B-8: Jawad's real, reviewed file has landed with 12 pairs
+  matching this exact schema, and this loader is now wired into
+  HussainMatchingProvider via
+  app.api.v1.endpoints.careers._get_shared_hussain_provider(). Before
+  that milestone, the file did not exist yet and this module was
+  deliberately inert (see git history for that earlier state) — kept
+  here only as historical context, not current behavior.
 - No exclusion pair is invented anywhere here. Every pair this module ever
   returns is read verbatim from the on-disk file.
 
