@@ -1,0 +1,16 @@
+{
+  "not_equivalent": [
+    ["python", "javascript"],
+    ["python", "matlab"],
+    ["excel", "vba"],
+    ["excel", "accounting_software"],
+    ["accounting_software", "financial_analysis_software"],
+    ["critical_thinking", "complex_problem_solving"],
+    ["complex_problem_solving", "systems_analysis"],
+    ["mathematics", "science"],
+    ["git", "programming"],
+    ["cad_software", "gis"],
+    ["data_visualization", "gis"],
+    ["matlab", "analytical_scientific_software"]
+  ]
+}

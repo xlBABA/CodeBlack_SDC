@@ -1,8 +1,8 @@
 # Link check report
 
-Generated 2026-10-22 (UTC) by `python -m services.catalog.check_links`, which checks every URL in `data/resources.json`, `data/projects.json`, `docs/source-register.md`.
+Generated 2026-10-23 (UTC) by `python -m services.catalog.check_links`, which checks every URL in `data/resources.json`, `data/projects.json`, `docs/source-register.md`.
 
-Summary: 38 URLs. OK: 38.
+Summary: 40 URLs. OK: 40.
 
 `BLOCKED (needs manual check)` means the site refused an automated request (HTTP 401/403/429 or a bot-challenge page). It is **not** a pass: someone has to open it in a browser.
 
@@ -18,6 +18,7 @@ Summary: 38 URLs. OK: 38.
 | https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data | 200 | OK | no | docs/source-register.md |
 | https://archive.ics.uci.edu/dataset/502/online+retail+ii | 200 | OK | no | docs/source-register.md |
 | https://archive.ics.uci.edu/dataset/601/ai4i+2020+predictive+maintenance+dataset | 200 | OK | no | docs/source-register.md |
+| https://creativecommons.org/licenses/by/4.0/ | 200 | OK | no | docs/source-register.md |
 | https://cs50.harvard.edu/x/ | 200 | OK | yes | data/resources.json, docs/source-register.md |
 | https://cs50.harvard.edu/x/license/ | 200 | OK | yes | docs/source-register.md |
 | https://datacatalog.worldbank.org/search/dataset/0037712/World-Development-Indicators | 200 | OK | no | docs/source-register.md |
@@ -43,6 +44,7 @@ Summary: 38 URLs. OK: 38.
 | https://www.onetonline.org/link/summary/19-1041.00 | 200 | OK | no | docs/source-register.md |
 | https://www.onetonline.org/link/summary/19-2041.00 | 200 | OK | no | docs/source-register.md |
 | https://www.onetonline.org/link/table/details/tc/15-1252.00/Software_Skills_15-1252-00.csv?fmt=csv | 200 | OK | no | docs/source-register.md |
+| https://www.onetonline.org/link/tt/15-2051.01/43232405 | 200 | OK | no | docs/source-register.md |
 | https://www.sas.com/en_us/training/offers/free-training.html | 200 | OK | no | data/resources.json |
 | https://youtu.be/Vl0H-qTclOg | 200 | OK | yes | data/resources.json, docs/source-register.md |
 | https://youtu.be/xxpc-HPKN28 | 200 | OK | yes | data/resources.json, docs/source-register.md |

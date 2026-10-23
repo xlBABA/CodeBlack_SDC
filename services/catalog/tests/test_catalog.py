@@ -101,6 +101,54 @@ def test_get_role_known_and_unknown():
     assert get_role("no_such_role") is None
 
 
+def test_data_analyst_has_python_with_onet_source():
+    da = get_role("data_analyst")
+    py = next(s for s in da["required_skills"] if s["skill_id"] == "python")
+    assert (py["importance"], py["required"]) == (3, True)
+    assert "NOT found" not in da["notes"] and "15-2051.01/43232405" in da["notes"]
+    skills = json.loads((Path(__file__).resolve().parents[3] / "data" / "skills.json").read_text(encoding="utf-8"))
+    assert "onet_15_2051_01" in next(s for s in skills["skills"] if s["skill_id"] == "python")["source_ids"]
+
+
+def test_not_equivalent_pairs_use_real_skill_ids():
+    root = Path(__file__).resolve().parents[3]
+    doc = json.loads((root / "data" / "skill_not_equivalent.json").read_text(encoding="utf-8"))
+    assert list(doc) == ["not_equivalent"]  # exactly Hussain's format, nothing else
+    pairs = doc["not_equivalent"]
+    for pair in pairs:
+        assert len(pair) == 2 and pair[0] != pair[1], pair
+        assert set(pair) <= set(SKILLS), set(pair) - set(SKILLS)
+    assert len({frozenset(p) for p in pairs}) == len(pairs), "duplicate pair"
+    assert not {frozenset(p) for p in pairs} & {frozenset(["programming", "python"]), frozenset(["programming", "javascript"])}
+    register = (root / "docs" / "source-register.md").read_text(encoding="utf-8")
+    for a, b in pairs:  # every pair has its reason in the source register
+        assert f"| {a} / {b} |" in register, (a, b)
+
+
+def test_cv_aliases_resolve_and_never_collide():
+    import re
+    key = lambda s: re.sub(r"[^a-z0-9+#]", "", s.lower())  # same rule as Hussain's SkillNormalizer._key
+    skills = json.loads((Path(__file__).resolve().parents[3] / "data" / "skills.json").read_text(encoding="utf-8"))["skills"]
+    assert [s["skill_id"] for s in skills] == [
+        "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis", "attention_to_detail",
+        "excel", "sql", "python", "data_visualization", "cad_software", "matlab", "financial_analysis_software",
+        "analytical_scientific_software", "vba", "programming", "javascript", "git", "accounting_software", "gis",
+        "science",
+    ]  # still the same 20 skills, same order
+    owner = {}
+    for s in skills:
+        assert len(s["aliases"]) == len(set(s["aliases"])), s["skill_id"]
+        for text in [s["skill_id"], s["name"], *s["aliases"]]:
+            for k in (text.lower(), key(text)):
+                assert owner.setdefault(k, s["skill_id"]) == s["skill_id"], (text, owner[k], s["skill_id"])
+    for alias, skill_id in {
+        "CAD": "cad_software", "QGIS": "gis", "Microsoft SQL Server": "sql",
+        "MySQL": "sql", "PostgreSQL": "sql", "Advanced Excel": "excel",
+    }.items():
+        assert alias in next(s for s in skills if s["skill_id"] == skill_id)["aliases"], alias
+        assert owner[key(alias)] == skill_id, alias
+
+
 def test_get_roles_does_not_change_the_data_file():
     before = (Path(__file__).resolve().parents[3] / "data" / "roles.json").read_text(encoding="utf-8")
     get_roles()[0]["required_skills"].clear()
