@@ -5,11 +5,12 @@
 Say this out loud. Every app claim here was checked on the deployed API (https://mustaqbal-ai.replit.app) with GET requests.
 
 > "My part is the data behind Mustaqbal AI.
-> Our catalog has 8 career roles and 20 skills.
+> Our catalog has 30 career roles and 20 skills.
 > They all come from O*NET, the US Department of Labor's job database.
-> Each role has free learning resources and portfolio projects.
+> Each role has free learning resources, and the first 8 have portfolio projects.
 > Every one has a dated, registered source.
-> In the app, every role and skill is linked to a UN Sustainable Development Goal, with a reason.
+> Every role and skill is linked to a UN Sustainable Development Goal, with a reason.
+> The app shows this for its first 8 roles.
 > That data is labelled cached.
 > Trends are different.
 > The app's trend data is a placeholder, labelled fixture, not live.
@@ -17,9 +18,10 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 > And GitHub activity is not job demand."
 
 **What each sentence rests on:**
-- **8 roles, 20 skills, SDGs, "cached" label:** `GET /api/v1/sdgs/{role_id}` returns `data_mode: "cached"` for all 8 role IDs, covering 20 distinct skills. Every mapping matches our data.
+- **30 roles, 20 skills:** counted in our data on `feat/jawad-30-roles` (standalone). The 22 newer roles are not in the app yet.
+- **SDGs, "cached" label:** on 2026-10-22, `GET /api/v1/sdgs/{role_id}` returned `data_mode: "cached"` for the 8 role IDs the app had, covering 20 distinct skills. Every mapping matched our data.
 - **Trends are "fixture":** `GET /api/v1/trends` returns `data_mode: "fixture"` and the warning "No real trend source is connected yet".
-- **Resources and projects:** in our data (16 resources, 17 projects, each with a dated, registered source). The app's roadmap and project endpoints are POST, so we did not check them.
+- **Resources and projects:** in our data (16 resources, 17 projects for the first 8 roles, each with a dated, registered source). The app's roadmap and project endpoints are POST, so we did not check them.
 
 ---
 
@@ -27,15 +29,15 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 
 **Two kinds of numbers. Say which one you show:**
 - **App:** what the deployed API returned to a GET request (checked; `generated_at` 2026-10-22T18:34Z UTC).
-- **Standalone:** output of my Python services (`services/catalog`, `services/sdg`, `services/trends`, `services/roadmaps`), run in the terminal on 2026-10-23 on the data in branch `feat/jawad-video-links` (PR #2). It is **not confirmed in the app**.
+- **Standalone:** output of my Python services (`services/catalog`, `services/sdg`, `services/trends`, `services/roadmaps`), run in the terminal on the data in branch `feat/jawad-30-roles`. It is **not confirmed in the app**.
   - The app's roadmap and project endpoints are POST, and we sent no POST request, so app hours may differ.
   - The standalone trend output uses only the 12 saved (cached) snapshots, with no live GitHub request.
 
 **1. The roles (about 20 s): Standalone**
-*[Terminal: list the 8 roles.]*
-- "Mustaqbal AI has 8 career roles right now, 2 in each of 4 industry groups."
+*[Terminal: list the 30 roles.]*
+- "Our data has 30 career roles in 4 industry groups: 9 in Technology and AI, 8 in Business and Finance, 7 in Engineering and 6 in Healthcare and Sustainability."
 - "Each role comes from a real occupation in O*NET, the US Department of Labor's job database."
-- "We didn't invent any roles or skills. The goal is 30 roles. That's planned, not built yet."
+- "We didn't invent any roles or skills. The app still shows the first 8; the other 22 are in our data and not connected yet."
 
 **2. One role's skills (about 25 s): Standalone**
 *[Terminal: Data Analyst skills with importance.]*
