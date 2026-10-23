@@ -38,7 +38,8 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | cbf3012 | Added 22 roles from O*NET to reach 30 roles. Claude Code fetched the O*NET pages, parsed the skill scores and tool lists, and wrote the records | `data/roles.json`, `data/skills.json` (source ids only), `docs/source-register.md` |
 | 9f7425a | SDG rows with reasons for the 22 new roles (team estimates, written by Claude Code) | `data/sdg_mappings.json` |
 | d5b0535 | Tests for the 30-role catalog; the two tests that hardcoded 8 roles now check 30 | `services/catalog/tests/test_catalog.py`, `services/roadmaps/tests/test_projects.py` |
-| this commit | 30-role section in the source register, link-check report (85 URLs, all OK), this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| 8cd1166 | 30-role section in the source register, link-check report (85 URLs, all OK), this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
+| feat/jawad-ph-fix | Claude Code analysed the Public Health Analyst ranking problem Hussain reported and applied the fix that Rehan and Hussain approved ("Option C"): the role was rebuilt with the same O*NET rule as the 22 newer roles and marked limited coverage | `data/roles.json` (public_health_analyst only), `docs/source-register.md`, tests |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
