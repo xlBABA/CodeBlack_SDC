@@ -4,8 +4,8 @@ Date: 2026-10-24. Dataset: `origin/feat/jawad-30-roles` @ `8cd1166` (read-only w
 Matcher: `feature/hussain-matching` @ `08f87ea` plus the uncommitted changes listed under "Fixed on my branch".
 Compared with the 8-role data of PR #1 (`origin/feat/jawad-trends-data`).
 
-**Important limit: this review is OFFLINE only.** `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID` were not set in this session, so no RunPod/embedding behaviour
-was run on the 30-role data (every match carries the "degraded" caveat in the outputs below, as intended). The earlier live RunPod results are in `docs/proof/runpod/live-run.md`.
+**Sections 1 to 8 are OFFLINE** (`RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID` were not set when they were written, so every match there would carry the "degraded" caveat).
+**Section 9 repeats the run with RunPod live** and corrects the offline picture where it differs. The earlier live results on the 8-role data are in `docs/proof/runpod/live-run.md`.
 
 ## Summary
 | Area | Result |
@@ -130,6 +130,83 @@ Wording notes (not bugs): `matched_skills` includes optional skills but the coun
 - Keep the three compatibility fixes already ported (`required`, `data_mode`, optional skills not in `missing_skills`).
 
 **Me, next, if you want them:** run this review again with RunPod on; split "A and B" skills; show the snapshot date in the scenario caveat; make ties break by something more meaningful than `role_id`.
+
+## 9. With RunPod live (2026-10-24, same data `8cd1166`, same 10 students)
+**Live check:** embedding "SQL" and "Database Querying" through the endpoint gives cosine **0.7061** (384 dimensions). First call 17.0 s (cold start), second 1.1 s.
+Full 10-student run (offline + RunPod, 30 roles each): 46 s. No match carried the "degraded" caveat.
+
+### 9.1 The 10 students, offline vs RunPod
+All ten typed exact catalogue names, so **no skill was interpreted** (no "Interpreted ..." caveat anywhere). The differences below come from the other RunPod feature: two *different* catalogue skills
+with similarity of at least 0.60 give half credit for each other (`X counted as related to Y`).
+
+| # | Top 3 offline | Top 3 RunPod | Change |
+|---|---|---|---|
+| 1 cs_data | public_health_analyst 44, data_analyst 36, financial_analyst 29 | public_health_analyst 44, data_analyst 36, **data_scientist 29** | 3rd place changes (better); 7 scores up by 1 to 5 |
+| 2 software | web_developer 37, software_developer 35, data_scientist 23 | same | top 3 same; 6 low roles rise (see Git/GIS below) |
+| 3 accounting | accountant 29, financial_analyst 26, financial_risk_specialist 26 | same | none |
+| 4 finance | financial_risk_specialist 37, financial_analyst 36, public_health_analyst 32 | financial_risk_specialist **39**, financial_analyst **38**, public_health_analyst 32 | same order; 10 scores up |
+| 5 mech_civil | mechanical_engineer 44, electrical_engineer 36, aerospace_engineer 32 | same | none |
+| 6 environmental | hydrologist 19, environmental_scientist 18, data_analyst 16 | same | top 3 same; `software_developer` 7 to 16, `web_developer` 3 to 14, `data_scientist` 10 to 15 |
+| 7 health | market_research_analyst 35, environmental_scientist 29, logistician 28 | same | 4 finance roles rise 2 to 8: `financial_analyst` 17 to 25 (rank 19 to 5); `public_health_analyst` falls from 8th to **11th** |
+| 8 empty, 9 unrelated | all 0, `accountant` first | same | none |
+| 10 mixed | industrial_engineer 32, public_health_analyst 32, mechanical_engineer 29 | same | top 3 same; tech roles rise 1 to 7 |
+
+Top-1 role unchanged for all 10; top 3 changes for 1 of 10; scores change for 7 of 10 (4 unchanged: 3, 5, 8, 9).
+
+**Every "related" credit that occurred (10 students x 30 roles):**
+| Pair (similarity) | Matches | Students | Verdict |
+|---|---|---|---|
+| Python ~ Programming (0.62) | 21 | 1, 6, 10 | Reasonable |
+| Financial Analysis Software ~ Analytical/Statistical Software (0.67) | 14 | 4, 7 | **Wrong, not blocked.** Two different tools; student 7 has no financial software and gains 8 points on `financial_analyst`. Makes issue 2 worse |
+| Git ~ GIS (0.74) | 12 | 2, 6 | **Wrong, not blocked.** Look-alike names ("Gi*"); a software student gets `urban_regional_planner` 0 to 8, `surveyor` 0 to 5, `civil_engineer` 0 to 3 |
+
+`skill_not_equivalent.json` (12 pairs) is **not enough**: the two wrong pairs above are missing. Of its 12 pairs only two are above the 0.60 threshold and block anything today (Accounting Software ~ Financial Analysis Software 0.72, Excel ~ VBA 0.64); Mathematics ~ Science (0.59) and Excel ~ Accounting Software (0.51) are near it, the other eight are below 0.50.
+Proposed additions for Jawad: `["git", "gis"]` and `["financial_analysis_software", "analytical_scientific_software"]`. I did not change his data.
+
+### 9.2 Free-text skills (one skill per profile)
+| Typed | Raw top 3 (similarity) | Result | Judgement |
+|---|---|---|---|
+| Database Querying | SQL 0.71, Programming 0.30, GIS 0.28 | SQL 0.71, half credit, "please confirm" | Correct |
+| Visual data presentation | Data Visualization 0.78, VBA 0.54, Excel 0.40 | Data Visualization 0.78 | Correct |
+| Analysing statistics | Analytical/Statistical Software 0.59, Data Visualization 0.46 | **Not mapped** (0.59 is below 0.60) | Reasonable miss; "Analytical/Statistical Software" is a tool, "statistics" is a topic |
+| Working in a team | Programming 0.33, Complex Problem Solving 0.32 | Not mapped | Correct (no teamwork skill in the catalogue) |
+| Accounting | Accounting Software 0.77 | Not mapped by the name rule; "Did you mean Accounting Software?" | Correct to block (the rule runs before RunPod) |
+| Cooking | Science 0.38 | Not mapped | Correct |
+| Java | Programming 0.61, GIS 0.46, Python 0.45 | Programming 0.61, half credit, "please confirm" | Acceptable (Java is programming; it did not map to JavaScript); only 0.01 above the threshold |
+| Bookkeeping | Accounting Software 0.44 | Not mapped | Correct (a miss a human would want, but 0.44 is far below) |
+| Data analysis | Data Visualization 0.62, Systems Analysis 0.61, Analytical/Statistical Software 0.49 | **Data Visualization 0.62**, half credit | **Questionable and not blocked.** Analysis is not visualization, and Systems Analysis is 0.01 behind. `not_equivalent` cannot help: it only rejects a text when its two best candidates are a *listed pair*, and `data_visualization ~ systems_analysis` is not listed |
+
+Also checked: "Charts and graphs" scores 0.597 for Data Visualization, just **below** the threshold, so it is not mapped (the pitch doc says 0.60; it is a miss either way). "Version control" is an exact alias of Git (1.0).
+So the only mapping I would call wrong and that nothing blocks is **"Data analysis" to Data Visualization**, plus the two catalogue pairs in 9.1.
+
+**New gap found (not fixed): dropped skills are silent.** "Skill 'Analysing statistics' is not in the supported catalogue ... Did you mean ..." is in the matcher's `warnings`, but `HussainMatchingProvider` returns only the matches.
+A student with `Python` and `Analysing statistics` sees no caveat about the dropped skill (checked). Only a profile with no recognised skill at all gets the "No recognised skills" caveat. Needs either a per-match caveat from the adapter or Rehan returning `warnings` to the UI.
+
+### 9.3 The pitch demo student on the 30 roles
+Profile from `docs/pitch-hussain.md`: Python, Excel, "Database Querying", "Charts and graphs"; project "Synthetic sales dashboard exercise"; interest "data analytics".
+- **The numbers in the pitch are for the 8-role data and are now wrong.** With RunPod on 30 roles: `financial_risk_specialist` 21, `public_health_analyst` 20, `financial_analyst` 17, `software_developer` 16, `computer_systems_analyst` 15, `data_scientist` 14; `data_analyst` is **9th at 12** (offline: 10th at 9).
+- The top role is a limited-coverage finance role for a CS/data student: not a sensible demo result. Interpretation is visible (SQL 0.71) but "Charts and graphs" is not interpreted (0.597).
+- Fast scenario: 21 to 23 on the top role, `public_health_analyst` 20 to 23 (tie), so it is visible, but the story is poor.
+- Project step: adding `da_bank_campaign_analysis` skills to this student takes `data_analyst` from 12 to 42 (my emulation by adding the project's four skills as exact skills; the backend's own simulation may differ by a point or two). The "seven to forty" in the script must change.
+
+### 9.4 Suggested demo student (replaces the one in the pitch)
+**Software student: Python, JavaScript, "Database Querying", "Java"**; semester 5, Computer Science; interest "web development"; project "Course project web app".
+| What the video shows | Result |
+|---|---|
+| Ranking (RunPod, no scenario) | `software_developer` 22, `web_developer` 21, `public_health_analyst` 15, `data_scientist` 14 (offline: 15, 13, 10, 7). Top two are sensible; no tie, no Git/GIS credit |
+| RunPod interpretation (caveats) | `Interpreted "Database Querying" as SQL (similarity 0.71)` and `Interpreted "Java" as Programming (similarity 0.61)`, both "partial credit; please confirm" |
+| Fast scenario (Jawad's cached signals) | `software_developer` 22 to **24**, `web_developer` 21 to 22, `public_health_analyst` 15 to 17; moderate gives 23. Caveat: `Scenario adjusted the weight of: Git, JavaScript, Python (based on dated GitHub developer-activity (not job demand) signals; ...)` |
+| Project simulation | `software_developer` with `sd_wdi_web_dashboard`: **22 to 40** (`sd_python_sales_report_cli`: 22 to 35) |
+| Fallback (no RunPod) | 15, 13, both interpretation caveats gone, degraded caveat on every match |
+
+Caveats about this choice: "Java" sits at 0.61, one hundredth above the threshold, so it is the fragile line (if the video must not risk it, drop Java and keep "Database Querying", whose 0.71 is steady; the ranking then shifts a little, so rerun the numbers).
+Alternative with a more dramatic scenario step: add Git (`JavaScript, Git, "Database Querying", "Java", Python`). Baseline is a 28/28 tie between `software_developer` and `web_developer` (alphabetical), and fast makes `web_developer` 31 pass `software_developer` 30. It shows the scenario changing the order, but that rests on a tie, so I do not recommend it; Git also brings the Git ~ GIS credit onto lower roles.
+Not run: the project simulation through Rehan's backend, only my emulation. Re-check the numbers on the real app before recording, and update the numbers in `docs/pitch-hussain.md` (not edited here).
+
+### 9.5 Fixed after this run (uncommitted)
+- **Ambiguity rule:** if the two best candidates that pass 0.60 are within 0.03, the text is not mapped and the warning gets `Ambiguous: did you mean X or Y?`. "Data analysis" (Data Visualization 0.62, Systems Analysis 0.61) is now not mapped: `... Ambiguous: did you mean Data Visualization or Systems Analysis?`. "Database Querying", "Visual data presentation" and "Java" still map.
+- **Dropped skills are visible:** every match carries `Not recognised and not used: "Analysing statistics". Try a skill from the list.` (all dropped names in one caveat). The hints are inside that caveat, so they reach the app through the adapter: `Not recognised and not used: "Accounting" (did you mean Accounting Software?), "Data analysis" (ambiguous: Data Visualization or Systems Analysis?). Try a skill from the list.`
+- Tests: 178 passed, 13 skipped (8 new, in `tests/test_interpretation.py`).
 
 ## Reproduce
 Profiles used (all fictional, semester 5): 1 `Python, SQL, Excel, Data Visualization, Mathematics` (project "Sales dashboard exercise", interest "data analytics"); 2 `Python, JavaScript, Git, Programming, SQL`;

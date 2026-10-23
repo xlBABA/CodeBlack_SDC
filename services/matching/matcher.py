@@ -39,9 +39,10 @@ class Matcher:
     ) -> dict:
         """Full response data for POST /careers/match, plus warnings for the envelope."""
         interpretation_failed: list[bool] = []
-        profile_skills, warnings, interpreted = self.normalizer.interpret_profile_skills(
+        reading = self.normalizer.read_profile_skills(
             profile.get("skills") or [], self._interpreter(interpretation_failed)
         )
+        profile_skills, warnings, interpreted = reading.resolved, reading.warnings, reading.interpreted
         multipliers, applied_signals, scenario_notes = skill_weight_adjustments(
             scenario_id, signals
         )
@@ -66,6 +67,10 @@ class Matcher:
                              applied_signals, scenario_notes, interpreted)
             for role in verified
         ]
+        if reading.unrecognised:  # dropped skills must be visible on every match, not only in warnings
+            quoted = ", ".join(f'"{name}"' + (f" ({hint})" if hint else "") for name, hint in reading.unrecognised)
+            for m in matches:
+                m["caveats"].append(f"Not recognised and not used: {quoted}. Try a skill from the list.")
         if interpretation_failed:  # unknown skills could not be interpreted: say so on every match
             for m in matches:
                 m["caveats"].append(DEGRADED_CAVEAT)

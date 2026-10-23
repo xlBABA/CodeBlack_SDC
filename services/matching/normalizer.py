@@ -55,8 +55,23 @@ class Interpretation:
                 "partial credit; please confirm.")
 
 
-# names -> one (skill_id, similarity) or None per name
-Interpreter = Callable[[Sequence[str]], Sequence["tuple[str, float] | None"]]
+@dataclass(frozen=True)
+class Ambiguous:
+    """Interpretation result: the two best candidates are too close to pick one."""
+    candidates: tuple[tuple[str, float], tuple[str, float]]  # (skill_id, similarity), best first
+
+
+@dataclass(frozen=True)
+class ProfileReading:
+    """What `read_profile_skills` understood from the profile's skill list."""
+    resolved: dict[str, str | None]
+    warnings: list[str]
+    interpreted: dict[str, Interpretation]
+    unrecognised: list[tuple[str, str | None]]  # (name, hint) of dropped skills; shown on every match
+
+
+# names -> one (skill_id, similarity), Ambiguous or None per name
+Interpreter = Callable[[Sequence[str]], Sequence["tuple[str, float] | Ambiguous | None"]]
 
 
 class SkillNormalizer:
@@ -124,6 +139,13 @@ class SkillNormalizer:
     def interpret_profile_skills(
         self, skill_refs: list[dict], interpreter: Interpreter | None = None
     ) -> tuple[dict[str, str | None], list[str], dict[str, Interpretation]]:
+        """`read_profile_skills` as a (resolved, warnings, interpreted) tuple."""
+        reading = self.read_profile_skills(skill_refs, interpreter)
+        return reading.resolved, reading.warnings, reading.interpreted
+
+    def read_profile_skills(
+        self, skill_refs: list[dict], interpreter: Interpreter | None = None
+    ) -> ProfileReading:
         """Like normalize_profile_skills, but unknown names get extra treatment.
 
         For a name that is not a catalogue name or alias, in this order:
@@ -132,14 +154,18 @@ class SkillNormalizer:
         2. it is only part of a longer skill name ("Accounting" in "Accounting Software"):
            NOT mapped, the warning gets "Did you mean ...?";
         3. otherwise `interpreter(names)` (embeddings) may map it. It returns one
-           (skill_id, similarity) or None per name.
+           (skill_id, similarity), an `Ambiguous` or None per name. An ambiguous name is
+           NOT mapped; the warning gets "Ambiguous: did you mean X or Y?".
 
         Interpretations are returned as {skill_id: Interpretation} so the caller can give
         partial credit and explain them. Catalogue hits always win. If nothing maps, or
-        the interpreter raises, an unknown skill is dropped with the usual warning.
+        the interpreter raises, an unknown skill is dropped with the usual warning and
+        listed in `unrecognised`.
         """
         resolved: dict[str, str | None] = {}
         warnings: list[str | None] = []
+        labels: dict[int, str] = {}  # warning index -> name of every skill that was not recognised
+        hints: dict[int, str] = {}  # warning index -> 'did you mean ...' / 'ambiguous: ...'
         unknown: list[tuple[int, str, str | None]] = []  # (warning index, name, proficiency)
         for ref in skill_refs:
             sid = ref.get("skill_id")
@@ -150,6 +176,7 @@ class SkillNormalizer:
                 label = ref.get("name") or ref.get("skill_id") or "<empty>"
                 if ref.get("name"):
                     unknown.append((len(warnings), ref["name"], ref.get("proficiency")))
+                labels[len(warnings)] = label
                 warnings.append(
                     f"Skill '{label}' is not in the supported catalogue and was "
                     "not used for matching. Please check the spelling or pick a "
@@ -194,7 +221,9 @@ class SkillNormalizer:
             if suggestions:  # a fragment of a longer skill name: ask, do not guess
                 not_held = [sid for sid in suggestions if sid not in resolved]
                 if not_held:
-                    warnings[index] += " " + self._did_you_mean(not_held)
+                    question = self._did_you_mean(not_held)
+                    warnings[index] += " " + question
+                    hints[index] = question[0].lower() + question[1:]
                 continue
             pending.append((index, name, prof))
 
@@ -207,10 +236,21 @@ class SkillNormalizer:
                 logger.warning("Skill interpretation unavailable (%s): %s", type(exc).__name__, exc)
                 results = [None] * len(pending)
             for (index, name, prof), hit in zip(pending, results):
-                if hit is not None and self.has(hit[0]):
+                if isinstance(hit, Ambiguous):
+                    options = [sid for sid, _ in hit.candidates if self.has(sid)]
+                    if len(options) == 2:
+                        first, second = (self.name_of(sid) for sid in options)
+                        warnings[index] += f" Ambiguous: did you mean {first} or {second}?"
+                        hints[index] = f"ambiguous: {first} or {second}?"
+                elif hit is not None and self.has(hit[0]):
                     accept(index, name, prof, hit[0], hit[1])
         resolved.update(interpreted_prof)
-        return resolved, [w for w in warnings if w is not None], interpreted
+        taken = {i.warning_index for i in interpreted.values()}
+        unrecognised = list(dict.fromkeys(
+            (label, hints.get(index)) for index, label in labels.items()
+            if warnings[index] is not None and index not in taken
+        ))
+        return ProfileReading(resolved, [w for w in warnings if w is not None], interpreted, unrecognised)
 
     def _contained_skill(self, text: str) -> tuple[str, str] | None:
         """(skill_id, matched phrase) if exactly one catalogue skill appears in `text` as a
