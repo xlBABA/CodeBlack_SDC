@@ -14,7 +14,7 @@ const metric = (s: TrendSignal) =>
   s.metric_value == null ? s.metric_name.replace(/_/g, ' ') : `${s.metric_name.replace(/_/g, ' ')}: ${s.metric_value}${s.unit ? ` ${s.unit}` : ''}`
 
 /**
- * Dated skill-demand signals exactly as the API sends them: direction, metric, source and
+ * Dated developer-activity signals exactly as the API sends them: direction, metric, source and
  * both dates. No bar lengths are drawn because the signals carry no comparable magnitude.
  * Stale sources use the hatched swatch (Halden idea) and say so in words too.
  */

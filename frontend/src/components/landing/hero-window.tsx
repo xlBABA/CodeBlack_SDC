@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { TrendingUp } from 'lucide-react'
+import { Activity } from 'lucide-react'
 import { BrandMark } from '@/components/brand'
 import { Badge } from '@/components/ui/badge'
 import { HERO } from '@/content/landing'
@@ -35,9 +35,9 @@ function ChipTrend() {
   return (
     <Chip>
       <span className="flex items-center gap-2 font-bold">
-        <TrendingUp className="size-4 text-[#9fe3ec]" aria-hidden /> SQL demand +18%
+        <Activity className="size-4 text-[#9fe3ec]" aria-hidden /> Developer activity
       </span>
-      <small className="block text-xs opacity-70">Example Jobs Index · fictional</small>
+      <small className="block text-xs opacity-70">GitHub signals, dated · not job demand</small>
     </Chip>
   )
 }

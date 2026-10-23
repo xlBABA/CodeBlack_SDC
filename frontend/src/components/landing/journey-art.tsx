@@ -19,25 +19,32 @@ function Skills() {
     </ul>
   )
 }
+// Change in new GitHub repositories per topic, last 30 days vs the 30 before, from the team's
+// cached snapshots (data/trend_snapshots, retrieved 21 Oct 2026).
+const TREND_ROWS: [string, number][] = [['MATLAB', 51.5], ['Python', 15.8], ['SQL', 7.9], ['Financial analysis software', -6.1]]
+const TREND_MAX = Math.max(...TREND_ROWS.map(([, v]) => Math.abs(v)))
+
 function Trends() {
-  const rows: [string, number, boolean][] = [['AI literacy', 41, false], ['ESG reporting', 27, true], ['SQL', 18, false], ['Manual data entry', -33, true]]
   return (
-    <ul className="grid gap-3">
-      {rows.map(([s, v, stale]) => (
-        <li key={s}>
-          <div className="flex justify-between text-sm font-semibold">
-            <span>{s}</span>
-            <span className={v > 0 ? 'text-good' : 'text-tomato'}>{v > 0 ? `+${v}` : v}%</span>
-          </div>
-          <div className="relative mt-1 h-2.5 rounded-full bg-well">
-            <i
-              className={`absolute inset-y-0 rounded-full ${stale ? 'hatch' : v > 0 ? 'bg-good' : 'bg-tomato'}`}
-              style={v > 0 ? { left: '50%', width: `${(v / 41) * 50}%` } : { right: '50%', width: `${(-v / 41) * 50}%` }}
-            />
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="grid gap-3">
+      <ul className="grid gap-3">
+        {TREND_ROWS.map(([s, v]) => (
+          <li key={s}>
+            <div className="flex justify-between text-sm font-semibold">
+              <span>{s}</span>
+              <span className={v > 0 ? 'text-good' : 'text-tomato'}>{v > 0 ? `+${v}` : v}%</span>
+            </div>
+            <div className="relative mt-1 h-2.5 rounded-full bg-well">
+              <i
+                className={`absolute inset-y-0 rounded-full ${v > 0 ? 'bg-good' : 'bg-tomato'}`}
+                style={v > 0 ? { left: '50%', width: `${(v / TREND_MAX) * 50}%` } : { right: '50%', width: `${(-v / TREND_MAX) * 50}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-muted-foreground">New GitHub repositories, last 30 days vs the 30 before. Cached 21 Oct 2026. Developer activity, not job demand.</p>
+    </div>
   )
 }
 function Roles() {

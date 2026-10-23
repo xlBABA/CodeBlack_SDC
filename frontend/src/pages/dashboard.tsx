@@ -69,7 +69,7 @@ export default function Dashboard() {
     <Page
       title="Career overview"
       docTitle="Overview"
-      subtitle="Where your skills point today, what is shifting in the market, and what to learn next. It informs your choice; it does not make it."
+      subtitle="Where your skills point today, how developer activity on GitHub is moving for them, and what to learn next. It informs your choice; it does not make it."
       meta={
         <>
           {m && <DataModeBadge mode={m.data_mode} />}
