@@ -5,6 +5,7 @@ import { EmptyState, ErrorState } from '@/components/api-states'
 import { RoleTiles } from '@/components/dashboard/role-tiles'
 import { DataModeBadge } from '@/components/data-mode-badge'
 import { NoProfile } from '@/components/no-profile'
+import { NoRecognizedSkills } from '@/components/no-recognized-skills'
 import { Page } from '@/components/page/page'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,12 +13,14 @@ import { Card, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useMatches } from '@/hooks/use-matches'
 import { useStoredProfile } from '@/lib/profile-store'
+import { lacksRecognizedSkills } from '@/lib/recognized-skills'
 
 /** Every role the matching service returned for this profile, best-aligned first. */
 export default function Roles() {
   const stored = useStoredProfile()
   const [match, retry] = useMatches(stored)
   const env = match.status === 'ok' ? match.data : null
+  const unranked = !!env && !!stored && lacksRecognizedSkills(stored.profile, env.data.matches)
   const matches = env?.data.matches ?? []
 
   return (
@@ -53,7 +56,8 @@ export default function Roles() {
         </div>
       )}
       {stored && match.status === 'error' && <ErrorState error={match.error} onRetry={retry} />}
-      {env && (
+      {unranked && <NoRecognizedSkills source={stored?.source} warnings={env.warnings} />}
+      {env && !unranked && (
         <Card aria-labelledby="roles-title">
           <CardHeader id="roles-title" title={`${matches.length} matched roles`} subtitle="The catalogue is still growing; roles not verified yet are never shown." icon={BriefcaseBusiness} />
           {matches.length ? (

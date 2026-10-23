@@ -22,6 +22,13 @@ type Review = {
   experience_summary: string
 }
 
+/** What the student did on the review screen; kept in memory so they can come back to it. */
+export type CvReviewState = {
+  review: Review
+  /** CV skill text → the catalogue skill_id the student mapped it to */
+  mapped: Record<string, string>
+}
+
 const joined = (...parts: (string | null | undefined)[]) => parts.filter(Boolean).join(' · ')
 const span = (start?: string | null, end?: string | null) => (start || end ? `${start ?? '?'} – ${end ?? 'now'}` : null)
 
@@ -104,7 +111,9 @@ function MapToCatalog({ raw, skills, mappedTo, onMap, onUndo }: MapToCatalogProp
 
 type CvReviewProps = {
   result: APIEnvelope<CvParsePayload>
-  onConfirm: (profile: StudentProfile) => Promise<void>
+  /** an earlier review of the same CV, to pick up where the student left off */
+  initial?: CvReviewState
+  onConfirm: (profile: StudentProfile, state: CvReviewState) => Promise<void>
   onRestart: () => void
 }
 
@@ -114,19 +123,21 @@ type CvReviewProps = {
  * never sent unless the student maps one to a catalogue skill. Nothing is saved until the
  * student confirms. The draft stays in memory only.
  */
-export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
+export function CvReview({ result, initial, onConfirm, onRestart }: CvReviewProps) {
   const { draft } = result.data
   const suggested = draft.suggested_profile
-  const [review, setReview] = useState<Review>(() => ({
-    education_level: suggested.education_level ?? '',
-    degree: suggested.degree ?? '',
-    semester: suggested.semester ? String(suggested.semester) : '',
-    skills: suggested.skills.filter((s) => isCatalogSkill(s.skill_id)),
-    projects: [...suggested.projects],
-    experience_summary: suggested.experience_summary ?? '',
-  }))
-  // CV skill text → the catalogue skill_id the student mapped it to
-  const [mapped, setMapped] = useState<Record<string, string>>({})
+  const [review, setReview] = useState<Review>(
+    () =>
+      initial?.review ?? {
+        education_level: suggested.education_level ?? '',
+        degree: suggested.degree ?? '',
+        semester: suggested.semester ? String(suggested.semester) : '',
+        skills: suggested.skills.filter((s) => isCatalogSkill(s.skill_id)),
+        projects: [...suggested.projects],
+        experience_summary: suggested.experience_summary ?? '',
+      },
+  )
+  const [mapped, setMapped] = useState<Record<string, string>>(() => initial?.mapped ?? {})
   const [confirmed, setConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
@@ -161,16 +172,19 @@ export function CvReview({ result, onConfirm, onRestart }: CvReviewProps) {
     setSubmitting(true)
     setError(null)
     try {
-      await onConfirm({
-        ...suggested,
-        profile_id: null,
-        education_level: review.education_level,
-        degree: review.degree.trim() || null,
-        semester: review.semester ? Number(review.semester) : null,
-        skills: review.skills,
-        projects: review.projects.map((p) => p.trim()).filter(Boolean),
-        experience_summary: review.experience_summary.trim() || null,
-      })
+      await onConfirm(
+        {
+          ...suggested,
+          profile_id: null,
+          education_level: review.education_level,
+          degree: review.degree.trim() || null,
+          semester: review.semester ? Number(review.semester) : null,
+          skills: review.skills,
+          projects: review.projects.map((p) => p.trim()).filter(Boolean),
+          experience_summary: review.experience_summary.trim() || null,
+        },
+        { review, mapped },
+      )
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ kind: 'http', status: 0, code: 'UNKNOWN', message: String(e) }))
       setSubmitting(false)

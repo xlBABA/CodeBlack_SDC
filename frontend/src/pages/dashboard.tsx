@@ -12,6 +12,7 @@ import { TopMatchCard } from '@/components/dashboard/top-match-card'
 import { TrendSnapshot } from '@/components/dashboard/trend-snapshot'
 import { DataModeBadge } from '@/components/data-mode-badge'
 import { NoProfile } from '@/components/no-profile'
+import { NoRecognizedSkills } from '@/components/no-recognized-skills'
 import { Page } from '@/components/page/page'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ import { useMatches } from '@/hooks/use-matches'
 import { useRequest } from '@/hooks/use-request'
 import { api } from '@/lib/api'
 import { useStoredProfile } from '@/lib/profile-store'
+import { lacksRecognizedSkills } from '@/lib/recognized-skills'
 
 /** Hours per week the dashboard roadmap assumes; the role workspace lets the student change it. */
 const HOURS_PER_WEEK = 8
@@ -55,7 +57,9 @@ export default function Dashboard() {
   const [match, retryMatch] = useMatches(profile)
 
   const m = match.status === 'ok' ? match.data : null
-  const matches = m?.data.matches ?? []
+  // no recognised skill means no meaningful ranking, so no roles are shown at all
+  const unranked = !!m && !!profile && lacksRecognizedSkills(profile.profile, m.data.matches)
+  const matches = unranked ? [] : (m?.data.matches ?? [])
   const top = matches[0]
   const roleKey = profile && top ? `${top.role_id}:${profile.analyzed_at}` : null
 
@@ -94,7 +98,9 @@ export default function Dashboard() {
       {(demo.loading || (profile && match.status === 'loading')) && <DashboardSkeleton />}
       {match.status === 'error' && profile && <ErrorState error={match.error} onRetry={retryMatch} />}
 
-      {m && !top && (
+      {unranked && <NoRecognizedSkills source={stored?.source} warnings={m.warnings} />}
+
+      {m && !unranked && !top && (
         <Card>
           <EmptyState
             title="No role matches yet"
