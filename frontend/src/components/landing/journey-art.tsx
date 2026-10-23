@@ -1,4 +1,5 @@
-import { DOMAIN_SDGS, type DomainSdg, type JourneyStep } from '@/content/landing'
+import { SdgIcon } from '@/components/sdg-icon'
+import { DOMAIN_SDGS, type JourneyStep } from '@/content/landing'
 
 // Small illustrative "screens" for each journey step. Static demo content.
 
@@ -82,10 +83,6 @@ function Path() {
       ))}
     </ol>
   )
-}
-// the official UN icon, unmodified
-function SdgIcon({ sdg, className }: { sdg: DomainSdg; className: string }) {
-  return <img src={`${import.meta.env.BASE_URL}sdg/E-WEB-Goal-${String(sdg.goal).padStart(2, '0')}.png`} alt={`SDG ${sdg.goal}: ${sdg.name}`} loading="lazy" className={`flex-none ${className}`} />
 }
 function Sdg() {
   const { main, related } = DOMAIN_SDGS

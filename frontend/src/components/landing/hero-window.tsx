@@ -1,24 +1,27 @@
 import { useRef } from 'react'
 import { Activity } from 'lucide-react'
 import { BrandMark } from '@/components/brand'
+import { SdgIcon } from '@/components/sdg-icon'
 import { Badge } from '@/components/ui/badge'
-import { HERO } from '@/content/landing'
+import { DOMAIN_SDGS, HERO } from '@/content/landing'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HeroCtas } from './hero-ctas'
 import { RichLine } from './rich-text'
 
-// floating "pieces of the product" inside the window; depth drives the parallax speed
+// floating "pieces of the product" inside the window; depth drives the parallax speed.
+// Phones stack them clear of a smaller mark and hold them still; small screens drop the extra chips.
 const CHIPS = [
-  { depth: 1.2, className: 'top-[14%] left-[7%]', body: <ChipRole /> },
-  { depth: 0.6, className: 'top-[18%] right-[8%]', body: <ChipTrend /> },
-  { depth: 1.6, className: 'bottom-[22%] left-[12%]', body: <ChipSkill /> },
-  { depth: 0.9, className: 'right-[11%] bottom-[16%]', body: <ChipSdg /> },
-  { depth: 0.4, className: 'top-[48%] right-[24%] hidden md:block', body: <ChipHours /> },
+  { depth: 1.2, className: 'top-[4%] left-[5%] sm:top-[14%] sm:left-[7%]', body: <ChipRole /> },
+  { depth: 0.6, className: 'top-[24%] right-[5%] sm:top-[18%] sm:right-[8%]', body: <ChipTrend /> },
+  { depth: 1.6, className: 'bottom-[22%] left-[12%] max-md:hidden', body: <ChipSkill /> },
+  { depth: 0.9, className: 'right-[5%] bottom-[24%] sm:right-[11%] sm:bottom-[16%]', body: <ChipSdg /> },
+  { depth: 0.4, className: 'top-[48%] right-[24%] hidden xl:block', body: <ChipHours /> },
 ]
+const drift = (depth: number) => (innerWidth < 640 ? 0 : -110 * depth)
 
 function Chip({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-[18px] border border-white/20 bg-white/12 px-4 py-3 text-on-deep shadow-[0_20px_40px_-20px_#0008] backdrop-blur-md">{children}</div>
+  return <div className="rounded-[18px] border border-white/20 bg-white/12 px-3 py-2 text-on-deep shadow-[0_20px_40px_-20px_#0008] backdrop-blur-md sm:px-4 sm:py-3">{children}</div>
 }
 function ChipRole() {
   return (
@@ -56,12 +59,10 @@ function ChipSkill() {
 function ChipSdg() {
   return (
     <Chip>
-      <small className="mb-1.5 block text-xs opacity-75">Linked goals</small>
+      <small className="mb-1.5 block text-xs opacity-75">Built for these UN goals</small>
       <span className="flex gap-1">
-        {[8, 9, 4, 13].map((g) => (
-          <i key={g} className="grid size-7 place-items-center rounded-full text-xs font-extrabold not-italic" style={{ background: `var(--sdg-${g})` }}>
-            {g}
-          </i>
+        {[DOMAIN_SDGS.main, ...DOMAIN_SDGS.related].map((g) => (
+          <SdgIcon key={g.goal} sdg={g} className="size-7" />
         ))}
       </span>
     </Chip>
@@ -108,7 +109,7 @@ export function HeroWindow({ ready }: { ready: boolean }) {
       const win = root.current!.querySelector('[data-window]')!
       gsap.fromTo(win, { '--clip': 1 }, { '--clip': 0, ease: 'none', scrollTrigger: { trigger: win, start: 'top 82%', end: 'top 6%', scrub: true } })
       gsap.utils.toArray<HTMLElement>('[data-depth]').forEach((chip) => {
-        gsap.to(chip, { y: -110 * Number(chip.dataset.depth), ease: 'none', scrollTrigger: { trigger: win, start: 'top bottom', end: 'bottom top', scrub: true } })
+        gsap.to(chip, { y: () => drift(Number(chip.dataset.depth)), ease: 'none', scrollTrigger: { trigger: win, start: 'top bottom', end: 'bottom top', scrub: true, invalidateOnRefresh: true } })
       })
       gsap.fromTo('[data-mark]', { scale: 0.8, rotation: -8 }, { scale: 1.06, rotation: 0, ease: 'none', scrollTrigger: { trigger: win, start: 'top bottom', end: 'bottom top', scrub: true } })
       gsap.fromTo(
@@ -158,7 +159,7 @@ export function HeroWindow({ ready }: { ready: boolean }) {
               <span className="absolute inset-[-40%] rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--node)_33%,transparent),transparent)] blur-2xl" />
               {/* on the deep backdrop the mark sits on a glass plate so its tile never blends in */}
               <span className="relative grid place-items-center rounded-[30%] border border-white/25 bg-white/10 p-4 sm:p-5 shadow-[0_30px_60px_-20px_#000a] backdrop-blur-md">
-                <BrandMark className="size-[clamp(120px,19vw,224px)]" />
+                <BrandMark className="size-[clamp(84px,19vw,224px)]" />
               </span>
             </div>
           </div>
@@ -168,7 +169,7 @@ export function HeroWindow({ ready }: { ready: boolean }) {
             </div>
           ))}
           <p data-caption className="absolute bottom-[7%] left-1/2 w-[min(92%,720px)] -translate-x-1/2 text-center text-[clamp(1.3rem,0.9rem+1.6vw,2.4rem)] leading-tight font-bold text-on-deep">
-            One student. Every <span className="serif text-deep-glow">verified</span> role, side by side.
+            One student. Every <span className="serif text-deep-glow">verified</span> role, side by side.
           </p>
         </div>
       </div>
