@@ -150,12 +150,7 @@ export default function Dashboard() {
             />
             {trends.status === 'loading' && <Skeleton className="h-56 rounded-tile" />}
             {trends.status === 'error' && <ErrorNotice error={trends.error} onRetry={retryTrends} />}
-            {trends.status === 'ok' &&
-              (trends.data.data.signals?.length ? (
-                <TrendSnapshot trends={trends.data.data} limit={3} />
-              ) : (
-                <EmptyState title="No signals yet" body="No dated trend signals have been collected for this role." />
-              ))}
+            {trends.status === 'ok' && <TrendSnapshot trends={trends.data.data} limit={3} />}
             {trends.status === 'ok' && <ApiWarnings items={trends.data.warnings} className="mt-3" />}
           </Card>
 
