@@ -9,7 +9,6 @@ import { CURTAIN_LINES } from '@/content/landing'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
-import { DEMO_ENTRY } from './hero-ctas'
 
 const LINKS = [
   { href: '#journey', label: 'How it works' },
@@ -21,7 +20,7 @@ const LINKS = [
 export function LandingHeader({ ready, lenis }: { ready: boolean; lenis: RefObject<Lenis | null> }) {
   const root = useRef<HTMLElement>(null)
   const [scrolled, setScrolled] = useState(false)
-  const toApp = useCurtainLink(DEMO_ENTRY, CURTAIN_LINES.demo)
+  const toApp = useCurtainLink('/dashboard', CURTAIN_LINES.dashboard)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -68,11 +67,11 @@ export function LandingHeader({ ready, lenis }: { ready: boolean; lenis: RefObje
         <div className="ml-auto flex items-center gap-2 md:ml-0">
           <ThemeToggle />
           <Link
-            to={DEMO_ENTRY}
+            to="/dashboard"
             onClick={toApp}
             className="hidden h-11 items-center gap-2 rounded-full bg-ink px-5 font-bold text-ink-foreground transition hover:brightness-110 sm:inline-flex"
           >
-            Open the app
+            Dashboard
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>

@@ -168,7 +168,7 @@ export function HeroWindow({ ready }: { ready: boolean }) {
             </div>
           ))}
           <p data-caption className="absolute bottom-[7%] left-1/2 w-[min(92%,720px)] -translate-x-1/2 text-center text-[clamp(1.3rem,0.9rem+1.6vw,2.4rem)] leading-tight font-bold text-on-deep">
-            One student. Thirty possible futures. <span className="serif text-deep-glow">Four verified</span> so far.
+            One student. Thirty possible roles. <span className="serif text-deep-glow">Eight verified</span> so far.
           </p>
         </div>
       </div>

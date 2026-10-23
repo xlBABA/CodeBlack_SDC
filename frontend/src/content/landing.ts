@@ -17,30 +17,31 @@ export const CURTAIN_LINES = {
     [{ text: '>', kind: 'prompt' }, { text: ' preparing your overview... ' }, { text: 'ok', kind: 'ok' }],
   ],
   profile: [[{ text: '>', kind: 'prompt' }, { text: ' opening profile builder... ' }, { text: 'ok', kind: 'ok' }]],
+  dashboard: [[{ text: '>', kind: 'prompt' }, { text: ' opening your dashboard... ' }, { text: 'ok', kind: 'ok' }]],
 } satisfies Record<string, BootSegment[][]>
 
 export const HERO = {
-  eyebrow: 'AI career readiness · Malaysian students & fresh graduates',
+  eyebrow: 'Career planning for Malaysian students and fresh graduates',
   // a word wrapped in *stars* is set in the italic serif
-  lines: ['Your *future*,', 'mapped for the AI era.'],
-  body: 'See which future roles fit the skills you already have, how developer activity on GitHub is moving for them, and a step-by-step plan to close the gap, linked to the UN SDGs.',
+  lines: ['Your *future*,', 'mapped from today.'],
+  body: 'See which roles fit the skills you have now, how GitHub developer activity is moving for those skills, and what to learn next, with hours for each step.',
 }
 
 /** Read as you scroll: words fill in from faint to full colour. *word* = serif accent. */
 export const MANIFESTO =
-  'AI is rewriting entry-level work across Malaysia. Some skills are *rising*, some are quietly fading. Mustaqbal reads dated developer activity on GitHub, lays it over what you already know, and shows you a *path*. Where you go next stays your *choice*.'
+  'Entry-level jobs are changing as AI tools spread. Mustaqbal compares your skills with what each role needs, adds dated GitHub activity for those skills, and gives you a *path* with hours. The *choice* stays yours.'
 
 export type JourneyStep = { title: string; body: string; kind: 'skills' | 'trends' | 'roles' | 'path' | 'sdg' }
 export const JOURNEY: JourneyStep[] = [
-  { kind: 'skills', title: 'Your skills, today', body: 'Degree, skills and projects, mapped to one shared vocabulary. Coursework counts.' },
-  { kind: 'trends', title: 'Signals, not hype', body: 'New GitHub projects per skill, each signal with its source and dates. Developer activity, not job demand.' },
+  { kind: 'skills', title: 'Your skills, today', body: 'Your degree, skills and projects, matched to the same 20-skill list every role uses. Coursework counts.' },
+  { kind: 'trends', title: 'Dated signals', body: 'How many new GitHub projects use each skill, with the source and dates. Developer activity, not job demand.' },
   { kind: 'roles', title: 'Roles that fit', body: 'Alignment estimates with matched skills, gaps and a caveat beside every score.' },
-  { kind: 'path', title: 'A path with hours', body: 'Ordered learning steps and portfolio projects that prove the skill.' },
+  { kind: 'path', title: 'A path with hours', body: 'Learning steps in order, with hours, and projects that show the skill.' },
   { kind: 'sdg', title: 'Impact you can name', body: 'Every role and skill tied to the UN Sustainable Development Goals, with reasons.' },
 ]
 
 export const CINEMA = {
-  intro: 'One profile in. A whole picture out.',
+  intro: 'One profile. Every role compared.',
   badges: ['Data analyst', 'Financial analyst', 'Environmental scientist', 'Software developer'],
   title: 'Your alignment report',
   offer: ['Alignment estimates, with caveats', 'GitHub activity signals, with sources', 'A roadmap, with hours', 'SDG links, with reasons'],

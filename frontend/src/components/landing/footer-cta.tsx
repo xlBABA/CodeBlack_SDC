@@ -31,7 +31,7 @@ export function FooterCta() {
           <CharText text={FOOTER_LINE} />
         </h2>
         <p data-final-rise className="mx-auto mt-6 max-w-[46ch] text-lg text-on-deep/77">
-          Walk through the whole flow with a demo student, or start your own profile.
+          Map your own future, or try the whole flow with a demo student first.
         </p>
         <div data-final-rise className="mt-8 flex justify-center">
           <HeroCtas onDark />

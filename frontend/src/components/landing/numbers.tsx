@@ -34,7 +34,7 @@ export function Numbers() {
             DEMO numbers, not real yet
           </Badge>
           <h2 id="numbers-title" className="mt-4 text-[clamp(2.4rem,1.4rem+3vw,4.6rem)] leading-none font-extrabold tracking-[-0.045em]">
-            The shift, in <span className="serif text-primary">numbers</span>.
+            The change, in <span className="serif text-primary">numbers</span>.
           </h2>
         </div>
         <p className="max-w-[40ch] text-muted-foreground">Placeholder figures for layout. Each will be replaced with a cited statistic before submission.</p>
