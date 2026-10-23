@@ -205,7 +205,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          <ApiWarnings items={m.warnings} className="lg:col-span-12" />
+          <ApiWarnings items={m.warnings} open className="lg:col-span-12" />
         </div>
       )}
     </Page>

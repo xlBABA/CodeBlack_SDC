@@ -65,7 +65,7 @@ export default function Roles() {
           ) : (
             <EmptyState title="No role matches yet" body="None of the verified roles lines up with this profile yet. Add a few skills and a project and try again." />
           )}
-          <ApiWarnings items={env.warnings} className="mt-5" />
+          <ApiWarnings items={env.warnings} open className="mt-5" />
         </Card>
       )}
     </Page>

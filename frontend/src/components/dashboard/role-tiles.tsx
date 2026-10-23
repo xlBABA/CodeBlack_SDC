@@ -37,16 +37,18 @@ function RoleTile({ match, rank }: { match: RoleMatch; rank: number }) {
       <span className="mt-1 text-sm font-semibold opacity-90">
         {have} of {total} core skills
       </span>
-      <span className="mt-auto flex items-end justify-between gap-2 pt-4">
-        <span className="grid">
-          <span className="flex items-baseline gap-1">
-            <CountUp value={match.score} className="text-[2rem] leading-none font-extrabold tracking-[-0.04em]" />
-            <small className="text-xs font-semibold opacity-90">alignment estimate</small>
-          </span>
-          {/* every score sits next to at least one caveat */}
-          <small className="mt-1 line-clamp-2 text-xs leading-snug opacity-90">{match.caveats?.[0] ?? DEFAULT_CAVEAT}</small>
+      <div className="mt-auto grid pt-4">
+        <span className="flex items-baseline gap-1">
+          <CountUp value={match.score} className="text-[2rem] leading-none font-extrabold tracking-[-0.04em]" />
+          <small className="text-xs font-semibold opacity-90">alignment estimate</small>
         </span>
-      </span>
+        {/* every score sits next to its caveats, shown in full */}
+        <ul className="mt-1 grid gap-1 text-xs leading-snug opacity-90">
+          {(match.caveats?.length ? match.caveats : [DEFAULT_CAVEAT]).map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
+      </div>
     </Link>
   )
 }
