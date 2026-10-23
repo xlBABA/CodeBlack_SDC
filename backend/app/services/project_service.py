@@ -151,7 +151,8 @@ class ProjectSimulationService:
         warnings = [
             *baseline.warnings,
             "Simulated score is a hypothetical, deterministic recalculation "
-            "using the same fixture matching logic as /careers/match; it is "
+            "using whichever matching algorithm is currently configured for "
+            "/careers/match (fixture or Hussain's, per MATCHING_MODE); it is "
             "not a validated prediction of real-world outcomes.",
         ]
         return ProjectSimulationOutcome(payload=payload, warnings=warnings)

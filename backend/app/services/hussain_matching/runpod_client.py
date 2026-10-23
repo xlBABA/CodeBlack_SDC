@@ -1,5 +1,3 @@
-# Vendored verbatim from origin/feature/hussain-matching @ 61373a5 (owner: Hussain).
-# Source: services/matching/runpod_client.py on that branch. Not modified from the original.
 """Embedding similarity served by a RunPod Serverless endpoint (see runpod-worker/).
 
     provider = RunPodEmbeddingProvider.from_catalogue(catalogue)   # reads the env vars below

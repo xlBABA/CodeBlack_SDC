@@ -1,5 +1,3 @@
-# Vendored from origin/feature/hussain-matching @ 61373a5 (owner: Hussain), source
-# services/matching/tests/conftest.py, with import paths rewritten to this package location.
 import copy
 import json
 from pathlib import Path

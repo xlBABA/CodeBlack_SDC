@@ -1,5 +1,3 @@
-# Vendored verbatim from origin/feature/hussain-matching @ 61373a5 (owner: Hussain).
-# Source: services/matching/matcher.py on that branch. Not modified from the original.
 """Role matcher: profile + roles (+ scenario + signals) -> ranked RoleMatch[].
 
 Output follows contracts/API_CONTRACT.md (RoleMatch, matches response data).
@@ -8,11 +6,17 @@ Only roles with verified == True are ranked.
 from __future__ import annotations
 
 from . import scoring
-from .normalizer import SkillNormalizer
+from .normalizer import Interpretation, SkillNormalizer
 from .scenarios import skill_weight_adjustments
 
 DEFAULT_LIMIT = 6
 TOTAL_TARGET_ROLES = 30
+# What a trend signal measures, by its `signal_type`; named in the scenario caveat so a
+# developer-activity signal is never read as job demand.
+SIGNAL_TYPE_LABELS = {
+    "developer_activity": "GitHub developer-activity (not job demand)",
+}
+DEGRADED_CAVEAT = "Semantic matching unavailable; exact skill matching only (degraded)"
 
 
 class Matcher:
@@ -29,8 +33,9 @@ class Matcher:
         limit: int = DEFAULT_LIMIT,
     ) -> dict:
         """Full response data for POST /careers/match, plus warnings for the envelope."""
-        profile_skills, warnings = self.normalizer.normalize_profile_skills(
-            profile.get("skills") or []
+        interpretation_failed: list[bool] = []
+        profile_skills, warnings, interpreted = self.normalizer.interpret_profile_skills(
+            profile.get("skills") or [], self._interpreter(interpretation_failed)
         )
         multipliers, applied_signals, scenario_notes = skill_weight_adjustments(
             scenario_id, signals
@@ -53,9 +58,12 @@ class Matcher:
 
         matches = [
             self._score_role(profile, profile_skills, role, multipliers,
-                             applied_signals, scenario_notes)
+                             applied_signals, scenario_notes, interpreted)
             for role in verified
         ]
+        if interpretation_failed:  # unknown skills could not be interpreted: say so on every match
+            for m in matches:
+                m["caveats"].append(DEGRADED_CAVEAT)
         matches.sort(key=lambda m: (-m["score"], m["role_id"]))
         return {
             "matches": matches[: max(0, limit)],
@@ -64,14 +72,33 @@ class Matcher:
             "warnings": warnings,
         }
 
-    def _score_role(self, profile, profile_skills, role, multipliers, applied_signals, scenario_notes) -> dict:
+    def _interpreter(self, failed: list[bool]):
+        """Names -> (skill_id, similarity) | None, if the similarity provider can read free text.
+
+        A failing call is recorded in `failed` and re-raised; the normalizer then drops the
+        unknown skills as before."""
+        interpret = getattr(self.similarity, "interpret", None)
+        if not callable(interpret):
+            return None
+
+        def interpreter(names):
+            try:
+                return interpret(names, threshold=scoring.SIMILARITY_THRESHOLD)
+            except Exception:
+                failed.append(True)
+                raise
+        return interpreter
+
+    def _score_role(self, profile, profile_skills, role, multipliers, applied_signals, scenario_notes,
+                    interpreted: dict[str, Interpretation] | None = None) -> dict:
         n = self.normalizer
+        interpreted = interpreted or {}
         s, matched, missing, skill_notes = scoring.skills_component(
-            profile_skills, role, multipliers, n.name_of, self.similarity
+            profile_skills, role, multipliers, n.name_of, self.similarity, interpreted
         )
         e, exp_notes = scoring.experience_component(profile, role, n.find_in_text)
         q, prereq_caveats = scoring.prerequisites_component(profile, role)
-        t = scoring.transferable_component(profile_skills, role, profile.get("interests"))
+        t = scoring.transferable_component(profile_skills, role, profile.get("interests"), interpreted)
 
         breakdown = {"skills": s, "experience": e, "prerequisites": q, "transferable": t}
         total = scoring.combine(breakdown)
@@ -79,22 +106,35 @@ class Matcher:
         role_skill_ids = {r["skill_id"] for r in role["required_skills"]}
         role_signals = [sig for sig in applied_signals if sig["skill_id"] in role_skill_ids]
 
-        caveats = list(prereq_caveats) + skill_notes + exp_notes + scenario_notes
+        used = role_skill_ids | set(role.get("transferable_skills") or [])
+        interpretation_notes = [i.message() for sid, i in interpreted.items() if sid in used]
+
+        caveats = list(prereq_caveats) + interpretation_notes + skill_notes + exp_notes + scenario_notes
         if role_signals:
             names = sorted({n.name_of(sig["skill_id"]) for sig in role_signals})
+            kinds = sorted({
+                SIGNAL_TYPE_LABELS.get(sig.get("signal_type"), sig.get("signal_type") or "unspecified-type")
+                for sig in role_signals
+            })
             caveats.append(
                 "Scenario adjusted the weight of: " + ", ".join(names)
-                + " (based on dated trend signals; an assumption, not a forecast)."
+                + f" (based on dated {' and '.join(kinds)} signals; an assumption, not a forecast)."
             )
         if role.get("data_mode") == "fixture":
             caveats.append("Fixture role for testing; not verified occupational data.")
 
         required = [r for r in role["required_skills"] if r.get("required", True)]
-        required_held = sum(1 for r in required if r["skill_id"] in profile_skills)
+        required_held = sum(1 for r in required
+                            if r["skill_id"] in profile_skills and r["skill_id"] not in interpreted)
+        required_interpreted = sum(1 for r in required if r["skill_id"] in interpreted)
         explanation = (
             f"You have {required_held} of {len(required)} core skills for "
-            f"{role['role_title']}. Skill coverage {round(s)}/100, experience "
-            f"{round(e)}/100, prerequisites {round(q)}/100"
+            f"{role['role_title']}"
+            + (f" (plus {required_interpreted} interpreted from your wording, partial credit)"
+               if required_interpreted else "")
+            + f". Skill coverage {round(s)}/100, experience "
+            f"{round(e)}/100, "
+            + (f"prerequisites {round(q)}/100" if q is not None else "prerequisites not assessed")
             + (f", transferable skills {round(t)}/100" if t is not None else "")
             + ". This is an estimated profile alignment, not a hiring prediction."
         )
@@ -114,7 +154,8 @@ class Matcher:
             "score_breakdown": {
                 "skills": round(s),
                 "experience": round(e),
-                "prerequisites": round(q),
+                # contract requires a number; None means "not defined for this role"
+                "prerequisites": round(q) if q is not None else 0,
                 # contract requires a number; None means "not defined for this role"
                 "transferable": round(t) if t is not None else 0,
             },

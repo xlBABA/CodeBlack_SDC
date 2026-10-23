@@ -1,5 +1,3 @@
-# Vendored verbatim from origin/feature/hussain-matching @ 61373a5 (owner: Hussain).
-# Source: services/matching/scenarios.py on that branch. Not modified from the original.
 """AI-adoption scenarios and how dated trend signals adjust skill weights.
 
 These are ASSUMPTIONS, not forecasts. A scenario only scales the importance
