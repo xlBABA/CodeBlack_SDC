@@ -110,5 +110,43 @@ export type RoleSdgMapping = { sdg_id: number; reason: string }
 export type SkillSdgMapping = { skill_id: string; sdg_id: number; reason: string }
 export type SdgPayload = { role_sdg_mappings: RoleSdgMapping[]; skill_sdg_mappings: SkillSdgMapping[] }
 
+/** POST /cv/parse (multipart, field "file"). The draft is for the student to review; it is never saved by the API. */
+export type CvParseStatus = 'ok' | 'manual_review' | 'no_extractable_text'
+
+export type CvEducation = { institution?: string | null; degree?: string | null; field_of_study?: string | null; start_date?: string | null; end_date?: string | null }
+export type CvExperience = { role?: string | null; organization?: string | null; start_date?: string | null; end_date?: string | null; description?: string | null }
+export type CvProject = { title: string; description?: string | null }
+export type CvCertification = { name: string; issuer?: string | null; year?: string | null }
+
+/** A skill whose quoted evidence was found in the CV text and that matched the catalogue. */
+export type CvMappedSkill = { skill_id: string; name: string; raw_text: string; evidence: string }
+/** Evidence found, but no catalogue match, so it has no skill_id. */
+export type CvUnmappedSkill = { raw_text: string; evidence: string }
+/** Named by the extractor without evidence found in the CV; never pre-added. */
+export type CvSkillNeedsReview = { name: string; reason: string }
+
+export type CvDraft = {
+  name?: string | null
+  summary?: string | null
+  education: CvEducation[]
+  mapped_skills: CvMappedSkill[]
+  unmapped_skills: CvUnmappedSkill[]
+  /** added after the first CV release, so older servers may leave it out */
+  skills_requiring_review?: CvSkillNeedsReview[]
+  projects: CvProject[]
+  experience: CvExperience[]
+  certifications: CvCertification[]
+  /** same shape as the /profile/analyze body; skill proficiency is always null */
+  suggested_profile: StudentProfile
+}
+
+export type CvParsePayload = {
+  status: CvParseStatus
+  draft: CvDraft
+  page_count: number
+  /** first 500 characters of the extracted text, only for manual_review */
+  extracted_text_preview?: string | null
+}
+
 /** /health is the one endpoint without an envelope. */
 export type Health = { status: string; version: string; dependencies?: Record<string, string> }

@@ -1,0 +1,104 @@
+{
+  "data": {
+    "status": "ok",
+    "page_count": 1,
+    "extracted_text_preview": null,
+    "draft": {
+      "name": "Jane Student",
+      "summary": "CS undergraduate",
+      "education": [
+        {
+          "institution": "Test University",
+          "degree": "BSc",
+          "field_of_study": "Computer Science",
+          "start_date": null,
+          "end_date": null
+        }
+      ],
+      "mapped_skills": [
+        {
+          "skill_id": "python",
+          "name": "Python",
+          "raw_text": "Python",
+          "evidence": "Python"
+        },
+        {
+          "skill_id": "sql",
+          "name": "SQL",
+          "raw_text": "SQL",
+          "evidence": "SQL"
+        },
+        {
+          "skill_id": "excel",
+          "name": "Excel",
+          "raw_text": "MS Excel",
+          "evidence": "MS Excel"
+        }
+      ],
+      "unmapped_skills": [
+        {
+          "raw_text": "Underwater Basket Weaving",
+          "evidence": "Underwater Basket Weaving"
+        }
+      ],
+      "skills_requiring_review": [],
+      "projects": [
+        {
+          "title": "Sales dashboard",
+          "description": "Built with SQL and Python"
+        }
+      ],
+      "experience": [
+        {
+          "role": "Peer tutor",
+          "organization": "Test University learning centre",
+          "start_date": "2025-02",
+          "end_date": null,
+          "description": "Tutored first-year students in introductory programming"
+        }
+      ],
+      "certifications": [
+        {
+          "name": "Intro to SQL",
+          "issuer": "Test Academy",
+          "year": "2025"
+        }
+      ],
+      "suggested_profile": {
+        "profile_id": null,
+        "education_level": null,
+        "degree": "Computer Science",
+        "semester": null,
+        "target_role_id": null,
+        "interests": [],
+        "skills": [
+          {
+            "skill_id": "python",
+            "name": "Python",
+            "proficiency": null
+          },
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          },
+          {
+            "skill_id": "excel",
+            "name": "Excel",
+            "proficiency": null
+          }
+        ],
+        "projects": [
+          "Sales dashboard: Built with SQL and Python"
+        ],
+        "experience_summary": "CS undergraduate | Peer tutor at Test University learning centre Tutored first-year students in introductory programming"
+      }
+    }
+  },
+  "data_mode": "live",
+  "generated_at": "2026-10-23T04:19:08Z",
+  "warnings": [
+    "Extracted automatically; please review every field before confirming — nothing here is final.",
+    "1 skill(s) were not recognized against the current catalogue and were not added to your profile automatically; review them below."
+  ]
+}
