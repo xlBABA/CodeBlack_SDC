@@ -84,7 +84,7 @@ The O*NET licence (CC BY 4.0, from the page footer) was read by an automated fet
 
 Not yet checked by me: the other new project datasets (including the UCI Beijing Multi-Site Air Quality dataset, CC BY 4.0) and the O*NET pages for the 4 newer roles.
 
-Also not yet checked by me in a browser (automated fetch by Claude Code on 2026-10-24 only): the 22 O*NET pages for the roles added in cbf3012 (summary, details and Software Skills CSV), and the UN SDG target wording used in their SDG reasons. Each O*NET URL is listed in `docs/source-register.md`.
+On 2026-10-24 I checked the 22 O*NET pages for the roles added in cbf3012 in my browser: all 22 titles and codes matched. I also spot-checked 3 Mathematics scores on their Details pages: Statistician 97, Data Scientist 85, Actuary 85. All other skill scores and tool lists on those pages (and the Software Skills CSV exports) were fetched automatically by Claude Code and not checked by hand. The UN SDG target wording used in their SDG reasons was also fetched automatically and not checked by me. Each O*NET URL is listed in `docs/source-register.md`.
 
 ## What is a team estimate (not from a source)
 - **Role importance numbers:** the cases where `roles.json` differs from O*NET's bucketed score (mostly mathematics), every tool-skill importance, and every `required: true/false` flag. For the 22 roles added on 2026-10-24, also which listed tools each role uses, and the rules for which cognitive skills are included (O*NET score 50 or more) and when attention_to_detail is included (Work Style impact 100). See "Importance score methodology" in `docs/source-register.md`.
