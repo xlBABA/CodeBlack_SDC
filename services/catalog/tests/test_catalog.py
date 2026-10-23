@@ -101,6 +101,15 @@ def test_get_role_known_and_unknown():
     assert get_role("no_such_role") is None
 
 
+def test_data_analyst_has_python_with_onet_source():
+    da = get_role("data_analyst")
+    py = next(s for s in da["required_skills"] if s["skill_id"] == "python")
+    assert (py["importance"], py["required"]) == (3, True)
+    assert "NOT found" not in da["notes"] and "15-2051.01/43232405" in da["notes"]
+    skills = json.loads((Path(__file__).resolve().parents[3] / "data" / "skills.json").read_text(encoding="utf-8"))
+    assert "onet_15_2051_01" in next(s for s in skills["skills"] if s["skill_id"] == "python")["source_ids"]
+
+
 def test_get_roles_does_not_change_the_data_file():
     before = (Path(__file__).resolve().parents[3] / "data" / "roles.json").read_text(encoding="utf-8")
     get_roles()[0]["required_skills"].clear()
