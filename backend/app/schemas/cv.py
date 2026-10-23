@@ -53,6 +53,19 @@ class CvCertificationEntry(BaseModel):
     year: str | None = Field(default=None, max_length=20)
 
 
+class GlmSkillEntry(BaseModel):
+    """One skill as GLM must report it: a name plus a short, exact quote
+    from the CV text supporting it (Milestone 11E). GLM never supplies a
+    skill_id or proficiency here — those are never asked for in the
+    prompt and are dropped by extra="ignore" if a model includes them
+    anyway (requirement 3/6)."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    name: str = Field(max_length=200)
+    evidence: str | None = Field(default=None, max_length=300)
+
+
 class GlmCvExtraction(BaseModel):
     """The *only* schema ever built directly from GLM's raw JSON output.
     Treat as untrusted: extra keys are dropped, every field is optional
@@ -64,28 +77,43 @@ class GlmCvExtraction(BaseModel):
     name: str | None = Field(default=None, max_length=200)
     summary: str | None = Field(default=None, max_length=2000)
     education: list[CvEducationEntry] = Field(default_factory=list, max_length=20)
-    skills: list[str] = Field(default_factory=list, max_length=100)
+    skills: list[GlmSkillEntry] = Field(default_factory=list, max_length=100)
     projects: list[CvProjectEntry] = Field(default_factory=list, max_length=30)
     experience: list[CvExperienceEntry] = Field(default_factory=list, max_length=30)
     certifications: list[CvCertificationEntry] = Field(default_factory=list, max_length=30)
 
 
 class CvMappedSkill(BaseModel):
-    """A skill GLM extracted that matched Jawad's canonical catalogue
-    (via app.services.hussain_matching.normalizer.SkillNormalizer —
+    """A skill GLM extracted that had evidence verified against the
+    locally-extracted CV text (Milestone 11E) AND matched Jawad's
+    canonical catalogue (via
+    app.services.hussain_matching.normalizer.SkillNormalizer —
     deterministic exact/alias match only, never a guess)."""
 
     skill_id: str
     name: str
     raw_text: str
+    evidence: str
 
 
 class CvUnmappedSkill(BaseModel):
-    """A skill GLM extracted with no catalogue match — kept for the
-    user's own review, never silently dropped and never assigned an
-    invented skill_id (requirement 4)."""
+    """A skill GLM extracted with verified evidence but no catalogue
+    match — kept for the user's own review, never silently dropped and
+    never assigned an invented skill_id (requirement 4)."""
 
     raw_text: str
+    evidence: str
+
+
+class CvSkillNeedsReview(BaseModel):
+    """A skill GLM claimed but whose evidence was missing or could not
+    be found (word-for-word, modulo whitespace) in the locally-extracted
+    CV text — Milestone 11E, requirement 4/5. Never added to
+    mapped_skills/unmapped_skills or suggested_profile; the student must
+    confirm it manually if it's actually true."""
+
+    name: str
+    reason: str
 
 
 class CvDraftProfile(BaseModel):
@@ -97,6 +125,11 @@ class CvDraftProfile(BaseModel):
     education: list[CvEducationEntry] = Field(default_factory=list)
     mapped_skills: list[CvMappedSkill] = Field(default_factory=list)
     unmapped_skills: list[CvUnmappedSkill] = Field(default_factory=list)
+    # Additive field (Milestone 11E) — skills GLM named but could not
+    # verify against the CV text; excluded from mapped_skills/
+    # unmapped_skills and suggested_profile, surfaced here so the UI can
+    # flag them for explicit manual confirmation (requirement 5/7).
+    skills_requiring_review: list[CvSkillNeedsReview] = Field(default_factory=list)
     projects: list[CvProjectEntry] = Field(default_factory=list)
     experience: list[CvExperienceEntry] = Field(default_factory=list)
     certifications: list[CvCertificationEntry] = Field(default_factory=list)

@@ -34,11 +34,14 @@ No JSON body, no other fields. No auth header beyond whatever your app already s
         { "institution": "Test University", "degree": "BSc", "field_of_study": "Computer Science", "start_date": null, "end_date": null }
       ],
       "mapped_skills": [
-        { "skill_id": "python", "name": "Python", "raw_text": "Python" },
-        { "skill_id": "sql", "name": "SQL", "raw_text": "SQL" }
+        { "skill_id": "python", "name": "Python", "raw_text": "Python", "evidence": "Python" },
+        { "skill_id": "sql", "name": "SQL", "raw_text": "SQL", "evidence": "SQL" }
       ],
       "unmapped_skills": [
-        { "raw_text": "Underwater Basket Weaving" }
+        { "raw_text": "Underwater Basket Weaving", "evidence": "Underwater Basket Weaving" }
+      ],
+      "skills_requiring_review": [
+        { "name": "Java", "reason": "The supporting quote for this skill could not be found in your CV text, so it was not added automatically. Add it yourself if it's accurate." }
       ],
       "projects": [
         { "title": "Sales dashboard", "description": "Built with SQL and Python" }
@@ -65,12 +68,21 @@ No JSON body, no other fields. No auth header beyond whatever your app already s
   "generated_at": "2026-10-23T04:19:08Z",
   "warnings": [
     "Extracted automatically; please review every field before confirming — nothing here is final.",
-    "1 skill(s) were not recognized against the current catalogue and were not added to your profile automatically; review them below."
+    "1 skill(s) were not recognized against the current catalogue and were not added to your profile automatically; review them below.",
+    "1 skill(s) could not be automatically verified against your CV text and were not added to your profile automatically; add them yourself if they're accurate."
   ]
 }
 ```
 
 **Everything in `draft` is for display/editing.** `draft.suggested_profile` is the one field shaped exactly like `POST /profile/analyze`'s request body — a sensible pre-filled default, not an authoritative result.
+
+### Evidence-backed skills (Milestone 11E — additive)
+
+Every entry in `mapped_skills`/`unmapped_skills` now carries an **`evidence`** field: a short, exact quote from your CV text that the backend verified actually appears there before trusting the skill at all. This is additive — existing code reading `skill_id`/`name`/`raw_text` is unaffected.
+
+A **new, additive** array, `draft.skills_requiring_review`, lists skills GLM named but whose evidence was missing or could not be found in the CV text (`{ "name": "...", "reason": "..." }`). These are **excluded from `mapped_skills`, `unmapped_skills`, and `suggested_profile.skills`** — never silently added. Show them in a clearly-labeled "needs manual confirmation" section, separate from the unmapped-but-verified skills above; a student who confirms one should add it to their profile explicitly (there's no auto-add endpoint for this — just edit `suggested_profile.skills` before submitting to `/profile/analyze`, the same as any other edit).
+
+`suggested_profile.skills[].proficiency` is always `null` — proficiency is never inferred from a CV, only ever set by the student.
 
 ## 3. Fallback states — `data.status` is not always `"ok"`
 
@@ -101,6 +113,7 @@ No JSON body, no other fields. No auth header beyond whatever your app already s
 3. **Review (status "ok")** — an editable form pre-filled from `draft`, split into:
    - Confirmed fields (from `suggested_profile`) — editable before submit.
    - **Unmapped skills** (`draft.unmapped_skills`) — show these separately with an "add anyway" or "ignore" choice; they are not in `suggested_profile.skills` yet.
+   - **Skills requiring review** (`draft.skills_requiring_review`) — GLM named these but the backend couldn't verify them against your CV text; show the `reason` and let the student add them manually if accurate. Never pre-checked/pre-added.
    - Everything else extracted (`education`, `projects`, `experience`, `certifications`, `name`, `summary`) — shown for context/copy-paste into other fields, since only `suggested_profile`'s shape is what the matching system actually consumes today.
 4. **Manual review (status "manual_review" or "no_extractable_text")** — show the relevant warning text verbatim, and (for `manual_review`) the `extracted_text_preview` in a read-only text box the user can copy from, then route to the normal manual intake form.
 5. **Error** — show `error.message` directly; it's already written to be user-facing.

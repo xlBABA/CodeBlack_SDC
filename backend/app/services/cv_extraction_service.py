@@ -1,9 +1,12 @@
-"""Milestone 11B: orchestrates POST /api/v1/cv/parse.
+"""Milestone 11B/11E: orchestrates POST /api/v1/cv/parse.
 
 Pipeline: PDF validation/extraction (cv_pdf.py, local, no network) ->
 RunPod GLM-5.3 (glm_client.py) -> Pydantic validation of GLM's untrusted
-output (app.schemas.cv.GlmCvExtraction) -> skill mapping (Hussain's
-SkillNormalizer, deterministic, never invents an ID) -> CvDraftProfile.
+output (app.schemas.cv.GlmCvExtraction) -> per-skill evidence validation
+against the locally-extracted CV text (_evidence_is_supported) -> skill
+mapping (Hussain's SkillNormalizer, deterministic, never invents an ID)
+-> CvDraftProfile. A skill with missing/unverifiable evidence never
+reaches mapping at all — see _validate_and_map_skills.
 
 Every GLM/parsing failure mode degrades to a "manual_review" CvParseData
 rather than raising past this module (requirement 6: never fabricate a
@@ -13,14 +16,17 @@ calling GLM at all.
 from __future__ import annotations
 
 import logging
+import re
 
 from app.core.config import Settings
 from app.schemas.cv import (
     CvDraftProfile,
     CvMappedSkill,
     CvParseData,
+    CvSkillNeedsReview,
     CvUnmappedSkill,
     GlmCvExtraction,
+    GlmSkillEntry,
 )
 from app.schemas.profile import SkillRef, StudentProfile
 from app.services.cv_pdf import PdfExtractionResult
@@ -39,27 +45,78 @@ MANUAL_REVIEW_WARNING = (
     "Automatic extraction was unavailable, so this is an empty draft for "
     "manual entry. Nothing was fabricated in its place."
 )
+MISSING_EVIDENCE_REASON = (
+    "No supporting quote was provided for this skill, so it was not "
+    "added automatically. Add it yourself if it's accurate."
+)
+UNVERIFIED_EVIDENCE_REASON = (
+    "The supporting quote for this skill could not be found in your CV "
+    "text, so it was not added automatically. Add it yourself if it's "
+    "accurate."
+)
+# Guards against a trivially short "evidence" string (e.g. a single
+# letter) that would make the substring check meaningless.
+MIN_EVIDENCE_CHARS = 2
 
 
 def _load_skill_catalogue() -> list[dict]:
     return _load_json("skills.json")["skills"]
 
 
-def _map_skills(raw_skills: list[str]) -> tuple[list[CvMappedSkill], list[CvUnmappedSkill]]:
-    """Deterministic exact/alias matching only (SkillNormalizer) — never
-    a guess, never an invented skill_id (requirement 4)."""
+def _normalize_whitespace(text: str) -> str:
+    """Collapse all whitespace runs (spaces, tabs, newlines — including
+    the kind PDF text extraction commonly introduces between words/
+    lines) to single spaces, for a tolerant-but-not-loose comparison."""
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _evidence_is_supported(evidence: str | None, cv_text: str) -> bool:
+    """True only if `evidence` is a real, non-trivial, word-for-word
+    (modulo whitespace) substring of the locally-extracted CV text.
+    Never a fuzzy/semantic match — an unrelated or hallucinated quote
+    must fail this check (requirement 4)."""
+    if not evidence:
+        return False
+    normalized_evidence = _normalize_whitespace(evidence).lower()
+    if len(normalized_evidence) < MIN_EVIDENCE_CHARS:
+        return False
+    normalized_text = _normalize_whitespace(cv_text).lower()
+    return normalized_evidence in normalized_text
+
+
+def _validate_and_map_skills(
+    skill_entries: list[GlmSkillEntry], cv_text: str
+) -> tuple[list[CvMappedSkill], list[CvUnmappedSkill], list[CvSkillNeedsReview]]:
+    """Evidence validation (requirement 4) runs before catalogue mapping:
+    a skill whose evidence is missing or not actually found in the CV
+    text is excluded from the automatically-suggested profile entirely
+    and reported in `skills_requiring_review`, regardless of whether it
+    would otherwise match the catalogue. Catalogue mapping itself stays
+    deterministic exact/alias matching only (SkillNormalizer) — never a
+    guess, never an invented skill_id (requirement 3/4)."""
     normalizer = SkillNormalizer(_load_skill_catalogue())
     mapped: list[CvMappedSkill] = []
     unmapped: list[CvUnmappedSkill] = []
+    needs_review: list[CvSkillNeedsReview] = []
     seen_ids: set[str] = set()
-    for raw in raw_skills:
-        result = normalizer.normalize(raw)
+    for entry in skill_entries:
+        name = entry.name.strip()
+        if not name:
+            continue
+        if not _evidence_is_supported(entry.evidence, cv_text):
+            reason = MISSING_EVIDENCE_REASON if not entry.evidence else UNVERIFIED_EVIDENCE_REASON
+            needs_review.append(CvSkillNeedsReview(name=name, reason=reason))
+            continue
+        evidence = entry.evidence.strip()  # non-empty/non-None, guaranteed by the check above
+        result = normalizer.normalize(name)
         if result.skill_id and result.skill_id not in seen_ids:
-            mapped.append(CvMappedSkill(skill_id=result.skill_id, name=result.name, raw_text=raw))
+            mapped.append(
+                CvMappedSkill(skill_id=result.skill_id, name=result.name, raw_text=name, evidence=evidence)
+            )
             seen_ids.add(result.skill_id)
         elif not result.skill_id:
-            unmapped.append(CvUnmappedSkill(raw_text=raw))
-    return mapped, unmapped
+            unmapped.append(CvUnmappedSkill(raw_text=name, evidence=evidence))
+    return mapped, unmapped, needs_review
 
 
 def _build_suggested_profile(
@@ -166,13 +223,16 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             [MANUAL_REVIEW_WARNING, "The extraction service's output did not match the expected format."],
         )
 
-    mapped_skills, unmapped_skills = _map_skills(extraction.skills)
+    mapped_skills, unmapped_skills, skills_requiring_review = _validate_and_map_skills(
+        extraction.skills, pdf_result.text
+    )
     draft = CvDraftProfile(
         name=extraction.name,
         summary=extraction.summary,
         education=extraction.education,
         mapped_skills=mapped_skills,
         unmapped_skills=unmapped_skills,
+        skills_requiring_review=skills_requiring_review,
         projects=extraction.projects,
         experience=extraction.experience,
         certifications=extraction.certifications,
@@ -185,5 +245,11 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
         warnings.append(
             f"{len(unmapped_skills)} skill(s) were not recognized against the current catalogue "
             "and were not added to your profile automatically; review them below."
+        )
+    if skills_requiring_review:
+        warnings.append(
+            f"{len(skills_requiring_review)} skill(s) could not be automatically verified against "
+            "your CV text and were not added to your profile automatically; add them yourself if "
+            "they're accurate."
         )
     return CvParseData(status="ok", draft=draft, page_count=pdf_result.page_count, extracted_text_preview=None), warnings

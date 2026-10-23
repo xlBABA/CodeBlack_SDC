@@ -77,14 +77,21 @@ def _build_encrypted_pdf() -> bytes:
     return buf.getvalue()
 
 
-VALID_CV_TEXT = "Jane Student Computer Science Python SQL Developer Internship"
+VALID_CV_TEXT = (
+    "Jane Student Computer Science Python SQL Developer Internship "
+    "Also skilled in Underwater Basket Weaving"
+)
 VALID_PDF = _build_text_pdf(VALID_CV_TEXT)
 
 FAKE_GLM_JSON = {
     "name": "Jane Student",
     "summary": "CS undergraduate",
     "education": [{"institution": "Test University", "degree": "BSc", "field_of_study": "Computer Science"}],
-    "skills": ["Python", "SQL", "Underwater Basket Weaving"],
+    "skills": [
+        {"name": "Python", "evidence": "Python"},
+        {"name": "SQL", "evidence": "SQL"},
+        {"name": "Underwater Basket Weaving", "evidence": "Underwater Basket Weaving"},
+    ],
     "projects": [{"title": "Sales dashboard", "description": "Built with SQL and Python"}],
     "experience": [],
     "certifications": [],
@@ -112,13 +119,29 @@ def test_valid_pdf_with_successful_glm_extraction_returns_ok_draft(client: TestC
     draft = body["data"]["draft"]
     assert draft["name"] == "Jane Student"
     assert {s["skill_id"] for s in draft["mapped_skills"]} == {"python", "sql"}
-    assert draft["unmapped_skills"] == [{"raw_text": "Underwater Basket Weaving"}]
+    assert all(s["evidence"] for s in draft["mapped_skills"])  # every mapped skill carries its quote
+    assert draft["unmapped_skills"] == [
+        {"raw_text": "Underwater Basket Weaving", "evidence": "Underwater Basket Weaving"}
+    ]
+    assert draft["skills_requiring_review"] == []
     assert draft["suggested_profile"]["skills"]
     assert draft["suggested_profile"]["degree"] == "Computer Science"
+    # Requirement 6: proficiency is never inferred, only left for the student.
+    assert all(s["proficiency"] is None for s in draft["suggested_profile"]["skills"])
 
 
 def test_mapped_skills_use_real_catalogue_ids_never_invented(client: TestClient):
-    glm_json = {**FAKE_GLM_JSON, "skills": ["sql", "Structured Query Language", "Flibbertigibbet"]}
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "skills": [
+            {"name": "sql", "evidence": "SQL"},
+            {"name": "Structured Query Language", "evidence": "SQL"},
+            # Not literally present in VALID_CV_TEXT — proves GLM is never trusted
+            # to invent a skill_id, AND (Milestone 11E) that an unverifiable quote
+            # keeps a skill out of mapped_skills entirely, catalogue match or not.
+            {"name": "Flibbertigibbet", "evidence": "Flibbertigibbet expert"},
+        ],
+    }
     with patch(
         "app.services.cv_extraction_service.extract_cv_fields",
         return_value=GlmExtractionResult(raw_json=glm_json),
@@ -128,7 +151,8 @@ def test_mapped_skills_use_real_catalogue_ids_never_invented(client: TestClient)
     draft = response.json()["data"]["draft"]
     mapped_ids = {s["skill_id"] for s in draft["mapped_skills"]}
     assert mapped_ids == {"sql"}  # "sql" and its alias both resolve to the one real catalogue skill_id
-    assert any(u["raw_text"] == "Flibbertigibbet" for u in draft["unmapped_skills"])
+    assert not any(u["raw_text"] == "Flibbertigibbet" for u in draft["unmapped_skills"])
+    assert any(r["name"] == "Flibbertigibbet" for r in draft["skills_requiring_review"])
 
 
 # --- Invalid upload content -------------------------------------------------
@@ -244,6 +268,124 @@ def test_glm_output_with_only_unexpected_extra_keys_is_still_usable(client: Test
 
     assert response.status_code == 200
     assert response.json()["data"]["status"] == "ok"
+
+
+def test_skills_items_that_are_plain_strings_instead_of_objects_fall_back_to_manual_review(client: TestClient):
+    """Milestone 11E changed skills from `list[str]` to a list of
+    {name, evidence} objects. A GLM deployment still answering in the
+    old plain-string shape must degrade safely, not crash."""
+    glm_json = {**FAKE_GLM_JSON, "skills": ["Python", "SQL"]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    assert response.status_code == 200
+    assert response.json()["data"]["status"] == "manual_review"
+
+
+# --- Evidence validation (Milestone 11E) ------------------------------------
+
+
+def test_skill_with_missing_evidence_is_excluded_and_flagged_for_review(client: TestClient):
+    glm_json = {**FAKE_GLM_JSON, "skills": [{"name": "Python", "evidence": None}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    draft = response.json()["data"]["draft"]
+    assert draft["mapped_skills"] == []
+    assert draft["unmapped_skills"] == []
+    assert draft["skills_requiring_review"] == [
+        {
+            "name": "Python",
+            "reason": (
+                "No supporting quote was provided for this skill, so it was not "
+                "added automatically. Add it yourself if it's accurate."
+            ),
+        }
+    ]
+    # Never silently added to the suggested profile either (requirement 5).
+    assert draft["suggested_profile"]["skills"] == []
+
+
+def test_skill_with_hallucinated_evidence_is_excluded_and_flagged_for_review(client: TestClient):
+    """The quoted 'evidence' is not actually present anywhere in the
+    locally-extracted CV text — must never be trusted just because GLM
+    said so (requirement 4)."""
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "skills": [
+            {
+                "name": "Java",
+                "evidence": "Led a team of 10 engineers building Java microservices",
+            }
+        ],
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    draft = response.json()["data"]["draft"]
+    assert draft["mapped_skills"] == []
+    assert draft["unmapped_skills"] == []
+    assert len(draft["skills_requiring_review"]) == 1
+    assert draft["skills_requiring_review"][0]["name"] == "Java"
+    assert "could not be found" in draft["skills_requiring_review"][0]["reason"]
+    assert draft["suggested_profile"]["skills"] == []
+    assert any("could not be automatically verified" in w for w in response.json()["warnings"])
+
+
+def test_skill_evidence_with_harmless_whitespace_differences_is_still_accepted(client: TestClient):
+    """GLM's quote need not byte-for-byte match the PDF's extracted
+    whitespace (extra spaces/newlines are common PDF-extraction noise)
+    — only the words themselves must be a real, exact substring."""
+    glm_json = {
+        **FAKE_GLM_JSON,
+        "skills": [{"name": "SQL", "evidence": "  SQL   \n Developer  "}],
+    }
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    draft = response.json()["data"]["draft"]
+    assert draft["skills_requiring_review"] == []
+    assert {s["skill_id"] for s in draft["mapped_skills"]} == {"sql"}
+
+
+def test_evidence_substring_match_is_case_insensitive(client: TestClient):
+    glm_json = {**FAKE_GLM_JSON, "skills": [{"name": "Python", "evidence": "python"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    draft = response.json()["data"]["draft"]
+    assert {s["skill_id"] for s in draft["mapped_skills"]} == {"python"}
+    assert draft["skills_requiring_review"] == []
+
+
+def test_evidence_validation_helper_directly():
+    """Unit-level coverage of the actual comparison logic, independent
+    of the PDF/GLM pipeline."""
+    from app.services.cv_extraction_service import _evidence_is_supported
+
+    text = "Built dashboards using   Python\nand SQL during an internship."
+    assert _evidence_is_supported("Python", text) is True
+    assert _evidence_is_supported("python", text) is True  # case-insensitive
+    assert _evidence_is_supported("Python\nand SQL", text) is True  # whitespace-normalized
+    assert _evidence_is_supported("Rust", text) is False  # not present at all -> hallucinated
+    assert _evidence_is_supported(None, text) is False  # missing evidence
+    assert _evidence_is_supported("", text) is False
+    assert _evidence_is_supported("P", text) is False  # too short to be meaningful evidence
 
 
 # --- Draft is never written to the stored profile ---------------------------
