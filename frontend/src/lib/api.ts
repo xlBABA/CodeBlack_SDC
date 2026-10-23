@@ -212,13 +212,3 @@ export const api: Api = USE_MOCKS ? mockApi : httpApi
 export function noteOutage(error: unknown, retry: () => void) {
   if (error instanceof ApiError && error.status === 503) reportOutage(error.message, retry, error.requestId)
 }
-
-/**
- * Development only: builds the error a real failure would produce, so the error UI can be
- * exercised without breaking the backend. Used by the diagnostics card on /design.
- */
-export function simulatedError(kind: 'PROFILE_NOT_FOUND' | 'PROVIDER_UNAVAILABLE' | 'NETWORK_ERROR'): ApiError {
-  if (kind === 'PROFILE_NOT_FOUND') return new ApiError({ kind: 'http', status: 404, code: kind, message: 'This profile no longer exists on the server.' })
-  if (kind === 'PROVIDER_UNAVAILABLE') return new ApiError({ kind: 'http', status: 503, code: kind, message: 'The data provider is not responding right now.' })
-  return new ApiError({ kind: 'network', status: 0, code: kind, message: 'Could not reach the server. Check your connection.' })
-}

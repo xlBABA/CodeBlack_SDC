@@ -8,7 +8,6 @@ export const APP_ROUTES = [
   { path: '/roles', Page: lazyPage(() => import('@/pages/roles')) },
   { path: '/roles/:roleId', Page: lazyPage(() => import('@/pages/role')) },
   { path: '/methodology', Page: lazyPage(() => import('@/pages/methodology')) },
-  { path: '/design', Page: lazyPage(() => import('@/pages/design-system')) },
 ]
 
 export const NotFoundPage = lazyPage(() => import('@/pages/not-found'))

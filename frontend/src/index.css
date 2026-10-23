@@ -251,10 +251,6 @@ html.theming *::after {
     animation: breathe 2.4s ease-in-out infinite;
   }
 
-  .is-flash {
-    animation: flash 0.9s var(--ease);
-  }
-
   /* boot-sequence text (landing intro and the landing → app curtain) */
   .boot-prompt {
     color: #9fe3ec;
@@ -300,11 +296,6 @@ html.theming *::after {
   }
   60% {
     box-shadow: 0 0 0 6px transparent;
-  }
-}
-@keyframes flash {
-  from {
-    color: var(--coral);
   }
 }
 @keyframes blink {

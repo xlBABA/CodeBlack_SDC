@@ -181,12 +181,3 @@ export function pressPop(el: Element) {
   const target = el.querySelector('svg') ?? el
   gsap.fromTo(target, { scale: 0.72 }, { scale: 1, duration: 0.55, ease: EASE.pop, overwrite: true })
 }
-
-/** A value just changed: nudge it and flash it coral. */
-export function flashValue(el: HTMLElement) {
-  el.classList.remove('is-flash')
-  void el.offsetWidth
-  el.classList.add('is-flash')
-  if (prefersReducedMotion()) return
-  gsap.fromTo(el, { y: -4, scale: 1.06 }, { y: 0, scale: 1, duration: 0.55, ease: 'back.out(2.4)', overwrite: 'auto', clearProps: 'transform' })
-}
