@@ -49,9 +49,7 @@ It did not write any files in the repo.
 ## Decisions I made (not Claude)
 - Picked the 4 starter roles (Data Analyst, Financial Analyst, Mechanical Engineer, Public Health Analyst).
 - Chose GitHub as the trend source, and set its rules: compare new repos in the last 30 days with the previous 30, use a >15% threshold, show `cached` or `unavailable` on failure (never fake `live`), and cover only skills with a clear topic.
-- Caught that `data_mode` should be `cached`, not `live`.
 - Replaced the SEC project with the UCI credit-card dataset, kept the diabetes project with a data note, and accepted a tutorial as the CAD project's source.
-- Chose the official product name "Mustaqbal AI".
 - Chose the 4 extra roles and confirmed their O*NET mappings: Accountant = "Accountants and Auditors", Environmental Scientist = "Environmental Scientists and Specialists, Including Health".
 - Asked for Python to be added to Data Analyst after checking O*NET, and approved (with Hussain) the 12 `not_equivalent` skill pairs.
 - Dropped the UCI Air Quality dataset, because its page says it is for research use only and this repo is public under Apache-2.0. Required the replacement to be CC BY, CC0 or public domain, with the licence read from the dataset's own page.
