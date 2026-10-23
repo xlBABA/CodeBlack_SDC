@@ -6,7 +6,8 @@ import pytest
 from app.services.hussain_matching import Matcher, SkillNormalizer
 from app.services.hussain_matching.matcher import DEGRADED_CAVEAT
 from app.services.hussain_matching.embeddings import DEFAULT_MODEL, EmbeddingProvider
-from app.services.hussain_matching.normalizer import Interpretation
+from app.services.hussain_matching.embeddings import AMBIGUITY_MARGIN
+from app.services.hussain_matching.normalizer import Ambiguous, Interpretation
 from app.services.hussain_matching.runpod_client import RunPodEmbeddingProvider
 from app.services.hussain_matching.scoring import RELATED_CREDIT, SIMILARITY_THRESHOLD
 
@@ -28,6 +29,8 @@ VECTORS = {
     "Charts and graphs": [1.0, 0.8, 0.0],   # 0.78 with the name, 0.93 with the alias Dashboards
     "Gardening": [0.3, 0.3, -0.9],          # below the threshold for every skill
     "Client work": [0.0, 1.0, 0.5],         # close to both customer skills
+    "Data analysis": [0.62, 0.0, 0.61],     # 0.71 for Data Visualization, 0.70 for Python: too close
+    "Data work": [0.8, 0.0, 0.65],          # 0.78 vs 0.63: both pass the threshold, clear winner
 }
 
 ROLE = {
@@ -282,3 +285,63 @@ def test_runpod_failure_falls_back_without_crashing():
     data = run(p, "Python", "Charts and graphs")
     assert any("not in the supported catalogue" in w for w in data["warnings"])
     assert all(DEGRADED_CAVEAT in m["caveats"] for m in data["matches"])
+
+
+# ---- ambiguity: best and second-best candidate too close ----
+
+def test_two_close_candidates_are_ambiguous_not_mapped():
+    (hit,) = provider().interpret(["Data analysis"])
+    assert isinstance(hit, Ambiguous)
+    (first, s1), (second, s2) = hit.candidates
+    assert (first, second) == ("data_viz", "python")
+    assert s1 - s2 <= AMBIGUITY_MARGIN and min(s1, s2) >= SIMILARITY_THRESHOLD
+
+
+def test_clear_winner_is_still_mapped_even_with_a_second_candidate_above_threshold():
+    (hit,) = provider().interpret(["Data work"])
+    assert hit[0] == "data_viz"
+
+
+def test_ambiguous_text_gets_a_did_you_mean_warning_and_no_credit():
+    data = run(provider(), "Python", "Data analysis")
+    warning = next(w for w in data["warnings"] if "Data analysis" in w)
+    assert "Ambiguous: did you mean Data Visualization or Python?" in warning
+    assert not any(c.startswith("Interpreted") for m in data["matches"] for c in m["caveats"])
+    # scored exactly like a profile without the ambiguous text
+    assert data["matches"][0]["score"] == run(provider(), "Python")["matches"][0]["score"]
+
+
+# ---- dropped skills are visible on every match ----
+
+def test_unrecognised_skills_are_listed_on_every_match():
+    data = run(provider(), "Python", "Gardening", "Data analysis", roles=(ROLE, OTHER_ROLE))
+    expected = ('Not recognised and not used: "Gardening", "Data analysis" '
+                '(ambiguous: Data Visualization or Python?). Try a skill from the list.')
+    assert len(data["matches"]) == 2
+    for m in data["matches"]:
+        assert m["caveats"].count(expected) == 1
+
+
+def test_interpreted_and_exact_skills_are_not_listed_as_unrecognised():
+    data = run(provider(), "Python", "Charts and graphs")
+    assert not any("Not recognised" in c for m in data["matches"] for c in m["caveats"])
+
+
+def test_unrecognised_skills_are_listed_without_an_interpreter_too():
+    data = run(None, "Python", "Charts and graphs")
+    assert 'Not recognised and not used: "Charts and graphs". Try a skill from the list.' in data["matches"][0]["caveats"]
+
+
+def test_a_name_consumed_by_a_confirmed_skill_is_not_reported_as_unrecognised():
+    # "Charts and graphs" would only repeat Data Visualization, which the student already confirmed
+    data = run(provider(), "Data Visualization", "Charts and graphs")
+    assert not any("Not recognised" in c for m in data["matches"] for c in m["caveats"])
+
+
+def test_hints_are_inside_the_caveat_so_they_reach_the_app():
+    skills = SKILLS + [{"skill_id": "accounting_software", "name": "Accounting Software"}]
+    matcher = Matcher(SkillNormalizer(skills), provider())
+    data = matcher.match_roles(student("Python", "Accounting", "Data analysis", "Gardening"), [ROLE], limit=10)
+    assert ('Not recognised and not used: "Accounting" (did you mean Accounting Software?), '
+            '"Data analysis" (ambiguous: Data Visualization or Python?), "Gardening". '
+            "Try a skill from the list.") in data["matches"][0]["caveats"]
