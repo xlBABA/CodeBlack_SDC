@@ -13,7 +13,7 @@ type Phase =
   | { name: 'idle' }
   | { name: 'uploading'; sent: number }
   | { name: 'processing' }
-  | { name: 'error'; message: string; file?: File; unavailable?: boolean }
+  | { name: 'error'; title: string; message: string; file?: File; unavailable?: boolean }
 
 function checkFile(file: File) {
   const pdf = PDF_TYPES.includes(file.type) || (file.type === '' && /\.pdf$/i.test(file.name))
@@ -25,12 +25,13 @@ function checkFile(file: File) {
 }
 
 function failure(error: unknown, file: File): Extract<Phase, { name: 'error' }> {
-  if (!(error instanceof ApiError)) return { name: 'error', message: 'Something went wrong while reading your CV.', file }
+  if (!(error instanceof ApiError)) return { name: 'error', title: 'Something went wrong', message: 'Something went wrong while reading your CV.', file }
   // the CV parser is not deployed on every server yet
-  if (error.status === 404 || error.status === 405) return { name: 'error', message: 'CV upload is not available on this server yet.', unavailable: true }
+  if (error.status === 404 || error.status === 405) return { name: 'error', title: 'CV upload unavailable', message: 'CV upload is not available on this server yet.', unavailable: true }
   // the file itself was rejected (INVALID_CV_FILE, FILE_TOO_LARGE, VALIDATION_ERROR); sending it again won't help
-  if (error.status === 413 || error.status === 422) return { name: 'error', message: error.message }
-  return { name: 'error', message: error.message, file }
+  if (error.status === 413 || error.status === 422) return { name: 'error', title: 'We couldn’t read that file', message: error.message }
+  const title = error.kind === 'network' || error.kind === 'timeout' ? 'Can’t reach the server' : 'Something went wrong'
+  return { name: 'error', title, message: error.message, file }
 }
 
 /** Drop zone and upload states for POST /cv/parse. The file stays in memory and is never stored. */
@@ -47,7 +48,7 @@ export function CvUpload({ onParsed, autoFocus }: { onParsed: (result: APIEnvelo
   const send = async (file: File) => {
     const problem = checkFile(file)
     if (problem) {
-      setPhase({ name: 'error', message: problem })
+      setPhase({ name: 'error', title: 'We couldn’t read that file', message: problem })
       return
     }
     const controller = new AbortController()
@@ -132,7 +133,7 @@ export function CvUpload({ onParsed, autoFocus }: { onParsed: (result: APIEnvelo
         <div role="alert" className="flex items-start gap-3 rounded-tile border border-line bg-well/50 p-4">
           <TriangleAlert className="mt-0.5 size-5 flex-none text-tomato" aria-hidden />
           <div className="min-w-0 flex-1">
-            <p className="font-bold">{phase.unavailable ? 'CV upload unavailable' : 'We couldn’t read that file'}</p>
+            <p className="font-bold">{phase.title}</p>
             <p className="text-muted-foreground">
               {phase.message} {phase.unavailable && 'Please fill in the form instead.'}
             </p>
