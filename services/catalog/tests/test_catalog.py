@@ -1,15 +1,16 @@
 """Run from the repo root: python -m services.catalog.tests.test_catalog"""
 import json
+import re
+import subprocess
 import sys
 from pathlib import Path
 
 from services.catalog import get_role, get_roles
 
+ROOT = Path(__file__).resolve().parents[3]
 SKILLS = {
     s["skill_id"]: s["name"]
-    for s in json.loads(
-        (Path(__file__).resolve().parents[3] / "data" / "skills.json").read_text(encoding="utf-8")
-    )["skills"]
+    for s in json.loads((ROOT / "data" / "skills.json").read_text(encoding="utf-8"))["skills"]
 }
 
 # Fields Hussain's matcher reads (services/matching/README.md "Data expected from Jawad")
@@ -21,18 +22,76 @@ MATCHER_KEYS = {
 
 ORIGINAL_4 = ["data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst"]
 ADDED_4 = ["software_developer", "accountant", "civil_engineer", "environmental_scientist"]
+ADDED_22 = [  # O*NET code in each role's onet_soc_code; see docs/source-register.md
+    "data_scientist", "statistician", "operations_research_analyst", "web_developer", "database_administrator",
+    "information_security_analyst", "computer_systems_analyst", "electrical_engineer", "industrial_engineer",
+    "chemical_engineer", "aerospace_engineer", "surveyor", "environmental_engineer", "biomedical_engineer",
+    "urban_regional_planner", "hydrologist", "management_analyst", "budget_analyst", "financial_risk_specialist",
+    "actuary", "market_research_analyst", "logistician",
+]
 
 
 def test_original_four_roles_still_exist_unchanged_order():
     assert [r["role_id"] for r in get_roles()][:4] == ORIGINAL_4
 
 
-def test_all_eight_roles_are_verified_and_unique():
+def test_all_thirty_roles_are_verified_and_unique():
     roles = get_roles()
     ids = [r["role_id"] for r in roles]
-    assert ids == ORIGINAL_4 + ADDED_4
-    assert len(set(ids)) == len(ids)
+    assert ids == ORIGINAL_4 + ADDED_4 + ADDED_22
+    assert len(ids) == 30 and len(set(ids)) == len(ids)
     assert all(r["verified"] is True for r in roles)
+    assert all(re.fullmatch(r"[a-z]+(_[a-z]+)*", i) for i in ids)
+
+
+def test_first_eight_roles_are_byte_identical_to_the_base():
+    # base = feat/jawad-data-fixes @ 9817054, the commit this branch started from
+    base = subprocess.run(["git", "show", "98170543e1210c57d21d3f19d96ab44247810ea1:data/roles.json"],
+                          cwd=ROOT, capture_output=True, check=True).stdout.replace(b"\r\n", b"\n")
+    now = (ROOT / "data" / "roles.json").read_bytes().replace(b"\r\n", b"\n")
+    old_records = base[: base.rindex(b"\n]")]  # everything before the closing bracket
+    assert now.startswith(old_records + b",\n"), "an old role record changed"
+    assert json.loads(now)[:8] == json.loads(base)
+
+
+def test_every_role_has_four_skills_a_required_one_and_its_own_onet_source():
+    roles = json.loads((ROOT / "data" / "roles.json").read_text(encoding="utf-8"))
+    register = (ROOT / "docs" / "source-register.md").read_text(encoding="utf-8")
+    codes = [r["onet_soc_code"] for r in roles]
+    assert len(codes) == len(set(codes)), "two roles use the same O*NET occupation"
+    for r in roles:
+        assert len(r["required_skills"]) >= 4, r["role_id"]
+        assert any(s["required"] for s in r["required_skills"]), r["role_id"]
+        assert set(SKILLS) >= {s["skill_id"] for s in r["required_skills"]}, r["role_id"]
+        assert r["source_id"] == "onet_" + r["onet_soc_code"].replace("-", "_").replace(".", "_"), r["role_id"]
+        assert r["evidence_ids"] == [r["source_id"]], r["role_id"]
+        row = next(l for l in register.splitlines() if l.startswith(f"| {r['source_id']} |"))
+        assert f"https://www.onetonline.org/link/summary/{r['onet_soc_code']} |" in row, r["role_id"]
+        assert f"({r['onet_soc_code']}) |" in row and r["onet_title"] in row, r["role_id"]
+        assert "CC BY 4.0" in row, r["role_id"]
+
+
+def test_new_roles_say_which_numbers_are_team_estimates():
+    for r in get_roles()[8:]:
+        assert "team estimates" in r["notes"], r["role_id"]
+        assert r.get("skills_coverage") in (None, "limited"), r["role_id"]
+        if r.get("skills_coverage") == "limited":
+            assert "nothing is invented" in r["notes"] or "NOT yet populated" in r["notes"], r["role_id"]
+    sdg = json.loads((ROOT / "data" / "sdg_mappings.json").read_text(encoding="utf-8"))
+    new_rows = [m for m in sdg["role_sdg_mappings"] if m["role_id"] in ADDED_22]
+    assert {m["role_id"] for m in new_rows} == set(ADDED_22)
+    assert all(m["reason"].endswith("Team estimate.") for m in new_rows)
+
+
+def test_every_sdg_row_points_at_a_real_role_or_skill():
+    sdg = json.loads((ROOT / "data" / "sdg_mappings.json").read_text(encoding="utf-8"))
+    role_ids = {r["role_id"] for r in get_roles()}
+    for m in sdg["role_sdg_mappings"]:
+        assert m["role_id"] in role_ids and 1 <= m["sdg_id"] <= 17, m
+    for m in sdg["skill_sdg_mappings"]:
+        assert m["skill_id"] in SKILLS and 1 <= m["sdg_id"] <= 17, m
+    pairs = [(m["role_id"], m["sdg_id"]) for m in sdg["role_sdg_mappings"]]
+    assert len(pairs) == len(set(pairs)), "duplicate role/SDG row"
 
 
 def test_no_existing_id_was_removed_or_renamed():
@@ -59,11 +118,15 @@ def test_no_existing_id_was_removed_or_renamed():
     } <= projects
 
 
-def test_two_roles_per_industry_bucket():
+def test_roles_per_industry_bucket():
     from collections import Counter
-    assert Counter(r["industry_category"] for r in get_roles()) == {
+    assert Counter(r["industry_category"] for r in get_roles()[:8]) == {
         "Technology & AI": 2, "Business & Finance": 2,
         "Engineering & Manufacturing": 2, "Healthcare & Sustainability": 2,
+    }
+    assert Counter(r["industry_category"] for r in get_roles()) == {
+        "Technology & AI": 9, "Business & Finance": 8,
+        "Engineering & Manufacturing": 7, "Healthcare & Sustainability": 6,
     }
 
 

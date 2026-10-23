@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[3]
 PROJECTS = json.loads((ROOT / "data" / "projects.json").read_text(encoding="utf-8"))["projects"]
 SKILL_IDS = {s["skill_id"] for s in json.loads((ROOT / "data" / "skills.json").read_text(encoding="utf-8"))["skills"]}
 ROLE_IDS = [r["role_id"] for r in json.loads((ROOT / "data" / "roles.json").read_text(encoding="utf-8"))]
+ROLES_WITH_PROJECTS = ROLE_IDS[:8]  # the 22 roles added for the 30-role catalog have no curated projects yet
 REGISTER = (ROOT / "docs" / "source-register.md").read_text(encoding="utf-8")
 REGISTERED = set(re.findall(r"^\| ([a-z0-9_]+) \|", REGISTER, flags=re.M))
 
@@ -41,7 +42,10 @@ def test_get_projects_output_fits_rehans_payload_for_every_role():
     for role_id in ROLE_IDS:
         data = get_projects(role_id, limit=10)
         ProjectRecommendationPayload.model_validate(data)
-        assert 2 <= len(data["projects"]) <= 3, role_id
+        if role_id in ROLES_WITH_PROJECTS:
+            assert 2 <= len(data["projects"]) <= 3, role_id
+        else:
+            assert data == {"projects": []}, role_id  # a visible gap, never a borrowed project
 
 
 def test_every_skill_id_exists():
@@ -73,7 +77,7 @@ def test_milestones_are_4_to_6_plain_strings():
 def test_ids_unique_and_roles_real():
     ids = [p["project_id"] for p in PROJECTS]
     assert len(ids) == len(set(ids))
-    assert {p["role_id"] for p in PROJECTS} == set(ROLE_IDS)
+    assert {p["role_id"] for p in PROJECTS} == set(ROLES_WITH_PROJECTS)
 
 
 def test_nothing_is_called_trending():
