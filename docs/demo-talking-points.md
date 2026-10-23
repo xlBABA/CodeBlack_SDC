@@ -5,13 +5,11 @@
 Say this out loud. Every app claim here was checked on the deployed API (https://mustaqbal-ai.replit.app) with GET requests.
 
 > "My part is the data behind Mustaqbal AI.
-> Our catalog has 30 career roles and 20 skills.
-> They all come from O*NET, the US Department of Labor's job database.
-> Each role has free learning resources, and the first 8 have portfolio projects.
+> Our catalog has 30 career roles and 20 skills, all from O*NET, the US Department of Labor's job database.
+> Each role has free learning resources; the first 8 have portfolio projects.
 > Every one has a dated, registered source.
-> Every role and skill is linked to a UN Sustainable Development Goal, with a reason.
-> The app shows this for its first 8 roles.
-> That data is labelled cached.
+> Every role and skill links to a UN Sustainable Development Goal, with a reason.
+> The app shows the first 8 roles, labelled cached.
 > Trends are different.
 > The app's trend data is a placeholder, labelled fixture, not live.
 > Our GitHub snapshots exist, but are not connected yet.
@@ -83,7 +81,7 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 - "We only link to datasets. We never copy them."
 
 **7. Close (about 10 s)**
-- "Every source is in our source register with its date and licence. All 38 links were checked on 22 October 2026."
+- "Every source is in our source register with its date and licence. All 85 links were checked on 23 October 2026 (UTC)."
 - "Where something is our estimate, or not in the app yet, we say so."
 
 ---
