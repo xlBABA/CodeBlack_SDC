@@ -101,6 +101,10 @@ fails, matching continues with exact skills only and every match gets the caveat
 Pass `not_equivalent=[[id, id], ...]` to the adapter to apply the exclusion list.
 
 ### Interpreting unknown skills
+Before any embedding is used, two text rules apply to a name that is not a catalogue name or alias:
+1. **Contains one known skill** ("Python (pandas)", "Advanced Excel" when it is not an alias): mapped to that skill with the caveat `Interpreted "Python (pandas)" as Python (it contains "Python"), partial credit; please confirm.` Same partial credit as an embedding match. Works without any model. Two or more known skills in one text ("Python and SQL") are not guessed.
+2. **Only part of a longer skill name** ("Accounting" in "Accounting Software"): never mapped, not even by embeddings. The usual warning gets `Did you mean Accounting Software?` (at most 3 suggestions).
+
 A profile skill that is not in the catalogue (e.g. "Charts and graphs") is no longer simply dropped when the similarity provider can embed free text
 (`EmbeddingProvider.interpret()`, inherited by `RunPodEmbeddingProvider`). Its text is embedded once per request (one batch, cached in memory) and compared with every
 catalogue skill (max cosine over name and aliases). If the best score is >= `SIMILARITY_THRESHOLD` (0.60) the skill is treated as held, but at `RELATED_CREDIT` (0.5) of normal credit,
@@ -109,6 +113,7 @@ in both the skills and transferable components, because it is an interpretation 
 - Every match whose role uses the skill gets the caveat `Interpreted "Charts and graphs" as Data Visualization (similarity 0.61), partial credit; please confirm.`, and the same text is returned in `warnings`.
 - `not_equivalent`: free text has no skill_id, so the list is applied to the candidates. If the best skill and another skill above the threshold are a `not_equivalent` pair, the text is ambiguous and is not mapped.
 - Without a provider, with a plain similarity function, or if the embedding call fails, behaviour is unchanged: the skill is dropped with the usual "not in the supported catalogue" warning.
+- A role flagged `skills_coverage: "limited"` (the catalogue misses its main tools) gets the caveat `Limited skills coverage: ...`; a profile with no recognised skills gets `No recognised skills in the profile; skill coverage is 0.` on every match.
 - The explanation counts only confirmed skills ("2 of 4 core skills (plus 1 interpreted ...)").
 
 ### Threshold calibration

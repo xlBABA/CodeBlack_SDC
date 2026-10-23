@@ -68,6 +68,7 @@ def role_to_matcher_format(role: Any) -> dict:
         "transferable_interests": list(r.get("transferable_interests") or []),
         "prerequisites": prerequisites,
         "evidence_ids": list(r.get("evidence_ids") or []),
+        "skills_coverage": r.get("skills_coverage"),  # "limited" when the catalogue misses the role's main tools
     }
 
 

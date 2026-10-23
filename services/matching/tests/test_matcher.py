@@ -203,3 +203,31 @@ def test_similarity_gives_partial_credit_only(normalizer, roles):
 def test_adapter_function_returns_role_matches(normalizer, cs_student, roles):
     result = match(cs_student, roles, "moderate", [], normalizer=normalizer)
     assert isinstance(result, list) and result[0]["role_id"] == "data_analyst"
+
+
+# ---- caveats added by the 30-role review ----
+
+def test_limited_coverage_roles_say_so(matcher, cs_student, roles):
+    from services.matching.matcher import LIMITED_COVERAGE_CAVEAT
+    limited = {**roles[0], "role_id": "limited_role", "skills_coverage": "limited"}
+    data = matcher.match_roles(cs_student, [limited, roles[1]], limit=5)
+    by_id = {m["role_id"]: m for m in data["matches"]}
+    assert LIMITED_COVERAGE_CAVEAT in by_id["limited_role"]["caveats"]
+    assert LIMITED_COVERAGE_CAVEAT not in by_id[roles[1]["role_id"]]["caveats"]
+
+
+def test_limited_coverage_flag_survives_the_adapter_conversion():
+    from services.matching.backend_adapter import role_to_matcher_format
+    role = {"role_id": "r", "role_title": "R", "skills_coverage": "limited",
+            "required_skills": [{"skill_id": "sql", "name": "SQL", "weight": 1.0}]}
+    assert role_to_matcher_format(role)["skills_coverage"] == "limited"
+    assert role_to_matcher_format({**role, "skills_coverage": None})["skills_coverage"] is None
+
+
+def test_profile_with_no_recognised_skills_explains_the_zero(matcher, roles):
+    from services.matching.matcher import NO_SKILLS_CAVEAT
+    for profile in ({"skills": []}, {"skills": [{"name": "Cooking"}]}):
+        matches = matcher.match_roles(profile, roles, limit=5)["matches"]
+        assert matches and all(NO_SKILLS_CAVEAT in m["caveats"] for m in matches)
+    ok = matcher.match_roles({"skills": [{"name": "SQL"}]}, roles, limit=5)["matches"]
+    assert all(NO_SKILLS_CAVEAT not in m["caveats"] for m in ok)
