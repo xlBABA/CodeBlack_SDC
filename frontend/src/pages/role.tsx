@@ -156,8 +156,8 @@ export default function Role() {
             )}
 
             {tab === 'trends' && (
-              <TabFrame title="Skill trends" subtitle={`Dated demand signals for ${title}`} icon={TrendingUp} state={trends[0]} retry={trends[1]}>
-                {(d) => (d.signals?.length ? <TrendSnapshot trends={d} /> : <EmptyState title="No signals yet" body="No dated trend signals have been collected for this role." />)}
+              <TabFrame title="Skill trends" subtitle={`Dated GitHub developer-activity signals for ${title} skills`} icon={TrendingUp} state={trends[0]} retry={trends[1]}>
+                {(d) => <TrendSnapshot trends={d} />}
               </TabFrame>
             )}
 
