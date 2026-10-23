@@ -110,6 +110,21 @@ def test_data_analyst_has_python_with_onet_source():
     assert "onet_15_2051_01" in next(s for s in skills["skills"] if s["skill_id"] == "python")["source_ids"]
 
 
+def test_not_equivalent_pairs_use_real_skill_ids():
+    root = Path(__file__).resolve().parents[3]
+    doc = json.loads((root / "data" / "skill_not_equivalent.json").read_text(encoding="utf-8"))
+    assert list(doc) == ["not_equivalent"]  # exactly Hussain's format, nothing else
+    pairs = doc["not_equivalent"]
+    for pair in pairs:
+        assert len(pair) == 2 and pair[0] != pair[1], pair
+        assert set(pair) <= set(SKILLS), set(pair) - set(SKILLS)
+    assert len({frozenset(p) for p in pairs}) == len(pairs), "duplicate pair"
+    assert not {frozenset(p) for p in pairs} & {frozenset(["programming", "python"]), frozenset(["programming", "javascript"])}
+    register = (root / "docs" / "source-register.md").read_text(encoding="utf-8")
+    for a, b in pairs:  # every pair has its reason in the source register
+        assert f"| {a} / {b} |" in register, (a, b)
+
+
 def test_get_roles_does_not_change_the_data_file():
     before = (Path(__file__).resolve().parents[3] / "data" / "roles.json").read_text(encoding="utf-8")
     get_roles()[0]["required_skills"].clear()

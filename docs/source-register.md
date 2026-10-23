@@ -66,6 +66,25 @@ O*NET does **not** publish a 0-100 importance number for individual technology/s
 
 **3. The `required: true/false` flag itself.** O*NET has no "required vs optional" field — this split is our own product design choice (to keep each role's core list short). It is a **team estimate** for every skill in every role.
 
+## Close-but-different skill pairs (`data/skill_not_equivalent.json`)
+
+Hussain's matcher uses these pairs to give a similarity of 0, so one skill never earns credit for the other. They are team judgments, based on what each skill means. Their similarity scores were **not** measured by us. `programming`/`python` and `programming`/`javascript` are deliberately **not** listed, because a Python or JavaScript skill is a kind of programming.
+
+| pair | why they are different |
+|---|---|
+| python / javascript | Two different programming languages |
+| python / matlab | Both used for scientific computing, but different languages and tools |
+| excel / vba | VBA is Excel's macro language; using Excel is not the same as writing VBA |
+| excel / accounting_software | A spreadsheet is not a bookkeeping package |
+| accounting_software / financial_analysis_software | Bookkeeping tools vs financial analysis and planning tools |
+| critical_thinking / complex_problem_solving | Two separate O*NET skills with separate importance scores |
+| complex_problem_solving / systems_analysis | Two separate O*NET skills |
+| mathematics / science | Two separate O*NET skills |
+| git / programming | Version control is not writing code |
+| cad_software / gis | Drawing parts and buildings vs mapping places |
+| data_visualization / gis | Charts and dashboards vs maps |
+| matlab / analytical_scientific_software | MATLAB vs statistics packages (SPSS, SAS, Stata) |
+
 ## Learning-resource hours (`data/resources.json` and roadmap steps)
 
 Every roadmap step has a numeric `estimated_hours` (Rehan's `RoadmapStep` requires a number >= 0) and an `hours_basis` label saying where the number came from:
