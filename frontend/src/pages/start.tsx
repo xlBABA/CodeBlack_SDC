@@ -115,6 +115,7 @@ function InterestsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) 
     <div className="grid gap-5">
       <fieldset>
         <legend className={labelCls}>What draws you? Pick any that fit.</legend>
+        <p className="mb-3 text-sm text-muted-foreground">Interests don't change scores yet.</p>
         <div className="flex flex-wrap gap-2">
           {options.map((i) => (
             <Chip key={i} active={draft.interests.includes(i)} onClick={() => toggle(i)}>
