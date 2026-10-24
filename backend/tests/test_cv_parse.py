@@ -713,3 +713,30 @@ def test_invalid_top_level_name_or_summary_becomes_none_and_keeps_the_rest(clien
         assert data["draft"][field] is None
     assert {s["skill_id"] for s in data["draft"]["mapped_skills"]} == {"python", "sql"}
     assert data["draft"]["education"]
+
+
+def test_evidence_must_match_whole_words():
+    from app.services.cv_extraction_service import _evidence_is_supported
+
+    text = "Digital marketing intern. Built a JavaScript page with C++ and Python (pandas)."
+    assert _evidence_is_supported("git", text) is False  # inside "Digital"
+    assert _evidence_is_supported("Java", text) is False  # inside "JavaScript"
+    assert _evidence_is_supported("Script", text) is False
+    assert _evidence_is_supported("JavaScript", text) is True
+    assert _evidence_is_supported("C++", text) is True
+    assert _evidence_is_supported("Python (pandas)", text) is True
+    assert _evidence_is_supported("marketing intern.", text) is True
+
+
+def test_skill_whose_evidence_is_only_part_of_a_word_is_flagged_for_review(client: TestClient):
+    pdf = _build_text_pdf("Digital marketing intern who wrote Python scripts")
+    glm_json = {"skills": [{"name": "Git", "evidence": "git"}, {"name": "Python", "evidence": "Python"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        draft = _post_cv(client, pdf).json()["data"]["draft"]
+
+    assert [s["skill_id"] for s in draft["mapped_skills"]] == ["python"]
+    assert [s["name"] for s in draft["skills_requiring_review"]] == ["Git"]
+    assert [s["skill_id"] for s in draft["suggested_profile"]["skills"]] == ["python"]

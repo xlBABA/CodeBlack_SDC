@@ -319,17 +319,20 @@ def _normalize_whitespace(text: str) -> str:
 
 
 def _evidence_is_supported(evidence: str | None, cv_text: str) -> bool:
-    """True only if `evidence` is a real, non-trivial, word-for-word
-    (modulo whitespace) substring of the locally-extracted CV text.
-    Never a fuzzy/semantic match — an unrelated or hallucinated quote
-    must fail this check (requirement 4)."""
+    """True only if `evidence` appears word-for-word (modulo whitespace
+    and case) in the locally-extracted CV text, as whole words — "git"
+    inside "Digital" or "Java" inside "JavaScript" does not count (the
+    same word-boundary rule as SkillNormalizer.find_in_text). Never a
+    fuzzy/semantic match — an unrelated or hallucinated quote must fail
+    this check (requirement 4)."""
     if not evidence:
         return False
     normalized_evidence = _normalize_whitespace(evidence).lower()
     if len(normalized_evidence) < MIN_EVIDENCE_CHARS:
         return False
     normalized_text = _normalize_whitespace(cv_text).lower()
-    return normalized_evidence in normalized_text
+    pattern = r"(?<![a-z0-9])" + re.escape(normalized_evidence) + r"(?![a-z0-9])"
+    return re.search(pattern, normalized_text) is not None
 
 
 def _validate_and_map_skills(
