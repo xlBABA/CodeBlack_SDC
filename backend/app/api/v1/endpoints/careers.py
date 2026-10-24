@@ -216,11 +216,11 @@ def get_matching_provider(settings: Settings = Depends(get_settings)) -> Matchin
         # combination genuinely fixture-free. Fail closed otherwise.
         if not settings.ENABLE_FIXTURES and settings.CATALOG_MODE != "cached":
             raise provider_unavailable(
-                "MatchingProvider (hussain)",
-                "ENABLE_FIXTURES is false and CATALOG_MODE is 'fixture'; "
-                "Hussain's matcher would still depend on fixture role "
-                "data. Set CATALOG_MODE=cached to use real cached role "
-                "data, or leave ENABLE_FIXTURES=true.",
+                "MatchingProvider",
+                "The deterministic matching algorithm is configured to require "
+                "real, non-placeholder role data, but the active role catalogue "
+                "is still a placeholder one. A real cached role catalogue must "
+                "be configured to use this combination.",
             )
         # Milestone 10A: similarity is left unset (None) deliberately —
         # HussainMatchingProvider's own _semantic_similarity() decides per
@@ -262,21 +262,34 @@ def catalog_data_mode(settings: Settings) -> DataMode:
     """The envelope's data_mode for every route that depends on
     get_role_catalog(). Always "fixture" for every CATALOG_MODE/
     MATCHING_MODE combination supported today: even when CATALOG_MODE=
-    cached supplies real, cached O*NET-derived role/skill identifiers,
-    and even when MATCHING_MODE=hussain runs a real (if still unvalidated
-    and "initial team choice") algorithm instead of the fixture one, the
-    actual response content these routes return — match scores and score
-    breakdowns, roadmap resources (FixtureResourceCatalog) and
-    recommended/simulated projects (FixtureProjectCatalog) — is still
-    either fixture-generated or an unvalidated heuristic. A single
-    data_mode value can't mark a response "partly cached, partly
-    fixture"; labelling the whole response "cached" would let that
-    content masquerade as a cached/verified outcome
+    cached supplies real, cached O*NET-derived role/skill identifiers
+    (and, as of Milestone 6D-2D, genuinely real cached roadmap resources
+    and recommended/simulated projects too — CachedResourceCatalog /
+    CachedProjectCatalog, not the Fixture* classes this docstring named
+    before that milestone), and even when MATCHING_MODE=hussain runs a
+    real (if still unvalidated and "initial team choice") algorithm
+    instead of the fixture one, the one thing every response here always
+    shares is a match score — and that score is still either
+    fixture-generated or an unvalidated heuristic, never a verified
+    outcome. A single data_mode value can't mark a response "partly
+    cached, partly fixture"; labelling the whole response "cached" would
+    let the score itself masquerade as a cached/verified outcome
     (REHAN_BACKEND_INTEGRATION.md: "don't let dummy scores accidentally
-    masquerade as real outcomes"). The cached role/skill provenance and
-    the active matching algorithm are both disclosed explicitly via
-    catalog_provenance_warnings()/matching_mode_warning() instead of via
-    this enum value.
+    masquerade as real outcomes"). The cached role/skill/resource/project
+    provenance and the active matching algorithm are both disclosed
+    explicitly via catalog_provenance_warnings()/matching_mode_warning()
+    (and roadmaps.py/projects.py's own resource_provenance_warnings()/
+    project_provenance_warnings()) instead of via this enum value.
+
+    Milestone (Jawad fix, 2026-10-25): the live deployed app's frontend
+    renders data_mode="fixture" as a generic "Demo data" badge
+    ("Example data bundled with the prototype, not live") for every
+    route, including this one — accurate for the score, but misleading
+    about the role/skill/resource/project data underneath it when
+    CATALOG_MODE=cached, which is real and sourced, not example data.
+    This is a frontend labelling gap, not a bug in this function or in
+    the underlying data; the fix belongs in the frontend's
+    DataModeBadge component (components/data-mode-badge.tsx), not here.
     """
     return "fixture"
 

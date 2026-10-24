@@ -47,9 +47,9 @@ def project_provenance_warnings(settings: Settings) -> list[str]:
     if settings.CATALOG_MODE != "cached":
         return []
     return [
-        "CATALOG_MODE=cached: the projects in this response come from "
-        "Jawad's verified, cached project dataset — real datasets/"
-        "tutorials and team-estimated hours, not fixture placeholders."
+        "The projects in this response come from a real, cached project "
+        "dataset — real datasets/tutorials and team-estimated hours, not "
+        "placeholder data."
     ]
 
 

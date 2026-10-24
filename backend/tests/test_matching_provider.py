@@ -94,13 +94,22 @@ def test_score_breakdown_values_within_0_100():
             assert 0.0 <= value <= 100.0
 
 
-def test_caveats_disclaim_hiring_prediction_and_fixture_status():
+def test_caveats_disclaim_hiring_prediction_and_illustrative_status():
+    """Milestone (Jawad fix, 2026-10-25): the caveat text used to say
+    "Fixture role catalog ... pending Jawad's verified 30-role dataset
+    and Hussain's real scoring model" — internal jargon, a teammate's
+    name, and (once that dataset and model existed) factually stale. It
+    must now say the same thing in student-safe, always-true terms: this
+    specific provider's scoring is illustrative/unvalidated, regardless
+    of which role catalog it happens to be scoring."""
     profile = _profile()
     result = FixtureMatchingProvider().match(profile, [DATA_ANALYST], None, [])[0]
 
     joined = " ".join(result.caveats).lower()
-    assert "fixture" in joined
+    assert "illustrative" in joined or "unvalidated" in joined
     assert "hiring" in joined
+    assert "jawad" not in joined
+    assert "hussain" not in joined
 
 
 def test_scenario_id_adds_caveat_without_changing_score():

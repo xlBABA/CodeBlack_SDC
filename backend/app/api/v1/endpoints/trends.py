@@ -27,8 +27,7 @@ _FIXTURE_WARNING = (
     "the contract shape, not sourced evidence or live job-market data."
 )
 _CACHED_WARNING = (
-    "CATALOG_MODE=cached: these are Jawad's real, dated, cached GitHub "
-    "developer-activity signals (app/data/cached/trend_snapshots) — "
+    "These are real, dated, cached GitHub developer-activity signals — "
     "GitHub repository creation/activity volume, NOT verified hiring "
     "demand or job vacancies. Not every skill has a covered signal; see "
     "each signal's confidence_note for its exact source and retrieval date."

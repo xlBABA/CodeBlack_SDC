@@ -93,8 +93,8 @@ def _explanation(matched: list[SkillRef], total_required: int) -> str:
 
 def _caveats(scenario_id: str | None, optional_missing: list[SkillRef]) -> list[str]:
     caveats = [
-        "Fixture role catalog and deterministic matching logic; pending "
-        "Jawad's verified 30-role dataset and Hussain's real scoring model.",
+        "Scores come from an illustrative, unvalidated matching algorithm "
+        "— an initial team choice, not a validated model.",
         "Score is an estimated profile alignment, not a hiring probability.",
     ]
     if optional_missing:

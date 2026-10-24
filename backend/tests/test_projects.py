@@ -67,6 +67,35 @@ def test_recommend_unknown_role_id_returns_honest_empty_catalog(client: TestClie
     assert body["warnings"]
 
 
+def test_uncovered_role_warning_never_names_a_teammate_and_states_real_coverage(client: TestClient):
+    """Milestone (Jawad fix, 2026-10-25): the "no projects for this role"
+    warning used to say "pending Jawad's verified project catalog" —
+    internal-sounding and, under CATALOG_MODE=cached, inaccurate (a real,
+    verified catalog already exists; it just doesn't cover every role
+    yet). It must now disclose the real, current role coverage instead,
+    with no teammate name."""
+    from app.api.v1.endpoints.careers import get_settings
+    from app.core.config import Settings
+
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        _env_file=None, CATALOG_MODE="cached", MATCHING_MODE="fixture", ENABLE_FIXTURES=True
+    )
+    try:
+        response = client.post(
+            "/api/v1/projects/recommend", json={"profile": EMPTY_PROFILE, "role_id": "surveyor"}
+        )
+    finally:
+        app.dependency_overrides.pop(get_settings, None)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["projects"] == []
+    own_warning = next(w for w in body["warnings"] if "surveyor" in w)
+    assert "jawad" not in own_warning.lower()
+    assert "pending" not in own_warning.lower()
+    assert "8 role" in own_warning  # the real cached catalog's current coverage
+
+
 def test_project_catalog_dependency_is_overridable(client: TestClient):
     class EmptyProjectCatalog:
         def list_projects(self):

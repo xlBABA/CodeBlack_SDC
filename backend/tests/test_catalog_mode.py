@@ -174,7 +174,14 @@ def test_cached_mode_provenance_warning_propagates_to_roadmap_and_projects(clien
     """All five matching-dependent endpoints share the same
     catalog_data_mode()/catalog_provenance_warnings() helpers — data_mode
     stays "fixture" everywhere, and the cached-input disclosure appears
-    consistently, not just on /careers/match."""
+    consistently, not just on /careers/match.
+
+    Milestone (Jawad fix, 2026-10-25): project_provenance_warnings() used
+    to say "not fixture placeholders" — internal jargon. It now says "not
+    placeholder data" instead, so the literal word "fixture" is no longer
+    guaranteed in the projects response specifically (it still appears on
+    roadmap, from a different, untouched source); check for the intended
+    disclosure — real/cached data, no internal jargon — directly instead."""
     _override_settings(CATALOG_MODE="cached")
     try:
         roadmap = client.post(
@@ -191,7 +198,11 @@ def test_cached_mode_provenance_warning_propagates_to_roadmap_and_projects(clien
     assert any("cached" in w.lower() for w in roadmap.json()["warnings"])
     assert any("cached" in w.lower() for w in projects.json()["warnings"])
     assert any("fixture" in w.lower() for w in roadmap.json()["warnings"])
-    assert any("fixture" in w.lower() for w in projects.json()["warnings"])
+    assert any("placeholder" in w.lower() for w in projects.json()["warnings"])
+    for warnings in (roadmap.json()["warnings"], projects.json()["warnings"]):
+        joined = " ".join(warnings).lower()
+        assert "jawad" not in joined
+        assert "catalog_mode" not in joined
 
 
 def test_cached_mode_all_five_matching_dependent_endpoints_stay_fixture_labeled(client: TestClient):

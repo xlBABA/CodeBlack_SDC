@@ -14,7 +14,7 @@ from app.services.sdg_catalog import SdgCatalogProvider
 
 _DEFAULT_PROVENANCE_WARNING = (
     "Illustrative demonstration SDG mappings only; not a United Nations "
-    "endorsement or official certification, and not yet Jawad's verified "
+    "endorsement or official certification, and not yet a verified "
     "role/skill SDG dataset."
 )
 
