@@ -21,8 +21,8 @@
 |---|---|
 | GitHub Repository | https://github.com/xlBABA/CodeBlack_SDC |
 | Live Demo | https://mustaqbal-ai.replit.app |
-| RunPod Endpoints | Embedding worker `f0phohhegtydji` (ours, deployed); GLM-5.3 Public Endpoint `b1dd8hy2hqo1nb` (RunPod sponsor-provided) — see [How We Use RunPod](#how-we-use-runpod) |
-| Slide Deck | https://canva.link/ineqa78jgovsc3l (link confirmed reachable, HTTP 200 — content not independently reviewed in this session) |
+| RunPod Endpoints | https://api.runpod.ai/v2/f0phohhegtydji |
+| Slide Deck | https://canva.link/pf4g0a1ofti915u |
 | Demo Video | **TODO:** `[ADD_DEMO_VIDEO_URL]` — not yet supplied |
 
 ---
