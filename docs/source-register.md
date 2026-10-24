@@ -157,7 +157,7 @@ All `required` flags are team estimates (cognitive skills with a bucket of 4 or 
 
 **Limited coverage.** `skills_coverage` is now `"limited"`: our 20-skill catalog cannot fully represent epidemiology-specific expertise. O*NET lists Knowledge of Biology (82) and Medicine and Dentistry (75), and epidemiology software (CDC Epi Info, SaTScan and others), for this occupation. None of these is in our catalog, and nothing was invented to fill the gap.
 
-Not changed in this fix: `data/skills.json`. Its `source_ids` for science, analytical_scientific_software and gis do not yet include `onet_19_1041_00`, although O*NET lists them for this occupation.
+Provenance (approved by Rehan, 2026-10-24): `onet_19_1041_00` was added to the `source_ids` of science, analytical_scientific_software and gis in `data/skills.json`, because O*NET lists them for this occupation. No other field or skill changed.
 
 ## Known limitation: mechanical_engineer
 

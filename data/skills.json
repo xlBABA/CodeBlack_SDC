@@ -77,7 +77,7 @@
       "skill_id": "analytical_scientific_software",
       "name": "Analytical/Statistical Software",
       "aliases": ["SPSS", "IBM SPSS Statistics", "SAS", "Stata", "StataCorp Stata"],
-      "source_ids": ["onet_13_2051_00", "onet_15_1252_00", "onet_13_2011_00", "onet_19_2041_00", "onet_15_2051_00", "onet_15_2041_00", "onet_15_2031_00", "onet_15_1254_00", "onet_15_1242_00", "onet_15_1212_00", "onet_15_1211_00", "onet_17_2112_00", "onet_17_2081_00", "onet_17_2031_00", "onet_13_1111_00", "onet_13_2054_00", "onet_15_2011_00", "onet_13_1161_00"]
+      "source_ids": ["onet_13_2051_00", "onet_15_1252_00", "onet_13_2011_00", "onet_19_2041_00", "onet_15_2051_00", "onet_15_2041_00", "onet_15_2031_00", "onet_15_1254_00", "onet_15_1242_00", "onet_15_1212_00", "onet_15_1211_00", "onet_17_2112_00", "onet_17_2081_00", "onet_17_2031_00", "onet_13_1111_00", "onet_13_2054_00", "onet_15_2011_00", "onet_13_1161_00", "onet_19_1041_00"]
     },
     {
       "skill_id": "vba",
@@ -113,13 +113,13 @@
       "skill_id": "gis",
       "name": "GIS",
       "aliases": ["Geographic Information Systems", "Geographic information system GIS software", "ESRI ArcGIS software", "ESRI ArcGIS", "ArcGIS", "QGIS"],
-      "source_ids": ["onet_15_1252_00", "onet_17_2051_00", "onet_19_2041_00", "onet_15_2051_00", "onet_15_2031_00", "onet_15_1254_00", "onet_15_1242_00", "onet_15_1212_00", "onet_15_1211_00", "onet_17_2071_00", "onet_17_1022_00", "onet_17_2081_00", "onet_19_3051_00", "onet_19_2043_00", "onet_13_1111_00", "onet_13_1161_00"]
+      "source_ids": ["onet_15_1252_00", "onet_17_2051_00", "onet_19_2041_00", "onet_15_2051_00", "onet_15_2031_00", "onet_15_1254_00", "onet_15_1242_00", "onet_15_1212_00", "onet_15_1211_00", "onet_17_2071_00", "onet_17_1022_00", "onet_17_2081_00", "onet_19_3051_00", "onet_19_2043_00", "onet_13_1111_00", "onet_13_1161_00", "onet_19_1041_00"]
     },
     {
       "skill_id": "science",
       "name": "Science",
       "aliases": ["Scientific Methods"],
-      "source_ids": ["onet_17_2051_00", "onet_19_2041_00", "onet_15_2041_00", "onet_15_2031_00", "onet_17_2071_00", "onet_17_2041_00", "onet_17_2011_00", "onet_17_2081_00", "onet_17_2031_00", "onet_19_2043_00"]
+      "source_ids": ["onet_17_2051_00", "onet_19_2041_00", "onet_15_2041_00", "onet_15_2031_00", "onet_17_2071_00", "onet_17_2041_00", "onet_17_2011_00", "onet_17_2081_00", "onet_17_2031_00", "onet_19_2043_00", "onet_19_1041_00"]
     }
   ]
 }
