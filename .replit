@@ -24,6 +24,7 @@ ENVIRONMENT = "production"
 CATALOG_MODE = "cached"
 MATCHING_MODE = "hussain"
 ENABLE_FIXTURES = "false"
+RUNPOD_GLM_READ_TIMEOUT_SECONDS = "40"
 
 [deployment]
 build = "python -m venv .venv && PIP_USER=false PIP_CONFIG_FILE=/dev/null .venv/bin/python -m pip install -r backend/requirements.txt && cd frontend && npm ci && npm run build"
