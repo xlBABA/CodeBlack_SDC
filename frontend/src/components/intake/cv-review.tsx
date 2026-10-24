@@ -156,7 +156,7 @@ export function CvReview({ result, initial, onConfirm, onRestart }: CvReviewProp
   const mappedTo = (key: string) => review.skills.find((k) => k.skill_id === mapped[key])
   const mapSkill = (key: string, skill: { skill_id: string; name: string }) => {
     setMapped((m) => ({ ...m, [key]: skill.skill_id }))
-    set({ skills: [...review.skills, { ...skill, proficiency: null }] })
+    set({ skills: [...review.skills, { skill_id: skill.skill_id, name: skill.name, proficiency: null }] })
   }
   const unmap = (key: string) => {
     set({ skills: review.skills.filter((k) => k.skill_id !== mapped[key]) })

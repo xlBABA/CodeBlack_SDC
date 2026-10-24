@@ -79,7 +79,7 @@ export function SkillPicker({ skills, onChange, evidence }: SkillPickerProps) {
 
   return (
     <div className="grid gap-6">
-      <SkillSearch label="Find a skill" exclude={chosen} onPick={(s) => onChange([...skills, { ...s, proficiency: 'beginner' }])} />
+      <SkillSearch label="Find a skill" exclude={chosen} onPick={(s) => onChange([...skills, { skill_id: s.skill_id, name: s.name, proficiency: 'beginner' }])} />
 
       <div>
         <p className={labelCls}>Your skills ({skills.length})</p>
