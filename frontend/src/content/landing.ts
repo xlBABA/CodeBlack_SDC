@@ -1,5 +1,6 @@
 // Landing copy and figures in one place so they can be edited without touching layout.
 import type { CountFormat } from '@/lib/motion'
+import { catalogResources, catalogRoles } from './catalog'
 
 /** One run of a boot line, coloured by kind. */
 export type BootSegment = { text: string; kind?: 'prompt' | 'demo' | 'ok' | 'dim' }
@@ -49,9 +50,14 @@ export const SDG_SOURCE = 'https://www.un.org/sustainabledevelopment'
 export const UN_DISCLAIMER =
   'The content of this publication has not been approved by the United Nations and does not reflect the views of the United Nations or its officials or Member States.'
 
+/** Real catalogue entries (roles.json, resources.json) shown on the landing page, labelled "Example". */
+export const EXAMPLE_LABEL = 'Example'
+export const EXAMPLE_ROLES = catalogRoles(['data_analyst', 'financial_analyst', 'environmental_scientist', 'software_developer'])
+export const EXAMPLE_PATH = catalogResources(['mslearn_tsql_query_modify', 'mslearn_power_bi_prepare_visualize', 'mslearn_python_part1_fundamentals'])
+
 export const CINEMA = {
   intro: 'One profile. Every role compared.',
-  badges: ['Data analyst', 'Financial analyst', 'Environmental scientist', 'Software developer'],
+  badges: EXAMPLE_ROLES.map((r) => r.role_title),
   title: 'Your alignment report',
   offer: ['Alignment estimates, with caveats', 'GitHub activity signals, with sources', 'A roadmap, with hours', 'SDG links, with reasons'],
 }

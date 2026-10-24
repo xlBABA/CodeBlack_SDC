@@ -28,7 +28,7 @@ def test_roadmap_steps_cover_missing_skills_with_resources(client: TestClient):
     step_skill_ids = {s["skill_id"] for s in steps}
     assert step_skill_ids == {"sql", "python", "data_visualization"}
     assert "statistics" not in step_skill_ids
-    assert any("statistics" in w for w in body["warnings"])
+    assert any("Statistics" in w for w in body["warnings"])
 
 
 def test_roadmap_steps_ordered_by_role_weight_descending(client: TestClient):
@@ -65,7 +65,7 @@ def test_roadmap_budget_limit_produces_informational_warning(client: TestClient)
         "/api/v1/roadmaps/generate",
         json={"profile": PROFILE_NO_SKILLS, "role_id": "data_analyst", "budget_limit": 50},
     )
-    assert any("budget_limit" in w for w in response.json()["warnings"])
+    assert any("budget limit" in w.lower() for w in response.json()["warnings"])
 
 
 def test_roadmap_hours_per_week_produces_weeks_estimate_warning(client: TestClient):

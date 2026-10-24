@@ -29,7 +29,6 @@
   "data_mode": "live",
   "generated_at": "2026-10-23T13:57:49Z",
   "warnings": [
-    "Automatic extraction was unavailable, so this is an empty draft for manual entry. Nothing was fabricated in its place.",
-    "Extraction service issue: RunPod API key is not configured."
+    "We couldn't read your CV automatically right now. Please review or fill in your details below."
   ]
 }

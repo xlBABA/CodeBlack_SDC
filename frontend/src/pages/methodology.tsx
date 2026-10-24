@@ -4,11 +4,11 @@ import { Page } from '@/components/page/page'
 import { Card, CardHeader } from '@/components/ui/card'
 
 const PARTS = [
-  ['Skills', 'How many of the role’s core skills you reported, weighted by how central each one is.'],
-  ['Experience', 'Whether your projects and experience mention skills the role needs.'],
-  ['Prerequisites', 'Whether you meet the role’s hard prerequisites, such as a level of study.'],
-  ['Transferable', 'Skills from coursework and projects that carry over to the role.'],
-]
+  ['Skills', 'How many of the role’s core skills you reported, weighted by how central each one is.', true],
+  ['Experience', 'Whether your projects and experience mention skills the role needs.', true],
+  ['Prerequisites', 'Whether you meet the role’s hard prerequisites, such as a level of study.', false],
+  ['Transferable', 'Skills from coursework and projects that carry over to the role.', false],
+] as const
 
 /** How the numbers are made and what they are not. Plain copy; nothing here is fetched. */
 export default function Methodology() {
@@ -22,13 +22,16 @@ export default function Methodology() {
         <Card>
           <CardHeader icon={Calculator} title="The alignment estimate" />
           <p data-enter="item" className="text-muted-foreground">
-            A 0 to 100 score for how closely the skills you reported line up with a role’s core skills. It is calculated by a deterministic matching service, so the same profile always gets the same score, and it
-            is built from four parts:
+            A 0 to 100 score for how closely the skills you reported line up with a role’s core skills. It is calculated by a deterministic matching service. The current score uses skills and experience only; the
+            other two parts are not assessed yet, because no role in the catalogue defines them:
           </p>
           <dl className="mt-3 grid gap-2">
-            {PARTS.map(([k, v]) => (
+            {PARTS.map(([k, v, assessed]) => (
               <div key={k} data-enter="item" className="rounded-[14px] bg-well px-3 py-2">
-                <dt className="font-semibold">{k}</dt>
+                <dt className="font-semibold">
+                  {k}
+                  {!assessed && <span className="ml-2 text-xs font-medium text-muted-foreground">Not assessed yet</span>}
+                </dt>
                 <dd className="text-sm text-muted-foreground">{v}</dd>
               </div>
             ))}

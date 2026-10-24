@@ -46,8 +46,8 @@ class RoadmapService:
 
         if resolution is None:
             warnings = [
-                f"role_id '{request.role_id}' was not found in the current "
-                "placeholder role catalog; no roadmap could be generated."
+                f"The role '{request.role_id}' was not found in the role "
+                "catalog; no roadmap could be generated."
             ]
             return RoadmapOutcome(
                 payload=RoadmapPayload(steps=[], total_estimated_hours=0.0), warnings=warnings
@@ -71,8 +71,8 @@ class RoadmapService:
             resource = resources_by_skill.get(skill.skill_id)
             if resource is None:
                 warnings.append(
-                    f"No placeholder resource is available yet for skill "
-                    f"'{skill.skill_id}'; this gap is omitted rather than fabricated."
+                    f"No learning resource is available yet for {skill.name}; "
+                    "this gap is left out rather than filled with a made-up resource."
                 )
                 continue
             reason = (
@@ -99,8 +99,8 @@ class RoadmapService:
 
         if request.budget_limit is not None:
             warnings.append(
-                "All placeholder resources are free (cost=0); budget_limit "
-                "does not currently constrain this demonstration roadmap."
+                "The listed resources were free or showed no price when checked, "
+                "so a budget limit does not change this roadmap."
             )
         if request.hours_per_week and total_hours > 0:
             weeks = total_hours / request.hours_per_week

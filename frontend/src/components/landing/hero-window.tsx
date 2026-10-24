@@ -3,7 +3,8 @@ import { Activity } from 'lucide-react'
 import { BrandMark } from '@/components/brand'
 import { SdgIcon } from '@/components/sdg-icon'
 import { Badge } from '@/components/ui/badge'
-import { DOMAIN_SDGS, HERO } from '@/content/landing'
+import { formatHours } from '@/content/catalog'
+import { DOMAIN_SDGS, EXAMPLE_LABEL, EXAMPLE_PATH, EXAMPLE_ROLES, HERO } from '@/content/landing'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
 import { HeroCtas } from './hero-ctas'
@@ -24,12 +25,13 @@ function Chip({ children }: { children: React.ReactNode }) {
   return <div className="rounded-[18px] border border-white/20 bg-white/12 px-3 py-2 text-on-deep shadow-[0_20px_40px_-20px_#0008] backdrop-blur-md sm:px-4 sm:py-3">{children}</div>
 }
 function ChipRole() {
+  const role = EXAMPLE_ROLES[0]
   return (
     <Chip>
-      <small className="block text-xs opacity-75">Top match · demo</small>
-      <b className="text-lg">Data analyst</b>
+      <small className="block text-xs opacity-75">{EXAMPLE_LABEL} role</small>
+      <b className="text-lg">{role.role_title}</b>
       <span className="mt-1 block text-sm opacity-85">
-        <b className="text-2xl">76</b> alignment estimate
+        O*NET {role.onet_soc_code} · {role.core_skills} core skills
       </span>
     </Chip>
   )
@@ -47,6 +49,7 @@ function ChipTrend() {
 function ChipSkill() {
   return (
     <Chip>
+      <small className="mb-1 block text-xs opacity-75">{EXAMPLE_LABEL} skills</small>
       <span className="flex items-center gap-2 text-sm font-semibold">
         <i className="size-2 rounded-full bg-deep-warm" /> Excel · advanced
       </span>
@@ -69,10 +72,13 @@ function ChipSdg() {
   )
 }
 function ChipHours() {
+  const step = EXAMPLE_PATH[0]
   return (
     <Chip>
-      <b className="text-2xl">96 h</b>
-      <small className="block text-xs opacity-75">roadmap · demo</small>
+      <b className="text-2xl">{formatHours(step.hours)}</b>
+      <small className="block max-w-[22ch] text-xs opacity-75">
+        {EXAMPLE_LABEL} step · {step.title}, {step.provider}
+      </small>
     </Chip>
   )
 }

@@ -406,10 +406,15 @@ def test_cached_mode_resource_catalog_matches_by_skill_id_not_role_id(client: Te
     body = response.json()
     step_skill_ids = {s["skill_id"] for s in body["data"]["steps"]}
     assert step_skill_ids == {"critical_thinking", "mathematics", "analytical_scientific_software"}
-    for missing in ("complex_problem_solving", "science", "systems_analysis"):
+    missing_names = {
+        "complex_problem_solving": "Complex Problem Solving",
+        "science": "Science",
+        "systems_analysis": "Systems Analysis",
+    }
+    for missing_id, missing_name in missing_names.items():
         assert any(
-            f"No placeholder resource is available yet for skill '{missing}'" in w for w in body["warnings"]
-        ), missing
+            f"No learning resource is available yet for {missing_name}" in w for w in body["warnings"]
+        ), missing_id
     fixture_resource_ids = {
         "resource_sql_basics_001", "resource_python_basics_001", "resource_dataviz_basics_001",
         "resource_excel_basics_001", "resource_finmodel_basics_001", "resource_cad_basics_001",

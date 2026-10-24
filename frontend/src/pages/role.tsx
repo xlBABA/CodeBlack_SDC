@@ -7,6 +7,7 @@ import { TrendSnapshot } from '@/components/dashboard/trend-snapshot'
 import { DataModeBadge } from '@/components/data-mode-badge'
 import { NoProfile } from '@/components/no-profile'
 import { NoRecognizedSkills } from '@/components/no-recognized-skills'
+import { OnetAttribution } from '@/components/onet-attribution'
 import { Page } from '@/components/page/page'
 import { OverviewTab } from '@/components/role/overview-tab'
 import { ProjectList } from '@/components/role/projects-tab'
@@ -207,6 +208,7 @@ export default function Role() {
           </div>
         </>
       )}
+      <OnetAttribution className="mt-8" />
     </Page>
   )
 }
