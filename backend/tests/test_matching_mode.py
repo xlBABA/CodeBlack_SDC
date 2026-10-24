@@ -558,6 +558,41 @@ def test_runpod_attempts_resume_after_the_cooldown_elapses(client: TestClient, m
     assert call_count["n"] > calls_after_failure  # a new attempt was made once cooldown had elapsed
 
 
+def test_similarity_is_never_explicitly_forced_to_none_anywhere_in_production_code():
+    """Hussain's question (2026-10-25): does the active adapter wiring
+    explicitly pass similarity=None, permanently disabling RunPod? NO —
+    verified two ways:
+
+    1. git history: commit 61373a5 (the one named) is a one-line
+       docs/AI_USAGE_LOG.md edit, unrelated to any matching code. The
+       only commits that ever reference "similarity=None" at all
+       (c60744c, 53de9cc) are a *function-default parameter* in the
+       vendored matcher.py, not a call-site override.
+    2. Every production construction of HussainMatchingProvider
+       (searched: app/api/v1/endpoints/careers.py — the only real one;
+       app/services/hussain_matching/backend_adapter.py's own
+       `similarity=` mention is inside its module *docstring*, an
+       illustrative example, never executed) omits the `similarity`
+       keyword entirely. It is not "explicitly None" — it is simply not
+       passed, so the constructor's own default (also None) applies,
+       and that default is what makes HussainMatchingProvider decide
+       per request via runpod_configured() — see
+       test_get_matching_provider_hussain_mode_no_longer_forces_no_similarity
+       and test_runpod_is_used_end_to_end_when_configured_and_reachable
+       above, which already prove RunPod is genuinely reachable end to
+       end when configured. This test only pins down the historical
+       claim itself, so it cannot silently regress."""
+    import inspect
+
+    from app.api.v1.endpoints import careers as careers_module
+
+    source = inspect.getsource(careers_module._get_shared_hussain_provider)
+    assert "similarity=" not in source  # not passed at all, not even as None
+
+    provider = get_matching_provider(Settings(MATCHING_MODE="hussain", _env_file=None))
+    assert provider.similarity is None  # the constructor's own default, not an override
+
+
 def test_shared_provider_survives_concurrent_requests_without_crashing_or_corrupting_matches(
     client: TestClient, monkeypatch
 ):
