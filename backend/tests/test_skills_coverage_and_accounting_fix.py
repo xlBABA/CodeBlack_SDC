@@ -21,9 +21,14 @@ NO_SIMILARITY = lambda a, b: 0.0  # noqa: E731
 
 # Confirmed against the real, current app/data/cached/roles.json —
 # re-verify this set if Jawad's data changes the flagged roles again.
+# public_health_analyst joined this set in Milestone 13D-9 (Jawad's approved
+# "Option C" rebuild, origin/feat/jawad-ph-fix @ 1cf9b74): it was flagged
+# limited coverage because our 20-skill catalog cannot represent its
+# epidemiology-specific Knowledge/software (Biology, Medicine and Dentistry,
+# CDC Epi Info, SaTScan), not because of a catalog defect.
 REAL_LIMITED_COVERAGE_ROLE_IDS = {
     "financial_analyst", "information_security_analyst",
-    "financial_risk_specialist", "logistician",
+    "financial_risk_specialist", "logistician", "public_health_analyst",
 }
 
 

@@ -162,7 +162,10 @@ def test_cached_roles_preserve_jawads_actual_required_optional_split():
         "data_analyst": {"excel"},
         "financial_analyst": {"analytical_scientific_software", "vba"},
         "mechanical_engineer": {"python", "excel"},
-        "public_health_analyst": {"excel", "data_visualization"},
+        # public_health_analyst was rebuilt in Milestone 13D-9 (Jawad's approved
+        # "Option C" fix, origin/feat/jawad-ph-fix @ 1cf9b74): python, sql and
+        # the new gis skill became optional, alongside excel/data_visualization.
+        "public_health_analyst": {"python", "sql", "gis", "excel", "data_visualization"},
         # Added in the Milestone 6D-2A Extension (origin/feat/jawad-trends-data @ 4ba98a0):
         "software_developer": {"mathematics"},
         "accountant": {"sql", "vba", "data_visualization"},
