@@ -356,30 +356,80 @@ def _empty_draft() -> CvDraftProfile:
 
 
 def _offline_skill_suggestions(cv_text: str) -> list[CvSkillNeedsReview]:
-    """Suggest catalogue skills only from explicit CV skill-list lines.
+    """Recover unconfirmed catalogue skills from explicit CV skill lists.
 
-    Never infer skills from education, job titles or narrative text.
-    Suggestions remain unconfirmed and are not added to the profile.
+    Handles both:
+      Technical Skills: Python, SQL
+    and:
+      TECHNICAL SKILLS
+      Programming Languages: Python, Java, SQL
+      AI/ML: PyTorch, NumPy
+      Web Development: HTML, CSS, JavaScript
+
+    Never infer skills from education or general narrative paragraphs.
     """
     normalizer = SkillNormalizer(_load_skill_catalogue())
-    sections = []
 
-    for line in cv_text.splitlines():
-        match = re.match(
-            r"^\s*(?:technical\s+skills|skills|technologies|tools)"
-            r"\s*[:\\-]\s*(.+)$",
+    heading = re.compile(
+        r"^(?:technical skills|skills|technical competencies)"
+        r"(?:\s*[:\-]\s*(.*))?$",
+        re.IGNORECASE,
+    )
+
+    categories = re.compile(
+        r"^(?:programming languages?|languages?|ai\s*/\s*ml|"
+        r"machine learning|web development|frameworks?|"
+        r"libraries|databases?|technologies|tools|"
+        r"platforms|cloud|development tools)"
+        r"\s*:\s*(.+)$",
+        re.IGNORECASE,
+    )
+
+    sections = []
+    inside_skills = False
+
+    for raw_line in cv_text.splitlines():
+        line = raw_line.strip()
+
+        if not line:
+            continue
+
+        match = heading.fullmatch(line)
+        if match:
+            inside_skills = True
+            if match.group(1):
+                sections.append(match.group(1))
+            continue
+
+        # Prevent reading the next resume section as skills.
+        if inside_skills and re.fullmatch(
+            r"(?:education|projects|experience|work experience|"
+            r"professional experience|certifications|certificates|"
+            r"leadership.*|extracurricular.*|awards|achievements|"
+            r"profile|summary|references)",
             line,
-            flags=re.IGNORECASE,
-        )
+            re.IGNORECASE,
+        ):
+            inside_skills = False
+            continue
+
+        if inside_skills:
+            match = categories.fullmatch(line)
+            if match:
+                sections.append(match.group(1))
+            continue
+
+        # Some CVs use individual category lines without a heading.
+        match = categories.fullmatch(line)
         if match:
             sections.append(match.group(1))
 
     if not sections:
         return []
 
-    found = normalizer.find_in_text("\\n".join(sections))
-    suggestions = []
+    found = normalizer.find_in_text("\n".join(sections))
 
+    suggestions = []
     for skill_id in sorted(found, key=normalizer.name_of):
         name = normalizer.name_of(skill_id)
 
@@ -390,8 +440,9 @@ def _offline_skill_suggestions(cv_text: str) -> list[CvSkillNeedsReview]:
             CvSkillNeedsReview(
                 name=name,
                 reason=(
-                    "Possible skill detected in an explicit CV skills list. "
-                    "Not AI-verified; confirm before adding."
+                    "Possible skill detected in your CV's explicit "
+                    "technical skills list. Not AI-verified; "
+                    "confirm before adding."
                 ),
             )
         )

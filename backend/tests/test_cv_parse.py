@@ -272,6 +272,28 @@ def test_timeout_offers_unconfirmed_skills_from_explicit_list(client: TestClient
     assert draft["suggested_profile"]["skills"] == []
 
 
+
+def test_timeout_recovers_multiline_resume_skills(client: TestClient):
+    """Fallback recognizes skills under a standalone heading."""
+    from app.services.cv_extraction_service import _offline_skill_suggestions
+
+    text = (
+        "PROFILE\nComputer Science undergraduate\n"
+        "EDUCATION\nBachelor of Computer Science\n"
+        "TECHNICAL SKILLS\n"
+        "Programming Languages: Python, Java, SQL\n"
+        "Web Development: HTML, CSS, JavaScript\n"
+        "Tools: Git, GitHub\n"
+        "CERTIFICATIONS\nIntroduction to Machine Learning"
+    )
+
+    suggestions = _offline_skill_suggestions(text)
+    names = {item.name.lower() for item in suggestions}
+
+    assert {"python", "sql", "javascript", "git"} <= names
+    assert "science" not in names
+
+
 def test_malformed_glm_json_falls_back_to_manual_review_not_a_crash(client: TestClient):
     """Milestone 12C-8E: this payload has no usable field anywhere (a
     garbage top-level key, and a 'skills' value that isn't even a list)
