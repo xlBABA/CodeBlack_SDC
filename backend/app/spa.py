@@ -45,13 +45,18 @@ def mount_spa(app: FastAPI, dist_dir: Path) -> None:
     if assets_dir.is_dir():
         app.mount("/assets", StaticFiles(directory=assets_dir), name="spa-assets")
 
+    dist_root = dist_dir.resolve()
+
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa_entrypoint(full_path: str) -> FileResponse:
         if _is_reserved_path(full_path):
             raise HTTPException(status_code=404)
 
-        candidate = dist_dir / full_path
-        if full_path and candidate.is_file():
+        # Resolve symlinks and parent segments before deciding whether a
+        # file may be served. Out-of-root paths fall through to the SPA
+        # entrypoint and are never opened as static files.
+        candidate = (dist_root / full_path).resolve()
+        if full_path and candidate.is_relative_to(dist_root) and candidate.is_file():
             return FileResponse(candidate)
 
         # Any other path ("", "dashboard", "roles/data_analyst", ...) is a

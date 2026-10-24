@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
 
 from pydantic import BaseModel, ValidationError
 
@@ -87,6 +88,59 @@ _LIST_FIELD_MODELS: dict[str, type[BaseModel]] = {
     "experience": CvExperienceEntry,
     "certifications": CvCertificationEntry,
 }
+
+
+@dataclass(frozen=True)
+class _LlmCallConfig:
+    api_key: str
+    base_url: str
+    model: str
+    provider: str
+    key_name: str
+    timeout_seconds: float | None = None
+    read_timeout_seconds: float | None = None
+
+
+def _llm_call_config(settings: Settings) -> _LlmCallConfig | None:
+    """Select only the credentials and endpoint belonging to CV extraction.
+
+    RunPod remains the default and uses its existing phase-specific timeout.
+    OpenRouter uses only LLM_* settings; a missing value fails closed to the
+    existing manual-review path. Semantic matching reads RunPod settings in
+    its own provider module and is intentionally unaffected here.
+    """
+    if settings.LLM_PROVIDER == "openrouter":
+        api_key = settings.LLM_API_KEY.get_secret_value() if settings.LLM_API_KEY else ""
+        values = {
+            "LLM_API_KEY": api_key,
+            "LLM_BASE_URL": settings.LLM_BASE_URL,
+            "LLM_MODEL": settings.LLM_MODEL,
+        }
+        missing = [name for name, value in values.items() if not (value or "").strip()]
+        if missing:
+            logger.warning(
+                "CV extraction skipped: LLM_PROVIDER=openrouter but %s not set; "
+                "falling back to manual review",
+                ", ".join(missing),
+            )
+            return None
+        return _LlmCallConfig(
+            api_key=api_key.strip(),
+            base_url=settings.LLM_BASE_URL.strip(),
+            model=settings.LLM_MODEL.strip(),
+            provider="openrouter",
+            key_name="LLM_API_KEY",
+            timeout_seconds=settings.LLM_TIMEOUT_SECONDS,
+        )
+
+    return _LlmCallConfig(
+        api_key=settings.RUNPOD_API_KEY.get_secret_value() if settings.RUNPOD_API_KEY else "",
+        base_url=settings.RUNPOD_GLM_BASE_URL,
+        model=settings.RUNPOD_GLM_MODEL,
+        provider="runpod",
+        key_name="RUNPOD_API_KEY",
+        read_timeout_seconds=settings.RUNPOD_GLM_READ_TIMEOUT_SECONDS,
+    )
 
 
 def _load_skill_catalogue() -> list[dict]:
@@ -469,14 +523,30 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             [NO_TEXT_WARNING],
         )
 
-    api_key = settings.RUNPOD_API_KEY.get_secret_value() if settings.RUNPOD_API_KEY else ""
+    llm = _llm_call_config(settings)
+    if llm is None:
+        return (
+            CvParseData(
+                status="manual_review",
+                draft=_fallback_draft_with_suggestions(pdf_result.text),
+                page_count=pdf_result.page_count,
+                extracted_text_preview=pdf_result.text[:500],
+            ),
+            [MANUAL_REVIEW_WARNING],
+        )
     try:
         result = extract_cv_fields(
             pdf_result.text,
-            api_key=api_key,
-            base_url=settings.RUNPOD_GLM_BASE_URL,
-            model=settings.RUNPOD_GLM_MODEL,
-            read_timeout_seconds=settings.RUNPOD_GLM_READ_TIMEOUT_SECONDS,
+            api_key=llm.api_key,
+            base_url=llm.base_url,
+            model=llm.model,
+            provider=llm.provider,
+            key_name=llm.key_name,
+            **(
+                {"timeout_seconds": llm.timeout_seconds}
+                if llm.timeout_seconds is not None
+                else {"read_timeout_seconds": llm.read_timeout_seconds}
+            ),
         )
     except GlmExtractionError as exc:
         logger.warning("CV extraction fell back to manual review (%s)", exc.reason)

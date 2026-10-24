@@ -90,6 +90,72 @@ def test_deep_link_falls_back_to_index_html(spa_client: TestClient, path: str):
     assert "mustaqbal-ai-spa" in response.text
 
 
+# --- Path traversal: files outside dist_dir are never served -----------------
+
+
+def _write_outside_dist_secret(tmp_path: Path) -> Path:
+    secret = tmp_path / "secret.txt"
+    secret.write_text("outside-dist-secret", encoding="utf-8")
+    return secret
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/..%2fsecret.txt",
+        "/%2e%2e%2fsecret.txt",
+        "/%2E%2E%2Fsecret.txt",
+        "/..%5csecret.txt",
+        "/..%5c..%5csecret.txt",
+    ],
+)
+def test_encoded_parent_segments_never_escape_dist(
+    spa_client: TestClient, tmp_path: Path, path: str
+):
+    _write_outside_dist_secret(tmp_path)
+    response = spa_client.get(path)
+    assert "outside-dist-secret" not in response.text
+    assert response.status_code == 200
+    assert "mustaqbal-ai-spa" in response.text
+
+
+def test_parent_segments_under_assets_mount_never_escape_dist(
+    spa_client: TestClient, tmp_path: Path
+):
+    _write_outside_dist_secret(tmp_path)
+    response = spa_client.get("/assets%2f..%2f..%2fsecret.txt")
+    assert "outside-dist-secret" not in response.text
+    assert response.status_code == 404
+
+
+def test_absolute_path_never_escapes_dist(spa_client: TestClient, tmp_path: Path):
+    secret = _write_outside_dist_secret(tmp_path)
+    response = spa_client.get("/" + str(secret).replace("/", "%2f"))
+    assert "outside-dist-secret" not in response.text
+    assert "mustaqbal-ai-spa" in response.text
+
+
+def test_symlink_pointing_outside_dist_is_not_served(
+    spa_client: TestClient, tmp_path: Path
+):
+    secret = _write_outside_dist_secret(tmp_path)
+    (tmp_path / "dist" / "linked.txt").symlink_to(secret)
+    response = spa_client.get("/linked.txt")
+    assert "outside-dist-secret" not in response.text
+    assert "mustaqbal-ai-spa" in response.text
+
+
+def test_file_inside_dist_subdirectory_is_still_served(
+    spa_client: TestClient, tmp_path: Path
+):
+    nested = tmp_path / "dist" / "sdg"
+    nested.mkdir()
+    (nested / "goal.txt").write_text("inside-dist", encoding="utf-8")
+    response = spa_client.get("/sdg/goal.txt")
+    assert response.status_code == 200
+    assert response.text == "inside-dist"
+
+
 # --- API route preservation (SPA mounted) ------------------------------------
 
 

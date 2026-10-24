@@ -79,3 +79,39 @@ def test_settings_load_without_ai_credentials(monkeypatch):
     assert settings.LLM_API_KEY is None
     assert settings.RUNPOD_API_KEY is None
     assert settings.DATABASE_URL.startswith("sqlite")
+
+
+@pytest.mark.parametrize("value", [None, "", "   "])
+def test_blank_llm_provider_preserves_runpod_default(value):
+    assert Settings(LLM_PROVIDER=value, _env_file=None).LLM_PROVIDER == "runpod"
+
+
+def test_llm_provider_settings_load_from_environment_without_exposing_key(monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "openrouter")
+    monkeypatch.setenv("LLM_API_KEY", "synthetic-openrouter-key")
+    monkeypatch.setenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
+    monkeypatch.setenv("LLM_MODEL", "z-ai/glm-5.3-flashx")
+    monkeypatch.setenv("RUNPOD_API_KEY", "synthetic-runpod-key")
+    monkeypatch.setenv("RUNPOD_ENDPOINT_ID", "synthetic-embedding-endpoint")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.LLM_PROVIDER == "openrouter"
+    assert settings.LLM_API_KEY is not None
+    assert settings.LLM_BASE_URL == "https://openrouter.ai/api/v1"
+    assert settings.LLM_MODEL == "z-ai/glm-5.3-flashx"
+    assert settings.RUNPOD_API_KEY is not None
+    assert settings.RUNPOD_ENDPOINT_ID == "synthetic-embedding-endpoint"
+    assert "synthetic-openrouter-key" not in repr(settings)
+    assert "synthetic-runpod-key" not in repr(settings)
+
+
+def test_invalid_llm_provider_is_rejected():
+    with pytest.raises(ValidationError):
+        Settings(LLM_PROVIDER="other", _env_file=None)
+
+
+def test_llm_timeout_must_be_positive_and_finite():
+    for value in ("0", "-1", "nan", "inf"):
+        with pytest.raises(ValidationError, match="LLM_TIMEOUT_SECONDS"):
+            Settings(LLM_TIMEOUT_SECONDS=value, _env_file=None)

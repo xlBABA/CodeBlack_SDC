@@ -25,7 +25,14 @@ All have safe defaults; nothing is required to start the app locally.
 | `ENABLE_FIXTURES` | No | `true` | `false` makes every matching-dependent route (`careers/match`, `scenarios/simulate`, `roadmaps/generate`, `projects/recommend`, `projects/simulate`) return `503 PROVIDER_UNAVAILABLE` instead of fixture output — there is no real provider to switch to yet. Keep `true` until Hussain's real matcher exists. |
 | `PROVIDER_TIMEOUT_SECONDS` | No | `5.0` | Reserved for a future real provider's own HTTP client. Nothing enforces this yet. |
 | `PORT` | No (platform-set) | `8000` | Read by `start.py` only. Not a `Settings` field — it controls which port uvicorn binds, not app behavior. |
-| `LLM_PROVIDER`, `LLM_API_KEY`, `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID`, `TREND_SOURCE_API_KEY` | No | unset | Placeholders for future integrations (Hussain/Rehan). Leave blank — no real values exist, and none are invented here. The three `*_API_KEY` fields are `SecretStr`, masked in logs/`repr()`. |
+| `LLM_PROVIDER` | No | `runpod` | CV extraction provider: `runpod` (existing default) or `openrouter`. Blank is treated as `runpod`; unsupported values fail startup validation. |
+| `LLM_API_KEY` | For OpenRouter CV extraction | unset | Secret key for OpenRouter; stored as `SecretStr`. OpenRouter CV extraction uses only this key plus `LLM_BASE_URL` and `LLM_MODEL`; missing settings cause manual review rather than a RunPod fallback. |
+| `LLM_BASE_URL` | For OpenRouter CV extraction | unset | OpenAI-compatible API base. Reviewed configuration: `https://openrouter.ai/api/v1`. |
+| `LLM_MODEL` | For OpenRouter CV extraction | unset | Reviewed model identifier: `z-ai/glm-5.3-flashx`. |
+| `LLM_TIMEOUT_SECONDS` | No | `60.0` | OpenRouter HTTP phase timeout; it is not a total request deadline. |
+| `RUNPOD_API_KEY` | For RunPod embeddings or RunPod CV extraction | unset | RunPod credential, stored as `SecretStr`. Semantic embeddings continue to use this key and `RUNPOD_ENDPOINT_ID`, independently of `LLM_PROVIDER`. |
+| `RUNPOD_ENDPOINT_ID` | For RunPod embeddings | unset | RunPod Serverless semantic-embedding endpoint identifier. |
+| `TREND_SOURCE_API_KEY` | No | unset | Optional trend-source credential, stored as `SecretStr`. |
 
 Copy `.env.example` to `.env` locally and fill in only what you actually have — never commit `.env` (already git-ignored).
 

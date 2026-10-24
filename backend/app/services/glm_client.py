@@ -1,10 +1,10 @@
-"""Milestone 11B: RunPod GLM-5.3 client (OpenAI-compatible chat completions).
+"""CV extraction LLM client (OpenAI-compatible chat completions).
 
 Deliberately separate from app/services/hussain_matching/runpod_client.py
 — that module is Hussain's embedding provider (RUNPOD_ENDPOINT_ID=
-f0phohhegtydji) and is never touched or imported here. This module only
-ever reads RUNPOD_API_KEY and the RUNPOD_GLM_* settings
-(app/core/config.py).
+f0phohhegtydji) and is never touched or imported here. The selected
+extraction provider's credentials and endpoint are passed in by
+cv_extraction_service.py; embedding configuration is never read here.
 
 The API key is read fresh from Settings for each call (never cached on
 an instance, never logged, never included in any exception message or
@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 # keeping the request small and the cost/latency predictable.
 MAX_INPUT_CHARS = 12_000
 MAX_OUTPUT_TOKENS = 1_200
+# OpenRouter's GLM-5.3 FlashX uses reasoning tokens, so reserve enough
+# output headroom for both reasoning and the structured JSON response.
+OPENROUTER_MAX_OUTPUT_TOKENS = 2_500
 REQUEST_TIMEOUT_SECONDS = 30.0
 # httpx applies this to each connect/read/write/pool phase, NOT total duration.
 
@@ -81,9 +84,9 @@ class GlmExtractionResult:
     raw_json: dict
 
 
-def _build_payload(cv_text: str, model: str) -> dict:
+def _build_payload(cv_text: str, model: str, provider: str = "runpod") -> dict:
     truncated = cv_text[:MAX_INPUT_CHARS]
-    return {
+    payload = {
         "model": model,
         "messages": [
             {"role": "system", "content": _SYSTEM_PROMPT},
@@ -91,12 +94,17 @@ def _build_payload(cv_text: str, model: str) -> dict:
         ],
         "max_tokens": MAX_OUTPUT_TOKENS,
         "temperature": 0.0,
+        "response_format": {"type": "json_object"},
+    }
+    if provider == "openrouter":
+        payload["max_tokens"] = OPENROUTER_MAX_OUTPUT_TOKENS
+        payload["reasoning"] = {"effort": "low"}
+    else:
         # Best-effort: honored by models/gateways that support it
         # (requirement 2: "low reasoning effort ... where supported"),
         # silently ignored otherwise — never required for correctness.
-        "reasoning_effort": "low",
-        "response_format": {"type": "json_object"},
-    }
+        payload["reasoning_effort"] = "low"
+    return payload
 
 
 def extract_cv_fields(
@@ -107,23 +115,30 @@ def extract_cv_fields(
     model: str,
     read_timeout_seconds: float = REQUEST_TIMEOUT_SECONDS,
     client: httpx.Client | None = None,
+    timeout_seconds: float | None = None,
+    provider: str = "runpod",
+    key_name: str = "RUNPOD_API_KEY",
 ) -> GlmExtractionResult:
-    """Calls RunPod's OpenAI-compatible GLM-5.3 endpoint. Raises
+    """Calls the selected OpenAI-compatible extraction endpoint. Raises
     GlmExtractionError (never a raw httpx/JSON exception) on any
     timeout, network error, non-2xx response, or malformed/non-JSON
     reply — the caller (cv_extraction_service.py) treats every one of
     these identically: fall back to manual review, never fabricate a
     result (requirement 6)."""
     if not api_key:
-        raise GlmExtractionError("RunPod API key is not configured.")
+        raise GlmExtractionError("The extraction API key is not configured.")
     if not cv_text.strip():
         raise GlmExtractionError("No text was provided to extract from.")
 
-    payload = _build_payload(cv_text, model)
+    payload = _build_payload(cv_text, model, provider)
     url = f"{base_url.rstrip('/')}/chat/completions"
     owns_client = client is None
-    timeout = httpx.Timeout(
-        connect=30.0, read=read_timeout_seconds, write=30.0, pool=30.0,
+    timeout = (
+        httpx.Timeout(timeout_seconds)
+        if timeout_seconds is not None
+        else httpx.Timeout(
+            connect=30.0, read=read_timeout_seconds, write=30.0, pool=30.0,
+        )
     )
     http_client = client if client is not None else httpx.Client(timeout=timeout)
     started = monotonic()
@@ -161,7 +176,7 @@ def extract_cv_fields(
         len(payload["messages"][1]["content"]),
     )
     if response.status_code == 401 or response.status_code == 403:
-        logger.warning("GLM request rejected: HTTP %d (check RUNPOD_API_KEY)", response.status_code)
+        logger.warning("GLM request rejected: HTTP %d (check %s)", response.status_code, key_name)
         raise GlmExtractionError("The extraction service rejected the request.")
     if response.status_code >= 400:
         logger.warning("GLM request failed: HTTP %d", response.status_code)
