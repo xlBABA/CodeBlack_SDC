@@ -186,20 +186,24 @@ def matching_mode_warning(settings: Settings) -> str | None:
     reachability; this text can only describe the possibility, since it
     is computed before matching runs. The per-match DEGRADED_CAVEAT is
     the authoritative, per-response signal for whether this request
-    actually fell back."""
+    actually fell back.
+
+    Milestone 13E-4: this text is student-facing, so it never names an
+    internal env var (MATCHING_MODE=, RUNPOD_API_KEY, RUNPOD_ENDPOINT_ID),
+    an implementation module path, or a teammate — only what a student
+    needs: the algorithm runs offline by default, may use an external AI
+    service when available, degrades visibly (the caveat text) when it
+    can't, and the score is not a validated or hiring-predictive number."""
     if settings.MATCHING_MODE != "hussain":
         return None
     return (
-        "MATCHING_MODE=hussain: scores are produced by Hussain's "
-        "deterministic matching algorithm (app/services/hussain_matching), "
-        "running fully offline by default. Semantic skill-similarity may "
-        "use a configured RunPod embedding endpoint when both "
-        "RUNPOD_API_KEY and RUNPOD_ENDPOINT_ID are set and that endpoint "
-        "is reachable; if they are absent, or the endpoint fails, matching "
-        "automatically falls back to exact skill matching only, and each "
-        f"affected match is labelled '{DEGRADED_CAVEAT}'. This methodology "
-        "is an initial team choice, not a validated model, and the score "
-        "is not a hiring probability."
+        "Scores are produced by a deterministic skill-matching algorithm, "
+        "run fully offline by default. Semantic skill similarity may use "
+        "an external AI service (RunPod) when it is configured and "
+        "reachable; if it isn't, matching automatically falls back to "
+        "exact skill matching only, and each affected match is labelled "
+        f"'{DEGRADED_CAVEAT}'. This methodology is an initial team choice, "
+        "not a validated model, and the score is not a hiring probability."
     )
 
 
@@ -285,23 +289,28 @@ def catalog_provenance_warnings(settings: Settings) -> list[str]:
     of this function claiming anything about content it doesn't return,
     since that content is no longer always a fixture placeholder once
     CachedResourceCatalog/CachedProjectCatalog are selected (Milestone
-    6D-2D)."""
+    6D-2D).
+
+    Milestone 13E-4: student-facing, so this never names the env var
+    (CATALOG_MODE=), a teammate, an internal class name
+    (FixtureMatchingProvider), or the internal data_mode enum value —
+    only that the catalog is real (not invented placeholder data) and
+    which kind of algorithm actually produced the score, in plain terms."""
     if settings.CATALOG_MODE != "cached":
         return []
     scoring_description = (
-        "Hussain's deterministic matching algorithm (semantic skill-"
-        "similarity optionally via a configured RunPod endpoint, falling "
-        "back to exact skill matching if unconfigured or unreachable)"
+        "a deterministic skill-matching algorithm (semantic skill "
+        "similarity optionally via an external AI service, falling back "
+        "to exact skill matching if that isn't configured or reachable)"
         if settings.MATCHING_MODE == "hussain"
-        else "an illustrative fixture algorithm (FixtureMatchingProvider)"
+        else "an illustrative, placeholder algorithm"
     )
     return [
-        "CATALOG_MODE=cached: the role and skill catalog inputs for this "
-        "response come from Jawad's cached, real O*NET-derived dataset — "
-        "those role/skill identifiers are not fictional. Matching scores "
-        f"are still calculated by {scoring_description}. data_mode remains "
-        "'fixture' because the generated score is still fixture-based, "
-        "even though the underlying sourced roles themselves are real."
+        "The role and skill catalog behind this response comes from a "
+        "real, cached occupational dataset — these role and skill "
+        "identifiers are real, not fictional placeholders. Matching "
+        f"scores are still calculated by {scoring_description}, which is "
+        "not yet a validated, real-world outcome."
     ]
 
 
@@ -312,13 +321,18 @@ def trend_signal_provenance_warnings(settings: Settings) -> list[str]:
     (Jawad's catalog covers 12 of 20 skills; the other 8 and any role
     whose required skills are all uncovered simply see no adjustment,
     which scenario_service.py's own warnings already disclose per
-    response)."""
+    response).
+
+    Milestone 13E-4: student-facing, so this never names the env var
+    (CATALOG_MODE=), a teammate, or the internal cache directory path —
+    only the two things a student needs: the signal is dated/cached
+    developer activity, not every skill has one, and it is never hiring
+    demand."""
     if settings.CATALOG_MODE != "cached":
         return []
     return [
-        "CATALOG_MODE=cached: when a scenario is requested, skill weight "
-        "adjustments use Jawad's real, dated, cached GitHub developer-"
-        "activity signals (app/data/cached/trend_snapshots) — not every "
+        "When a scenario is requested, skill weight adjustments use real, "
+        "dated, cached GitHub developer-activity signals — not every "
         "skill has a covered signal, and this is developer-activity data, "
         "never a verified hiring-demand measurement."
     ]
