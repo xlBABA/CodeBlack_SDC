@@ -23,7 +23,7 @@
 | Live Demo | https://mustaqbal-ai.replit.app |
 | RunPod Endpoints | https://api.runpod.ai/v2/f0phohhegtydji |
 | CV Extraction API Provider | https://openrouter.ai |
-| Slide Deck | https://canva.link/pf4g0a1ofti915u |
+| Slide Deck | https://drive.google.com/file/d/1BT8s42cli9p-Q5nXa0CJn5SRnVuFVror/view?usp=sharing |
 | Demo Video | **TODO:** `[ADD_DEMO_VIDEO_URL]` — not yet supplied |
 
 ---
@@ -124,7 +124,7 @@ Full data-flow diagram and component breakdown: [`docs/architecture/README.md`](
 
 Short version:
 ```
-Student → React frontend → FastAPI backend → (manual profile | CV → GLM-5.3 RunPod/ DeepSeek Paid → draft)
+Student → React frontend → FastAPI backend → (manual profile | CV → GLM-5.3 RunPod/ ZAI GLM 5.3 FlashX Paid → draft)
         → student review & confirmation → skill normalization → matching engine
         → career recommendations, roadmap, projects, SDG mapping, trend signals
 ```
