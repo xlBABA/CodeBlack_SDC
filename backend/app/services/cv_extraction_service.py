@@ -335,6 +335,15 @@ def _evidence_is_supported(evidence: str | None, cv_text: str) -> bool:
     return re.search(pattern, normalized_text) is not None
 
 
+def _contained_skill(normalizer: SkillNormalizer, name: str) -> str | None:
+    """skill_id when `name` contains exactly one catalogue skill name or
+    alias as a whole phrase, via SkillNormalizer.read_profile_skills with
+    no interpreter (so only its deterministic "contains" rule applies)."""
+    reading = normalizer.read_profile_skills([{"name": name}])
+    interpretations = [i for i in reading.interpreted.values() if i.contains is not None]
+    return interpretations[0].skill_id if len(interpretations) == 1 else None
+
+
 def _validate_and_map_skills(
     skill_entries: list[GlmSkillEntry], cv_text: str
 ) -> tuple[list[CvMappedSkill], list[CvUnmappedSkill], list[CvSkillNeedsReview]]:
@@ -360,12 +369,22 @@ def _validate_and_map_skills(
             continue
         evidence = entry.evidence.strip()  # non-empty/non-None, guaranteed by the check above
         result = normalizer.normalize(name)
-        if result.skill_id and result.skill_id not in seen_ids:
+        skill_id, skill_name, needs_confirmation = result.skill_id, result.name, False
+        if not skill_id:
+            # The matcher's own rule, no embeddings: a name containing exactly
+            # one catalogue skill phrase ("Python (pandas)") maps to it.
+            contained = _contained_skill(normalizer, name)
+            if contained is not None:
+                skill_id, skill_name, needs_confirmation = contained, normalizer.name_of(contained), True
+        if skill_id and skill_id not in seen_ids:
             mapped.append(
-                CvMappedSkill(skill_id=result.skill_id, name=result.name, raw_text=name, evidence=evidence)
+                CvMappedSkill(
+                    skill_id=skill_id, name=skill_name, raw_text=name, evidence=evidence,
+                    needs_confirmation=needs_confirmation,
+                )
             )
-            seen_ids.add(result.skill_id)
-        elif not result.skill_id:
+            seen_ids.add(skill_id)
+        elif not skill_id:
             unmapped.append(CvUnmappedSkill(raw_text=name, evidence=evidence))
     return mapped, unmapped, needs_review
 
@@ -538,6 +557,11 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             f"{len(unmapped_skills)} skill(s) were not recognized against the current catalogue "
             "and were not added to your profile automatically; review them below."
         )
+    for skill in mapped_skills:
+        if skill.needs_confirmation:
+            warnings.append(
+                f'"{skill.raw_text}" from your CV was matched to {skill.name}; please confirm it is right.'
+            )
     if skills_requiring_review:
         warnings.append(
             f"{len(skills_requiring_review)} skill(s) could not be automatically verified against "

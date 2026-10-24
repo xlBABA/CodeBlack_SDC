@@ -98,12 +98,17 @@ class CvMappedSkill(BaseModel):
     locally-extracted CV text (Milestone 11E) AND matched Jawad's
     canonical catalogue (via
     app.services.hussain_matching.normalizer.SkillNormalizer —
-    deterministic exact/alias match only, never a guess)."""
+    deterministic exact/alias match, or the matcher's "contains exactly
+    one catalogue phrase" rule, never a guess)."""
 
     skill_id: str
     name: str
     raw_text: str
     evidence: str
+    # Additive: True when raw_text was not an exact name/alias but contains
+    # exactly one catalogue skill phrase (e.g. "Python (pandas)" -> Python);
+    # the student is asked to confirm it.
+    needs_confirmation: bool = False
 
 
 class CvUnmappedSkill(BaseModel):

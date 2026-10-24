@@ -740,3 +740,55 @@ def test_skill_whose_evidence_is_only_part_of_a_word_is_flagged_for_review(clien
     assert [s["skill_id"] for s in draft["mapped_skills"]] == ["python"]
     assert [s["name"] for s in draft["skills_requiring_review"]] == ["Git"]
     assert [s["skill_id"] for s in draft["suggested_profile"]["skills"]] == ["python"]
+
+
+# --- Contained-skill fallback ------------------------------------------------
+
+
+def test_skill_name_containing_one_catalogue_phrase_maps_pending_confirmation(client: TestClient):
+    pdf = _build_text_pdf("Skills: Python (pandas), Advanced Excel, Statistics")
+    glm_json = {"skills": [
+        {"name": "Python (pandas)", "evidence": "Python (pandas)"},  # contains "Python"
+        {"name": "Advanced Excel", "evidence": "Advanced Excel"},  # an exact alias
+        {"name": "Statistics", "evidence": "Statistics"},  # contains no catalogue phrase
+    ]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        body = _post_cv(client, pdf).json()
+
+    draft = body["data"]["draft"]
+    by_id = {s["skill_id"]: s for s in draft["mapped_skills"]}
+    assert by_id["python"]["raw_text"] == "Python (pandas)"
+    assert by_id["python"]["needs_confirmation"] is True
+    assert by_id["excel"]["needs_confirmation"] is False
+    assert draft["unmapped_skills"] == [{"raw_text": "Statistics", "evidence": "Statistics"}]
+    assert {s["skill_id"] for s in draft["suggested_profile"]["skills"]} == {"python", "excel"}
+    assert any('"Python (pandas)"' in w and "please confirm" in w for w in body["warnings"])
+
+
+def test_contained_skill_fallback_still_requires_evidence(client: TestClient):
+    pdf = _build_text_pdf("Skills: SQL reporting for a student club")
+    glm_json = {"skills": [{"name": "Python (pandas)", "evidence": "Python (pandas)"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        draft = _post_cv(client, pdf).json()["data"]["draft"]
+
+    assert draft["mapped_skills"] == []
+    assert [s["name"] for s in draft["skills_requiring_review"]] == ["Python (pandas)"]
+
+
+def test_name_containing_two_catalogue_phrases_is_not_guessed(client: TestClient):
+    pdf = _build_text_pdf("Skills: Python and SQL scripting")
+    glm_json = {"skills": [{"name": "Python and SQL scripting", "evidence": "Python and SQL scripting"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        draft = _post_cv(client, pdf).json()["data"]["draft"]
+
+    assert draft["mapped_skills"] == []
+    assert [s["raw_text"] for s in draft["unmapped_skills"]] == ["Python and SQL scripting"]
