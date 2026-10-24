@@ -88,7 +88,10 @@ _JSON_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL | re.IGNOREC
 def _strip_json_fence(content: str) -> str:
     """Models sometimes wrap a JSON reply in a ```json ... ``` markdown
     fence despite being asked not to; unwrap it rather than discarding an
-    otherwise valid reply. Anything else is returned unchanged."""
+    otherwise valid reply. Anything else (including a non-string, e.g. a
+    null content) is returned unchanged for json.loads to reject."""
+    if not isinstance(content, str):
+        return content
     stripped = content.strip()
     match = _JSON_FENCE.match(stripped)
     return match.group(1) if match else stripped

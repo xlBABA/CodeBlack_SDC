@@ -794,3 +794,19 @@ def test_name_containing_two_catalogue_phrases_is_not_guessed(client: TestClient
 
     assert draft["mapped_skills"] == []
     assert [s["raw_text"] for s in draft["unmapped_skills"]] == ["Python and SQL scripting"]
+
+
+@pytest.mark.parametrize("content", [None, "", '{"name": "Jane", "skills": [{"name": "Py'])
+def test_glm_client_null_empty_or_truncated_content_is_an_extraction_error(content):
+    import httpx
+
+    from app.services.glm_client import extract_cv_fields
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}, "finish_reason": "length"}]})
+
+    with pytest.raises(GlmExtractionError):
+        extract_cv_fields(
+            "some cv text", api_key="dummy", base_url="https://llm.invalid/v1", model="m",
+            client=httpx.Client(transport=httpx.MockTransport(_handler)),
+        )
