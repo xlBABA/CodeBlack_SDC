@@ -1,0 +1,34 @@
+{
+  "data": {
+    "status": "manual_review",
+    "draft": {
+      "name": null,
+      "summary": null,
+      "education": [],
+      "mapped_skills": [],
+      "unmapped_skills": [],
+      "skills_requiring_review": [],
+      "projects": [],
+      "experience": [],
+      "certifications": [],
+      "suggested_profile": {
+        "profile_id": null,
+        "education_level": null,
+        "degree": null,
+        "semester": null,
+        "target_role_id": null,
+        "interests": [],
+        "skills": [],
+        "projects": [],
+        "experience_summary": null
+      }
+    },
+    "page_count": 1,
+    "extracted_text_preview": "Test Student (fictional)\nBSc Computer Science, Test University\nSkills: Python, SQL, Excel, Underwater Basket Weaving\nProject: Sales dashboard built with SQL and Python\nTutor, campus learning centre, 2025"
+  },
+  "data_mode": "live",
+  "generated_at": "2026-10-23T13:57:49Z",
+  "warnings": [
+    "We couldn't read your CV automatically right now. Please review or fill in your details below."
+  ]
+}

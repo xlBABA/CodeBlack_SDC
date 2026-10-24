@@ -1,0 +1,217 @@
+{
+ "_note": "Fictional calibration pairs: skill names only, no real data. synonyms = same skill, unrelated = clearly different, hard_negatives = close but different skills that must NOT match. Used by calibrate_threshold.py.",
+ "synonyms": [
+  [
+   "Data Visualization",
+   "Data Visualisation"
+  ],
+  [
+   "Data Visualization",
+   "Dashboard Design"
+  ],
+  [
+   "Machine Learning",
+   "ML Modeling"
+  ],
+  [
+   "Machine Learning",
+   "Predictive Modeling"
+  ],
+  [
+   "SQL",
+   "Database Querying"
+  ],
+  [
+   "Teamwork",
+   "Team Collaboration"
+  ],
+  [
+   "Communication Skills",
+   "Verbal Communication"
+  ],
+  [
+   "Project Management",
+   "Project Planning"
+  ],
+  [
+   "Software Testing",
+   "Quality Assurance"
+  ],
+  [
+   "Web Development",
+   "Frontend Development"
+  ],
+  [
+   "Statistics",
+   "Statistical Analysis"
+  ],
+  [
+   "Microsoft Excel",
+   "Spreadsheet Modeling"
+  ],
+  [
+   "Cloud Computing",
+   "Cloud Infrastructure"
+  ],
+  [
+   "Cybersecurity",
+   "Information Security"
+  ],
+  [
+   "Artificial Intelligence",
+   "Machine Intelligence"
+  ],
+  [
+   "Graphic Design",
+   "Visual Design"
+  ],
+  [
+   "Public Speaking",
+   "Presentation Skills"
+  ],
+  [
+   "Customer Service",
+   "Client Support"
+  ],
+  [
+   "Financial Accounting",
+   "Bookkeeping"
+  ],
+  [
+   "Content Writing",
+   "Copywriting"
+  ]
+ ],
+ "unrelated": [
+  [
+   "Data Visualization",
+   "Cooking"
+  ],
+  [
+   "Machine Learning",
+   "Welding"
+  ],
+  [
+   "SQL",
+   "Gardening"
+  ],
+  [
+   "Teamwork",
+   "Plumbing"
+  ],
+  [
+   "Project Management",
+   "Sculpture"
+  ],
+  [
+   "Software Testing",
+   "Baking"
+  ],
+  [
+   "Web Development",
+   "Carpentry"
+  ],
+  [
+   "Statistics",
+   "Pottery"
+  ],
+  [
+   "Cybersecurity",
+   "Horse Riding"
+  ],
+  [
+   "Cloud Computing",
+   "Knitting"
+  ],
+  [
+   "Graphic Design",
+   "Bricklaying"
+  ],
+  [
+   "Public Speaking",
+   "Soldering"
+  ],
+  [
+   "Customer Service",
+   "Rock Climbing"
+  ],
+  [
+   "Financial Accounting",
+   "Painting Walls"
+  ],
+  [
+   "Content Writing",
+   "Truck Driving"
+  ],
+  [
+   "Microsoft Excel",
+   "Fishing"
+  ],
+  [
+   "Communication Skills",
+   "Metal Casting"
+  ],
+  [
+   "Artificial Intelligence",
+   "Beekeeping"
+  ],
+  [
+   "Data Visualization",
+   "Welding"
+  ],
+  [
+   "Teamwork",
+   "Orchestral Conducting"
+  ]
+ ],
+ "hard_negatives": [
+  [
+   "Java",
+   "JavaScript"
+  ],
+  [
+   "Data Analysis",
+   "Data Engineering"
+  ],
+  [
+   "Machine Learning",
+   "Data Entry"
+  ],
+  [
+   "Accounting",
+   "Auditing"
+  ],
+  [
+   "UI Design",
+   "Backend Development"
+  ],
+  [
+   "Project Management",
+   "Product Management"
+  ],
+  [
+   "Sales",
+   "Marketing"
+  ],
+  [
+   "Graphic Design",
+   "Interior Design"
+  ],
+  [
+   "Software Testing",
+   "Software Architecture"
+  ],
+  [
+   "Network Security",
+   "Network Administration"
+  ],
+  [
+   "Frontend Development",
+   "Database Administration"
+  ],
+  [
+   "Customer Service",
+   "Customer Research"
+  ]
+ ]
+}

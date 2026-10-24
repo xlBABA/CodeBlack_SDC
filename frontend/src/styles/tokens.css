@@ -1,0 +1,178 @@
+/* Mustaqbal AI design tokens: one palette (the landing page's teal set) for every page.
+   Light is the default; <html data-theme="dark"> switches, <html data-accent="…"> swaps
+   only the accent tokens (--primary, --primary-2, --on-primary). */
+
+:root {
+  --font: 'Urbanist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-2xs: 0.75rem;
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.875rem;
+  --fs-md: 0.9375rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.125rem;
+
+  --bg: #edf3f3;
+  --mesh-a: #22aabe3d;
+  --mesh-b: #ff966e2e;
+  --mesh-c: #9fe3ec47;
+  --glass: #fbfdfdb8;
+  --glass-2: #fbfdfde0;
+  --solid: #f3f7f7;
+  --raised: #fff;
+  --rim: #ffffffc4;
+  --well: #102a300f;
+  --line: #102a301a;
+  --line-2: #102a302e;
+  --hatch: #8a9ea4;
+  --shadow: 0 1px 2px #102a300a, 0 10px 26px -20px #102a304d;
+  --shadow-pop: 0 24px 60px -18px #102a3057, 0 2px 6px #102a3014;
+
+  --text: #13262b;
+  --muted: #50636a;
+  --faint: #5c6f76;
+
+  --primary: #0b6e85;
+  --primary-2: #0f2a31;
+  --on-primary: #fff;
+  --deep-a: #0e7c99;
+  --deep-b: #0f2a31;
+
+  --ink: #0f2a31;
+  --on-ink: #e6f2f3;
+  --butter: #9fe3ec;
+  --on-butter: #062a31;
+  --tomato: #e8603b;
+  /* dark text: white on this orange is only 3.4:1 */
+  --on-tomato: #2e0e03;
+  --emerald: #23926a;
+  --sky: #3a6fd4;
+  --plum: #d6466c;
+  --teal: #0e7c99;
+  --good: #1b8657;
+  --warn: #946005;
+  --bad: #c4352c;
+  --slate: #63737b;
+  --soft: 14%;
+
+  /* fixed colours for content on the deep backdrops (hero window, footer, curtain, intro),
+     which stay dark in both themes */
+  --on-deep: #f6faf8;
+  --deep-ink: #0f2a31;
+  --deep-glow: #9fe3ec;
+  --deep-warm: #ffb38f;
+  --node: #f0c64a;
+  /* share of the accent in the deep hero card */
+  --deep-mix: 44%;
+
+  --r-card: 26px;
+  --r-tile: 20px;
+  --r-ctl: 999px;
+  --gap: 16px;
+  --gutter: clamp(16px, 1.8vw, 30px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0b1517;
+  --mesh-a: #28b4c82e;
+  --mesh-b: #ff825f14;
+  --mesh-c: #5fcfe01a;
+  --glass: #121e21b8;
+  --glass-2: #172427e0;
+  --solid: #172427;
+  --raised: #1c2b2f;
+  --rim: #ffffff12;
+  --well: #ffffff0e;
+  --line: #ffffff14;
+  --line-2: #ffffff29;
+  --hatch: #6f8287;
+  --shadow: 0 1px 0 #ffffff09 inset, 0 18px 40px -26px #000000d9;
+  --shadow-pop: 0 24px 60px -18px #000000bf, 0 0 0 1px #ffffff14;
+
+  --text: #e9f3f4;
+  --muted: #a2b5b9;
+  --faint: #87999e;
+
+  --primary: #5fcfe0;
+  --primary-2: #0f3a44;
+  --on-primary: #04222a;
+  --deep-a: #0d5f70;
+  --deep-b: #0c191c;
+  /* the bright dark-theme accents need less, so muted text on the card keeps AA */
+  --deep-mix: 32%;
+
+  --ink: #e9f3f4;
+  --on-ink: #0b1517;
+  /* amber: pale teal would sit too close to the bright dark-theme primary */
+  --butter: #efb547;
+  --on-butter: #2b1a00;
+  --tomato: #ff8a68;
+  --on-tomato: #2e0e03;
+  --emerald: #52c79a;
+  --sky: #84a9f5;
+  --plum: #f37f9c;
+  --teal: #5fcfe0;
+  --good: #5fd39a;
+  --warn: #efb547;
+  --bad: #f58b7f;
+  --slate: #9fb0b7;
+  --soft: 20%;
+
+  color-scheme: dark;
+}
+
+/* Accent picker: only the accent tokens change. Teal (the default) is the palette above. */
+:root[data-accent='emerald'] {
+  --primary: #146c54;
+  --primary-2: #0d4c3b;
+}
+:root[data-accent='indigo'] {
+  --primary: #4549b8;
+  --primary-2: #2f3283;
+}
+:root[data-accent='tomato'] {
+  --primary: #b9431d;
+  --primary-2: #842e13;
+}
+:root[data-theme='dark'][data-accent='emerald'] {
+  --primary: #4fcf9f;
+  --primary-2: #2a9c74;
+  --on-primary: #062419;
+}
+:root[data-theme='dark'][data-accent='indigo'] {
+  --primary: #9a9ef7;
+  --primary-2: #6a6ee0;
+  --on-primary: #121345;
+}
+:root[data-theme='dark'][data-accent='tomato'] {
+  --primary: #f08a65;
+  --primary-2: #cf5e37;
+  --on-primary: #2e0e03;
+}
+
+/* The 17 official UN SDG colours. */
+:root {
+  --sdg-1: #e5243b;
+  --sdg-2: #dda63a;
+  --sdg-3: #4c9f38;
+  --sdg-4: #c5192d;
+  --sdg-5: #ff3a21;
+  --sdg-6: #26bde2;
+  --sdg-7: #fcc30b;
+  --sdg-8: #a21942;
+  --sdg-9: #fd6925;
+  --sdg-10: #dd1367;
+  --sdg-11: #fd9d24;
+  --sdg-12: #bf8b2e;
+  --sdg-13: #3f7e44;
+  --sdg-14: #0a97d9;
+  --sdg-15: #56c02b;
+  --sdg-16: #00689d;
+  --sdg-17: #19486a;
+}

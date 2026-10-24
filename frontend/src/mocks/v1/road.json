@@ -1,0 +1,35 @@
+{
+  "data": {
+    "steps": [
+      {
+        "skill_id": "critical_thinking",
+        "resource_id": "alison_thinking_critically",
+        "estimated_hours": 3.0,
+        "reason": "Closes a missing skill for Data Analyst (role-weighted priority 1.0). Provider-stated: the page says \"Avg. Duration 1.5-3 Hours\"; we use the upper end of that range."
+      },
+      {
+        "skill_id": "data_visualization",
+        "resource_id": "mslearn_power_bi_prepare_visualize",
+        "estimated_hours": 8.2,
+        "reason": "Closes a missing skill for Data Analyst (role-weighted priority 1.0). Provider-stated: 492 minutes (duration_in_minutes in Microsoft Learn's official catalog API)."
+      },
+      {
+        "skill_id": "mathematics",
+        "resource_id": "fcc_statistics_video_monika_wahi",
+        "estimated_hours": 8.0,
+        "reason": "Closes a missing skill for Data Analyst (role-weighted priority 1.0). Team estimate: a third-party article (expertbeacon.com, updated 2024-08-20) calls it an \"8-hour course\"; Jawad has not seen the video page itself."
+      }
+    ],
+    "total_estimated_hours": 19.2
+  },
+  "data_mode": "fixture",
+  "generated_at": "2026-10-22T20:06:30Z",
+  "warnings": [
+    "MATCHING_MODE=hussain: scores are produced by Hussain's deterministic matching algorithm (app/services/hussain_matching), running fully offline — semantic similarity is explicitly disabled, so no RunPod endpoint or embedding model was contacted. This methodology is an initial team choice, not a validated model, and the score is not a hiring probability.",
+    "No placeholder resource is available yet for skill 'complex_problem_solving'; this gap is omitted rather than fabricated.",
+    "No placeholder resource is available yet for skill 'systems_analysis'; this gap is omitted rather than fabricated.",
+    "At 8 hour(s)/week, this plan takes approximately 2.4 week(s).",
+    "CATALOG_MODE=cached: the role and skill catalog inputs for this response come from Jawad's cached, real O*NET-derived dataset — those role/skill identifiers are not fictional. Matching scores are still calculated by Hussain's deterministic matching algorithm, running fully offline (no RunPod contacted). data_mode remains 'fixture' because the generated score is still fixture-based, even though the underlying sourced roles themselves are real.",
+    "CATALOG_MODE=cached: the learning resources in this roadmap come from Jawad's verified, cached resource dataset — real course titles, URLs and provider-stated or team-estimated hours, not fixture placeholders. Which skills are selected for this roadmap is still driven by the matching score above."
+  ]
+}

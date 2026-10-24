@@ -1,0 +1,301 @@
+{
+  "role_sdg_mappings": [
+    {
+      "role_id": "data_analyst",
+      "sdg_id": 8,
+      "reason": "Business intelligence/data analysis work directly supports organizations making productive, evidence-based decisions, matching SDG 8's focus on productivity and economic growth."
+    },
+    {
+      "role_id": "financial_analyst",
+      "sdg_id": 8,
+      "reason": "Financial analysts guide capital allocation and investment decisions that affect economic growth and job creation, a core part of SDG 8."
+    },
+    {
+      "role_id": "mechanical_engineer",
+      "sdg_id": 9,
+      "reason": "Mechanical engineers design and build industrial systems, products and infrastructure, directly supporting SDG 9's goal of resilient infrastructure and inclusive industrialization."
+    },
+    {
+      "role_id": "public_health_analyst",
+      "sdg_id": 3,
+      "reason": "Epidemiology-based analysis tracks disease patterns and health risks to protect population health, matching SDG 3's goal of health and well-being for all."
+    },
+    {
+      "role_id": "software_developer",
+      "sdg_id": 9,
+      "reason": "Software developers build the digital systems and applications that modern industry and infrastructure run on, matching SDG 9 (industry, innovation and infrastructure; target 9.c on access to information and communications technology)."
+    },
+    {
+      "role_id": "accountant",
+      "sdg_id": 8,
+      "reason": "Accountants keep business finances accurate and sustainable, supporting the productive enterprises and economic growth that SDG 8 aims for."
+    },
+    {
+      "role_id": "accountant",
+      "sdg_id": 16,
+      "reason": "Accounting and auditing make organisations' finances transparent and accountable, matching SDG target 16.6 on effective, accountable and transparent institutions."
+    },
+    {
+      "role_id": "civil_engineer",
+      "sdg_id": 9,
+      "reason": "Civil engineers design and build roads, bridges, water systems and other infrastructure, the core of SDG 9's goal of resilient infrastructure."
+    },
+    {
+      "role_id": "civil_engineer",
+      "sdg_id": 11,
+      "reason": "Civil engineering shapes how cities are planned and built (transport, drainage, housing), directly supporting SDG 11 on sustainable cities and communities."
+    },
+    {
+      "role_id": "environmental_scientist",
+      "sdg_id": 3,
+      "reason": "O*NET describes this work as identifying and reducing pollutants and hazards that affect the environment or public health, matching SDG target 3.9 on reducing illness from hazardous chemicals and pollution."
+    },
+    {
+      "role_id": "environmental_scientist",
+      "sdg_id": 12,
+      "reason": "Tracking and reducing pollutants and hazardous materials supports SDG target 12.4 on the sound management of chemicals and wastes."
+    },
+    {
+      "role_id": "data_scientist",
+      "sdg_id": 9,
+      "reason": "O*NET describes this work as applying data mining, data modeling and machine learning to large datasets; building that analytic capability supports SDG target 9.5 (enhance scientific research and upgrade technological capabilities). Team estimate."
+    },
+    {
+      "role_id": "statistician",
+      "sdg_id": 17,
+      "reason": "Statisticians collect, organize and interpret numerical data to provide usable information (O*NET), the statistical capacity that SDG targets 17.18 (high-quality, timely and reliable data) and 17.19 (statistical capacity-building) call for. Team estimate."
+    },
+    {
+      "role_id": "operations_research_analyst",
+      "sdg_id": 8,
+      "reason": "O*NET describes this work as mathematical modeling and optimizing methods that help management decide, including optimal time, cost or logistics networks; that efficiency supports SDG target 8.2 (higher economic productivity through technological upgrading and innovation). Team estimate."
+    },
+    {
+      "role_id": "web_developer",
+      "sdg_id": 9,
+      "reason": "Web developers build the websites and web applications people use to reach information and services online, matching SDG target 9.c (increase access to information and communications technology). Team estimate."
+    },
+    {
+      "role_id": "database_administrator",
+      "sdg_id": 9,
+      "reason": "Database administrators keep databases reliable, scalable and secure (O*NET), part of the reliable digital infrastructure behind SDG target 9.1 (quality, reliable, sustainable and resilient infrastructure). Team estimate."
+    },
+    {
+      "role_id": "information_security_analyst",
+      "sdg_id": 9,
+      "reason": "O*NET says this role safeguards digital files and 'vital electronic infrastructure' against security risks, which keeps the infrastructure in SDG target 9.1 (quality, reliable, sustainable and resilient infrastructure) working. Team estimate."
+    },
+    {
+      "role_id": "computer_systems_analyst",
+      "sdg_id": 9,
+      "reason": "Computer systems analysts improve existing computer systems and solve data processing problems for organizations (O*NET), upgrading their technological capabilities as in SDG target 9.5. Team estimate."
+    },
+    {
+      "role_id": "electrical_engineer",
+      "sdg_id": 7,
+      "reason": "O*NET tasks for this occupation include developing systems that produce electricity from renewable sources (wind, solar, biofuels) and designing systems that minimize electric energy requirements, which is the work of SDG 7 (affordable and clean energy). Team estimate."
+    },
+    {
+      "role_id": "electrical_engineer",
+      "sdg_id": 9,
+      "reason": "Electrical engineers design and supervise the installation of electrical equipment and systems for commercial and industrial use, supporting SDG target 9.1 (reliable, resilient infrastructure). Team estimate."
+    },
+    {
+      "role_id": "industrial_engineer",
+      "sdg_id": 9,
+      "reason": "Industrial engineers design integrated systems for managing production processes, quality control and material flow (O*NET), supporting SDG target 9.4 (increased resource-use efficiency in industry). Team estimate."
+    },
+    {
+      "role_id": "industrial_engineer",
+      "sdg_id": 12,
+      "reason": "Better inventory control, logistics and material flow in production (O*NET) cuts wasted materials, matching SDG target 12.5 (substantially reduce waste generation). Team estimate."
+    },
+    {
+      "role_id": "chemical_engineer",
+      "sdg_id": 9,
+      "reason": "Chemical engineers design plant equipment and processes for manufacturing chemicals and products (O*NET), the industrial processes SDG target 9.4 asks to make cleaner and more resource-efficient. Team estimate."
+    },
+    {
+      "role_id": "chemical_engineer",
+      "sdg_id": 12,
+      "reason": "Designing how chemicals are manufactured and handled matches SDG target 12.4 (environmentally sound management of chemicals and wastes throughout their life cycle). Team estimate."
+    },
+    {
+      "role_id": "aerospace_engineer",
+      "sdg_id": 9,
+      "reason": "Aerospace engineers design, build and test aircraft and spacecraft and conduct applied research on materials (O*NET), the engineering research and innovation in SDG target 9.5. Team estimate."
+    },
+    {
+      "role_id": "surveyor",
+      "sdg_id": 11,
+      "reason": "Surveyors make exact measurements and determine property boundaries for construction and land evaluation (O*NET), the base data for SDG target 11.3 (sustainable human settlement planning and management). Team estimate."
+    },
+    {
+      "role_id": "surveyor",
+      "sdg_id": 9,
+      "reason": "Survey data on land shape, location and elevation is used for engineering and construction (O*NET), supporting SDG target 9.1 (quality, reliable infrastructure). Team estimate."
+    },
+    {
+      "role_id": "environmental_engineer",
+      "sdg_id": 6,
+      "reason": "O*NET describes this work as preventing, controlling and remediating environmental hazards, including waste treatment and pollution control, which matches SDG target 6.3 (improve water quality by reducing pollution and untreated wastewater). Team estimate."
+    },
+    {
+      "role_id": "environmental_engineer",
+      "sdg_id": 11,
+      "reason": "Waste treatment and pollution control technology reduce the environmental impact of cities, matching SDG target 11.6 (air quality and municipal and other waste management). Team estimate."
+    },
+    {
+      "role_id": "biomedical_engineer",
+      "sdg_id": 3,
+      "reason": "Biomedical engineers design and evaluate medical diagnostic and clinical equipment, prostheses and health care delivery systems (O*NET), directly supporting SDG 3 (good health and well-being). Team estimate."
+    },
+    {
+      "role_id": "urban_regional_planner",
+      "sdg_id": 11,
+      "reason": "Urban and regional planners develop comprehensive plans for the use of land and facilities in towns, cities and metropolitan areas (O*NET), the core of SDG target 11.3 (sustainable urbanization and settlement planning). Team estimate."
+    },
+    {
+      "role_id": "hydrologist",
+      "sdg_id": 6,
+      "reason": "Hydrologists produce the information used in water resource management decisions and promote conservation of water resources (O*NET), matching SDG target 6.5 (integrated water resources management). Team estimate."
+    },
+    {
+      "role_id": "hydrologist",
+      "sdg_id": 13,
+      "reason": "O*NET tasks include studying flood and drought risks and evaluating flood control planning and flood warning systems, which supports SDG target 13.1 (resilience to climate-related hazards and natural disasters). Team estimate."
+    },
+    {
+      "role_id": "management_analyst",
+      "sdg_id": 8,
+      "reason": "Management analysts study organizations and design systems and procedures to help them operate more efficiently and effectively (O*NET), supporting SDG target 8.2 (higher economic productivity). Team estimate."
+    },
+    {
+      "role_id": "budget_analyst",
+      "sdg_id": 16,
+      "reason": "Budget analysts examine budget estimates for completeness, accuracy and conformance with procedures and regulations (O*NET), which helps make institutions accountable and transparent as in SDG target 16.6. Team estimate."
+    },
+    {
+      "role_id": "financial_risk_specialist",
+      "sdg_id": 8,
+      "reason": "Financial risk specialists measure exposure to credit and market risk that threatens an organization's assets and recommend ways to limit it (O*NET), helping financial institutions stay strong as in SDG target 8.10. Team estimate."
+    },
+    {
+      "role_id": "actuary",
+      "sdg_id": 8,
+      "reason": "Actuaries forecast risk and set the insurance rates and cash reserves needed to pay future benefits (O*NET), supporting SDG target 8.10 (strengthen financial institutions and expand access to insurance and financial services). Team estimate."
+    },
+    {
+      "role_id": "market_research_analyst",
+      "sdg_id": 8,
+      "reason": "Market research analysts study customer needs and factors affecting product demand (O*NET), helping businesses plan products and stay productive, a part of SDG 8 (decent work and economic growth). Team estimate."
+    },
+    {
+      "role_id": "logistician",
+      "sdg_id": 12,
+      "reason": "O*NET says logisticians manage a product's entire life cycle, including distribution, delivery and final disposal of resources, which connects to SDG target 12.5 (reduce waste generation through prevention, reduction, recycling and reuse). Team estimate."
+    }
+  ],
+  "skill_sdg_mappings": [
+    {
+      "skill_id": "critical_thinking",
+      "sdg_id": 4,
+      "reason": "Core analytical competency built through education; a foundational learning outcome (SDG 4) that transfers across any evidence-based career."
+    },
+    {
+      "skill_id": "mathematics",
+      "sdg_id": 4,
+      "reason": "Quantitative literacy is a foundational education outcome (SDG 4) underlying STEM, finance, and health analysis work."
+    },
+    {
+      "skill_id": "complex_problem_solving",
+      "sdg_id": 4,
+      "reason": "A higher-order thinking skill developed through education (SDG 4), applicable across all four roles in this catalog."
+    },
+    {
+      "skill_id": "systems_analysis",
+      "sdg_id": 4,
+      "reason": "An analytical competency taught and strengthened through formal education and training (SDG 4)."
+    },
+    {
+      "skill_id": "attention_to_detail",
+      "sdg_id": 4,
+      "reason": "A work-quality competency developed through training and education (SDG 4), important for accurate financial analysis."
+    },
+    {
+      "skill_id": "excel",
+      "sdg_id": 8,
+      "reason": "A baseline digital workplace skill tied to employability, matching SDG target 8.6 on equipping youth with skills for employment."
+    },
+    {
+      "skill_id": "sql",
+      "sdg_id": 8,
+      "reason": "An in-demand technical skill directly tied to employability in data-driven roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "python",
+      "sdg_id": 8,
+      "reason": "An in-demand technical skill directly tied to employability in data-driven and engineering roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "data_visualization",
+      "sdg_id": 8,
+      "reason": "A widely-demanded workplace tool skill that improves employability across analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "cad_software",
+      "sdg_id": 9,
+      "reason": "CAD tools are used to design industrial products and infrastructure, supporting SDG 9's focus on inclusive, sustainable industrialization."
+    },
+    {
+      "skill_id": "matlab",
+      "sdg_id": 9,
+      "reason": "MATLAB is used for engineering modeling and simulation that underpins infrastructure and industrial design (SDG 9)."
+    },
+    {
+      "skill_id": "financial_analysis_software",
+      "sdg_id": 8,
+      "reason": "An in-demand finance-sector tool skill directly tied to employability in investment/analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "analytical_scientific_software",
+      "sdg_id": 8,
+      "reason": "A statistical-analysis tool skill tied to employability in quantitative analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "vba",
+      "sdg_id": 8,
+      "reason": "A workplace automation/scripting skill tied to employability in finance and analyst roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "programming",
+      "sdg_id": 4,
+      "reason": "A core information and communications technology skill built through education, matching SDG target 4.4 on youth and adults with relevant ICT skills for employment."
+    },
+    {
+      "skill_id": "javascript",
+      "sdg_id": 8,
+      "reason": "An in-demand web programming skill directly tied to employability in software roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "git",
+      "sdg_id": 8,
+      "reason": "A standard workplace tool for collaborating on code, tied to employability in software and data roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "accounting_software",
+      "sdg_id": 8,
+      "reason": "A practical workplace tool skill tied to employability in accounting and bookkeeping roles (SDG target 8.6)."
+    },
+    {
+      "skill_id": "gis",
+      "sdg_id": 11,
+      "reason": "GIS is used to map land use, hazards and services for planning, supporting SDG target 11.3 on inclusive, sustainable urban planning."
+    },
+    {
+      "skill_id": "science",
+      "sdg_id": 4,
+      "reason": "Using scientific rules and methods is a foundational learning outcome built through education (SDG 4), needed for engineering and environmental work."
+    }
+  ]
+}

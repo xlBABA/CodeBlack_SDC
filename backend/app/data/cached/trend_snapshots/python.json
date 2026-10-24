@@ -1,0 +1,22 @@
+{
+  "skill_id": "python",
+  "source_status": "cached",
+  "source_id": "github_search_repos",
+  "current": {
+    "topic": "python",
+    "start": "2026-09-22",
+    "end": "2026-10-21",
+    "total_count": 52147,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:38:44Z"
+  },
+  "previous": {
+    "topic": "python",
+    "start": "2026-08-23",
+    "end": "2026-09-21",
+    "total_count": 45046,
+    "incomplete": false,
+    "retrieved_at": "2026-10-21T17:38:42Z"
+  },
+  "prior_snapshot": null
+}

@@ -1,0 +1,34 @@
+{
+  "data": {
+    "status": "no_extractable_text",
+    "draft": {
+      "name": null,
+      "summary": null,
+      "education": [],
+      "mapped_skills": [],
+      "unmapped_skills": [],
+      "skills_requiring_review": [],
+      "projects": [],
+      "experience": [],
+      "certifications": [],
+      "suggested_profile": {
+        "profile_id": null,
+        "education_level": null,
+        "degree": null,
+        "semester": null,
+        "target_role_id": null,
+        "interests": [],
+        "skills": [],
+        "projects": [],
+        "experience_summary": null
+      }
+    },
+    "page_count": 1,
+    "extracted_text_preview": null
+  },
+  "data_mode": "live",
+  "generated_at": "2026-10-23T13:57:49Z",
+  "warnings": [
+    "No selectable text was found in this PDF (it may be a scanned image). Please fill in your profile manually — automatic text recognition (OCR) is not performed."
+  ]
+}

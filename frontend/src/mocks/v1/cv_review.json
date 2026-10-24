@@ -1,0 +1,85 @@
+{
+  "data": {
+    "status": "ok",
+    "page_count": 1,
+    "extracted_text_preview": null,
+    "draft": {
+      "name": "Jane Student",
+      "summary": "CS undergraduate",
+      "education": [
+        {
+          "institution": "Test University",
+          "degree": "BSc",
+          "field_of_study": "Computer Science",
+          "start_date": null,
+          "end_date": null
+        }
+      ],
+      "mapped_skills": [
+        {
+          "skill_id": "python",
+          "name": "Python",
+          "raw_text": "Python",
+          "evidence": "Python"
+        },
+        {
+          "skill_id": "sql",
+          "name": "SQL",
+          "raw_text": "SQL",
+          "evidence": "SQL"
+        }
+      ],
+      "unmapped_skills": [
+        {
+          "raw_text": "Underwater Basket Weaving",
+          "evidence": "Underwater Basket Weaving"
+        }
+      ],
+      "skills_requiring_review": [
+        {
+          "name": "Java",
+          "reason": "The supporting quote for this skill could not be found in your CV text, so it was not added automatically. Add it yourself if it's accurate."
+        }
+      ],
+      "projects": [
+        {
+          "title": "Sales dashboard",
+          "description": "Built with SQL and Python"
+        }
+      ],
+      "experience": [],
+      "certifications": [],
+      "suggested_profile": {
+        "profile_id": null,
+        "education_level": null,
+        "degree": "Computer Science",
+        "semester": null,
+        "target_role_id": null,
+        "interests": [],
+        "skills": [
+          {
+            "skill_id": "python",
+            "name": "Python",
+            "proficiency": null
+          },
+          {
+            "skill_id": "sql",
+            "name": "SQL",
+            "proficiency": null
+          }
+        ],
+        "projects": [
+          "Sales dashboard: Built with SQL and Python"
+        ],
+        "experience_summary": "CS undergraduate"
+      }
+    }
+  },
+  "data_mode": "live",
+  "generated_at": "2026-10-23T04:19:08Z",
+  "warnings": [
+    "Extracted automatically; please review every field before confirming — nothing here is final.",
+    "1 skill(s) were not recognized against the current catalogue and were not added to your profile automatically; review them below.",
+    "1 skill(s) could not be automatically verified against your CV text and were not added to your profile automatically; add them yourself if they're accurate."
+  ]
+}

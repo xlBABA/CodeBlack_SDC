@@ -1,0 +1,40 @@
+modules = ["nodejs-24", "python-3.11"]
+
+[[ports]]
+localPort = 8000
+externalPort = 80
+
+[nix]
+
+[workflows]
+
+[[workflows.workflow]]
+name = "Start Backend"
+mode = "sequential"
+author = 23956635
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && DATABASE_URL=sqlite:///./futurepath.db python start.py"
+
+[userenv]
+
+[userenv.shared]
+ENVIRONMENT = "production"
+CATALOG_MODE = "cached"
+MATCHING_MODE = "hussain"
+ENABLE_FIXTURES = "false"
+RUNPOD_GLM_READ_TIMEOUT_SECONDS = "40"
+RUNPOD_ENDPOINT_ID = "f0phohhegtydji"
+LLM_PROVIDER = "openrouter"
+LLM_BASE_URL = "https://openrouter.ai/api/v1"
+LLM_MODEL = "z-ai/glm-5.3-flashx"
+
+[deployment]
+build = "python -m venv .venv && PIP_USER=false PIP_CONFIG_FILE=/dev/null .venv/bin/python -m pip install -r backend/requirements.txt && cd frontend && npm ci && npm run build"
+run = "cd backend && DATABASE_URL=sqlite:///./futurepath.db ../.venv/bin/python start.py"
+deploymentTarget = "cloudrun"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 180000

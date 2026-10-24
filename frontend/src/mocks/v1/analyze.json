@@ -1,0 +1,31 @@
+{
+  "data": {
+    "profile_id": "profile_a4262d0f1355490b978c372ac4107148",
+    "education_level": "undergraduate",
+    "degree": "Computer Science",
+    "semester": 4,
+    "target_role_id": null,
+    "interests": [
+      "data analytics"
+    ],
+    "skills": [
+      {
+        "skill_id": "python",
+        "name": "Python",
+        "proficiency": null
+      },
+      {
+        "skill_id": "sql",
+        "name": "SQL",
+        "proficiency": null
+      }
+    ],
+    "projects": [
+      "Synthetic university data-cleaning exercise"
+    ],
+    "experience_summary": "No professional experience (fictional test case)"
+  },
+  "data_mode": "live",
+  "generated_at": "2026-10-22T20:06:15Z",
+  "warnings": []
+}
