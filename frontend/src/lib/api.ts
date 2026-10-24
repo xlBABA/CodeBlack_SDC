@@ -5,6 +5,7 @@ import { mockApi } from '@/mocks/client'
 import type {
   APIEnvelope,
   APIErrorBody,
+  CvParsePayload,
   Health,
   MatchPayload,
   MatchRequest,
@@ -28,6 +29,8 @@ export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true'
 
 const TIMEOUT_MS = 20_000
 const RETRY_DELAYS_MS = [700, 1600]
+// The CV parser waits up to 30 s for its language model, so uploads get a longer limit.
+const UPLOAD_TIMEOUT_MS = 60_000
 
 export type ApiErrorKind = 'http' | 'validation' | 'network' | 'timeout'
 
@@ -133,6 +136,56 @@ async function envelope<T>(method: 'GET' | 'POST', path: string, body: unknown, 
   return { ...res, warnings: res.warnings ?? [] }
 }
 
+export type UploadOptions = {
+  signal?: AbortSignal
+  /** share of the file sent so far, 0 to 1 */
+  onProgress?: (sent: number) => void
+  /** the whole file has reached the server, which is now processing it */
+  onUploaded?: () => void
+}
+
+/**
+ * Multipart POST. Uses XHR because fetch cannot report when the upload itself is finished,
+ * which is what tells "uploading" apart from "processing". Not retried: the caller offers that.
+ */
+function upload<T>(path: string, form: FormData, { signal, onProgress, onUploaded }: UploadOptions = {}): Promise<APIEnvelope<T>> {
+  return new Promise((resolve, reject) => {
+    const done = trackRequest()
+    const xhr = new XMLHttpRequest()
+    const fail = (error: unknown) => {
+      done()
+      reject(error)
+    }
+    xhr.open('POST', new URL(`${BASE_URL}${path}`, window.location.origin))
+    xhr.setRequestHeader('accept', 'application/json')
+    xhr.timeout = UPLOAD_TIMEOUT_MS
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress?.(e.loaded / e.total)
+    }
+    xhr.upload.onload = () => onUploaded?.()
+    xhr.onload = () => {
+      const res = new Response(xhr.responseText, { status: xhr.status, statusText: xhr.statusText })
+      if (!res.ok) {
+        toApiError(res).then(fail)
+        return
+      }
+      res
+        .json()
+        .then((body: APIEnvelope<T> & { warnings?: string[] }) => {
+          clearOutage()
+          done()
+          resolve({ ...body, warnings: body.warnings ?? [] })
+        })
+        .catch(() => fail(new ApiError({ kind: 'http', status: res.status, code: 'BAD_RESPONSE', message: 'The server sent an answer that could not be read.' })))
+    }
+    xhr.onerror = () => fail(new ApiError({ kind: 'network', status: 0, code: 'NETWORK_ERROR', message: 'Could not reach the server. Check your connection.' }))
+    xhr.ontimeout = () => fail(new ApiError({ kind: 'timeout', status: 0, code: 'TIMEOUT', message: 'The server took too long to answer.' }))
+    xhr.onabort = () => fail(signal?.reason)
+    signal?.addEventListener('abort', () => xhr.abort())
+    xhr.send(form)
+  })
+}
+
 const httpApi = {
   health: (o?: Options) => fetchJson<Health>('GET', '/health', undefined, o),
   analyzeProfile: (profile: StudentProfile, o?: Options) => envelope<StudentProfile>('POST', '/profile/analyze', profile, o),
@@ -143,6 +196,11 @@ const httpApi = {
   recommendProjects: (req: RoleProfileRequest, o?: Options) => envelope<ProjectRecommendationPayload>('POST', '/projects/recommend', req, o),
   simulateProject: (req: ProjectSimulationRequest, o?: Options) => envelope<ProjectSimulationPayload>('POST', '/projects/simulate', req, o),
   getSdgs: (roleId: string, o?: Options) => envelope<SdgPayload>('GET', `/sdgs/${encodeURIComponent(roleId)}`, undefined, o),
+  parseCv: (file: File, o?: UploadOptions) => {
+    const form = new FormData()
+    form.append('file', file)
+    return upload<CvParsePayload>('/cv/parse', form, o)
+  },
 }
 
 export type Api = typeof httpApi
@@ -153,14 +211,4 @@ export const api: Api = USE_MOCKS ? mockApi : httpApi
 /** Hands a failed request's 503 to the outage banner so the user can retry it from there. */
 export function noteOutage(error: unknown, retry: () => void) {
   if (error instanceof ApiError && error.status === 503) reportOutage(error.message, retry, error.requestId)
-}
-
-/**
- * Development only: builds the error a real failure would produce, so the error UI can be
- * exercised without breaking the backend. Used by the diagnostics card on /design.
- */
-export function simulatedError(kind: 'PROFILE_NOT_FOUND' | 'PROVIDER_UNAVAILABLE' | 'NETWORK_ERROR'): ApiError {
-  if (kind === 'PROFILE_NOT_FOUND') return new ApiError({ kind: 'http', status: 404, code: kind, message: 'This profile no longer exists on the server.' })
-  if (kind === 'PROVIDER_UNAVAILABLE') return new ApiError({ kind: 'http', status: 503, code: kind, message: 'The data provider is not responding right now.' })
-  return new ApiError({ kind: 'network', status: 0, code: kind, message: 'Could not reach the server. Check your connection.' })
 }

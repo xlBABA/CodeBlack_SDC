@@ -1,4 +1,5 @@
-import type { JourneyStep } from '@/content/landing'
+import { SdgIcon } from '@/components/sdg-icon'
+import { DOMAIN_SDGS, type JourneyStep } from '@/content/landing'
 
 // Small illustrative "screens" for each journey step. Static demo content.
 
@@ -19,25 +20,32 @@ function Skills() {
     </ul>
   )
 }
+// Change in new GitHub repositories per topic, last 30 days vs the 30 before, from the team's
+// cached snapshots (data/trend_snapshots, retrieved 21 Oct 2026).
+const TREND_ROWS: [string, number][] = [['MATLAB', 51.5], ['Python', 15.8], ['SQL', 7.9], ['Financial analysis software', -6.1]]
+const TREND_MAX = Math.max(...TREND_ROWS.map(([, v]) => Math.abs(v)))
+
 function Trends() {
-  const rows: [string, number, boolean][] = [['AI literacy', 41, false], ['ESG reporting', 27, true], ['SQL', 18, false], ['Manual data entry', -33, true]]
   return (
-    <ul className="grid gap-3">
-      {rows.map(([s, v, stale]) => (
-        <li key={s}>
-          <div className="flex justify-between text-sm font-semibold">
-            <span>{s}</span>
-            <span className={v > 0 ? 'text-good' : 'text-tomato'}>{v > 0 ? `+${v}` : v}%</span>
-          </div>
-          <div className="relative mt-1 h-2.5 rounded-full bg-well">
-            <i
-              className={`absolute inset-y-0 rounded-full ${stale ? 'hatch' : v > 0 ? 'bg-good' : 'bg-tomato'}`}
-              style={v > 0 ? { left: '50%', width: `${(v / 41) * 50}%` } : { right: '50%', width: `${(-v / 41) * 50}%` }}
-            />
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="grid gap-3">
+      <ul className="grid gap-3">
+        {TREND_ROWS.map(([s, v]) => (
+          <li key={s}>
+            <div className="flex justify-between text-sm font-semibold">
+              <span>{s}</span>
+              <span className={v > 0 ? 'text-good' : 'text-tomato'}>{v > 0 ? `+${v}` : v}%</span>
+            </div>
+            <div className="relative mt-1 h-2.5 rounded-full bg-well">
+              <i
+                className={`absolute inset-y-0 rounded-full ${v > 0 ? 'bg-good' : 'bg-tomato'}`}
+                style={v > 0 ? { left: '50%', width: `${(v / TREND_MAX) * 50}%` } : { right: '50%', width: `${(-v / TREND_MAX) * 50}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-muted-foreground">New GitHub repositories, last 30 days vs the 30 before. Cached 21 Oct 2026. Developer activity, not job demand.</p>
+    </div>
   )
 }
 function Roles() {
@@ -77,13 +85,24 @@ function Path() {
   )
 }
 function Sdg() {
+  const { main, related } = DOMAIN_SDGS
   return (
-    <div className="grid grid-cols-6 gap-1.5">
-      {Array.from({ length: 17 }, (_, i) => (
-        <span key={i} className="grid aspect-square place-items-center rounded-[10px] text-sm font-extrabold text-white" style={{ background: `var(--sdg-${i + 1})` }}>
-          {i + 1}
-        </span>
-      ))}
+    <div className="grid gap-2 md:gap-3">
+      <div className="flex items-center gap-3 rounded-[16px] bg-raised p-2 pr-3 shadow-card md:p-2.5">
+        <SdgIcon sdg={main} className="size-12 md:size-[clamp(56px,7svh,80px)]" />
+        <p className="text-xs leading-snug md:text-sm">
+          <b className="block text-2xs font-bold tracking-[0.1em] text-primary uppercase">Main goal</b>
+          {main.line}
+        </p>
+      </div>
+      <ul className="grid gap-y-2 md:grid-cols-2 md:gap-x-3 md:gap-y-2.5">
+        {related.map((g) => (
+          <li key={g.goal} className="flex items-start gap-2">
+            <SdgIcon sdg={g} className="size-8 md:size-[clamp(36px,5svh,48px)]" />
+            <span className="text-[0.6875rem] leading-snug md:text-xs">{g.line}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

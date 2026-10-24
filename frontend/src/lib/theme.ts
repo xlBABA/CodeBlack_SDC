@@ -4,7 +4,7 @@ import { EASE, prefersReducedMotion } from './motion'
 
 export type ThemePref = 'light' | 'dark' | 'system'
 export type Theme = 'light' | 'dark'
-export const ACCENTS = ['emerald', 'petrol', 'indigo', 'tomato'] as const
+export const ACCENTS = ['teal', 'emerald', 'indigo', 'tomato'] as const
 export type Accent = (typeof ACCENTS)[number]
 
 const THEME_KEY = `${STORAGE_PREFIX}:theme`
@@ -31,7 +31,7 @@ function write(key: string, value: string) {
 export const getPref = () => read<ThemePref>(THEME_KEY, 'system', ['light', 'dark', 'system'])
 export const resolve = (pref = getPref()): Theme => (pref === 'system' ? (systemDark.matches ? 'dark' : 'light') : pref)
 export const currentTheme = (): Theme => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
-export const currentAccent = (): Accent => (document.documentElement.dataset.accent as Accent) ?? 'emerald'
+export const currentAccent = (): Accent => ACCENTS.find((a) => a === document.documentElement.dataset.accent) ?? 'teal'
 
 export function subscribe(fn: () => void) {
   listeners.add(fn)
@@ -40,7 +40,7 @@ export function subscribe(fn: () => void) {
   }
 }
 
-/** Browser bar colour follows whatever --bg the current palette and theme resolve to. */
+/** Browser bar colour follows whatever --bg the current theme resolves to. */
 export function syncThemeColor() {
   const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()
   if (bg) document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content', bg)
@@ -107,12 +107,12 @@ export function setTheme(pref: ThemePref, origin?: Element | null) {
   transition(applyTheme, origin)
 }
 
-/** Halden-style accent: only the primary colour pair changes, revealed with the same wipe. */
+/** Halden-style accent: only the accent tokens change, revealed with the same wipe. */
 export function setAccent(accent: Accent, origin?: Element | null) {
   write(ACCENT_KEY, accent)
   if (accent === currentAccent()) return
   transition(() => {
-    if (accent === 'emerald') delete document.documentElement.dataset.accent
+    if (accent === 'teal') delete document.documentElement.dataset.accent
     else document.documentElement.dataset.accent = accent
   }, origin)
 }

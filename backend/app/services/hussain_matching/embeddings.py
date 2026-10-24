@@ -26,11 +26,13 @@ import math
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
+from .normalizer import Ambiguous
 from .scoring import SIMILARITY_THRESHOLD
 
 DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 MAX_QUERY_CHARS = 200  # same limit as the RunPod worker
 MAX_QUERY_CACHE = 1000  # free texts kept in memory
+AMBIGUITY_MARGIN = 0.03  # best and second-best candidate this close: do not pick one
 
 
 def _normalize(vec: Iterable[float]) -> list[float]:
@@ -114,14 +116,16 @@ class EmbeddingProvider:
 
     def interpret(
         self, texts: Sequence[str], *, threshold: float = SIMILARITY_THRESHOLD
-    ) -> list[tuple[str, float] | None]:
+    ) -> list[tuple[str, float] | Ambiguous | None]:
         """Map free text (not a skill_id) to the closest catalogue skill.
 
         One entry per input: (skill_id, similarity) when the best max-cosine over
-        that skill's name and aliases is >= threshold, else None. A text is also
-        rejected as ambiguous when its best skill and another skill that passes the
-        threshold form a `not_equivalent` pair (a raw text has no skill_id of its
-        own, so the list can only be applied to the candidates). Blank text gives None.
+        that skill's name and aliases is >= threshold, else None. Two cases are rejected
+        as ambiguous instead of guessed: the best skill and another skill that passes
+        the threshold form a `not_equivalent` pair (None; a raw text has no skill_id of
+        its own, so the list can only be applied to the candidates), or the two best
+        skills that pass the threshold are within AMBIGUITY_MARGIN of each other
+        (`Ambiguous`, so the caller can ask "did you mean X or Y?"). Blank text gives None.
         """
         cleaned = [(t or "").strip()[:MAX_QUERY_CHARS] for t in texts]
         self.precompute()
@@ -142,7 +146,7 @@ class EmbeddingProvider:
                     self._query_vectors[text] = vec
         return {t: self._query_vectors.get(t) or fresh[t] for t in texts}
 
-    def _nearest(self, vec: list[float], threshold: float) -> tuple[str, float] | None:
+    def _nearest(self, vec: list[float], threshold: float) -> tuple[str, float] | Ambiguous | None:
         scored = sorted(
             (
                 (max(sum(x * y for x, y in zip(vec, v)) for v in vectors), sid)
@@ -156,6 +160,8 @@ class EmbeddingProvider:
         best_score, best_id = passing[0]
         if any(frozenset((best_id, sid)) in self._not_equivalent for _, sid in passing[1:]):
             return None
+        if len(passing) > 1 and best_score - passing[1][0] <= AMBIGUITY_MARGIN + 1e-9:
+            return Ambiguous(((best_id, best_score), (passing[1][1], passing[1][0])))
         return best_id, best_score
 
     def _get_model(self):

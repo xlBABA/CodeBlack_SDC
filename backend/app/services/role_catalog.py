@@ -47,6 +47,12 @@ class RoleFixture:
     transferable_interests: tuple[str, ...]
     evidence_ids: tuple[str, ...]
     verified: bool = True
+    # Milestone 13C-7: Hussain's matcher reads this ("limited") to caveat
+    # a role whose real-world tools aren't all in our 20-skill catalogue
+    # yet — see app.services.hussain_matching.matcher.LIMITED_COVERAGE_CAVEAT.
+    # Defaults to None so every existing RoleFixture construction (the 4
+    # fixture roles here, and any other caller) is unaffected.
+    skills_coverage: str | None = None
 
 
 class RoleCatalogProvider(Protocol):

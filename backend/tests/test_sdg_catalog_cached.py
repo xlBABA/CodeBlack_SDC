@@ -7,9 +7,18 @@ import pytest
 from app.services.role_catalog_cached import CachedCatalogError
 from app.services.sdg_catalog_cached import _validate_sdg_mappings, load_cached_sdg_mappings
 
+# Milestone 13C-4: Jawad's catalog expanded from the original 8 verified
+# roles to the full 30-role target — the original 8 are unchanged, 22
+# new O*NET occupations were added.
 JAWAD_ROLE_IDS = {
-    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
-    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    "accountant", "actuary", "aerospace_engineer", "biomedical_engineer", "budget_analyst",
+    "chemical_engineer", "civil_engineer", "computer_systems_analyst", "data_analyst",
+    "data_scientist", "database_administrator", "electrical_engineer", "environmental_engineer",
+    "environmental_scientist", "financial_analyst", "financial_risk_specialist", "hydrologist",
+    "industrial_engineer", "information_security_analyst", "logistician", "management_analyst",
+    "market_research_analyst", "mechanical_engineer", "operations_research_analyst",
+    "public_health_analyst", "software_developer", "statistician", "surveyor",
+    "urban_regional_planner", "web_developer",
 }
 CANONICAL_SKILL_IDS = {
     "critical_thinking", "mathematics", "complex_problem_solving", "systems_analysis",
@@ -20,11 +29,12 @@ CANONICAL_SKILL_IDS = {
 
 
 def test_loads_exactly_the_expected_mapping_counts():
-    """11 role mappings for 8 roles: some roles (accountant, civil_engineer)
-    now have more than one SDG — our validator only requires at least
-    one per role, so this is not a regression."""
+    """Milestone 13C-4: 39 role mappings for the full 30-role catalog
+    (some roles, e.g. accountant/civil_engineer, have more than one SDG
+    — our validator only requires at least one per role, so this is not
+    a regression) and still 20 skill mappings, one per catalog skill."""
     d = load_cached_sdg_mappings()
-    assert len(d["role_sdg_mappings"]) == 11
+    assert len(d["role_sdg_mappings"]) == 39
     assert len(d["skill_sdg_mappings"]) == 20
 
 
@@ -119,4 +129,4 @@ def test_rejects_incomplete_skill_coverage():
 
 def test_valid_data_still_loads_unchanged_after_validation_hardening():
     d = load_cached_sdg_mappings()
-    assert len(d["role_sdg_mappings"]) == 11 and len(d["skill_sdg_mappings"]) == 20
+    assert len(d["role_sdg_mappings"]) == 39 and len(d["skill_sdg_mappings"]) == 20

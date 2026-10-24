@@ -1,21 +1,24 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, FileUp, GraduationCap, Heart, ListChecks, LoaderCircle, Plus, Sparkles, Wrench, X } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router'
+import { ArrowLeft, ArrowRight, Check, FileUp, GraduationCap, Heart, ListChecks, LoaderCircle, PenLine, Sparkles, Wrench } from 'lucide-react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { ErrorNotice } from '@/components/api-states'
+import { CvIntake } from '@/components/intake/cv-intake'
+import { Chip, field, labelCls } from '@/components/intake/form'
+import { ProjectsEditor } from '@/components/intake/projects-editor'
+import { SkillPicker } from '@/components/intake/skill-picker'
 import { Page } from '@/components/page/page'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import { STORAGE_PREFIX } from '@/config/product'
 import { DEMO_PROFILE } from '@/content/demo-profile'
-import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill, SKILL_CATALOG, slugSkill } from '@/content/skills'
+import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill } from '@/content/skills'
 import { ApiError } from '@/lib/api'
 import { gsap } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
-import { analyzeAndStore, getProfile } from '@/lib/profile-store'
+import { analyzeAndStore, getProfile, type ProfileSource } from '@/lib/profile-store'
 import { cn } from '@/lib/utils'
-import type { Proficiency, SkillRef, StudentProfile } from '@/types/api'
+import type { SkillRef, StudentProfile } from '@/types/api'
 
 type Draft = {
   education_level: string
@@ -34,7 +37,6 @@ const STEPS = [
   { label: 'Interests', icon: Heart },
   { label: 'Review', icon: ListChecks },
 ]
-const LEVELS: Proficiency[] = ['beginner', 'intermediate', 'advanced']
 const DRAFT_KEY = `${STORAGE_PREFIX}:intake-draft`
 
 const EMPTY: Draft = { education_level: '', degree: '', semester: '', skills: [], projects: [], experience_summary: '', interests: [] }
@@ -43,7 +45,7 @@ const fromProfile = (p: StudentProfile): Draft => ({
   education_level: p.education_level ?? '',
   degree: p.degree ?? '',
   semester: p.semester ? String(p.semester) : '',
-  skills: p.skills.map((s) => ({ ...s, proficiency: s.proficiency ?? 'beginner' })),
+  skills: p.skills.filter((s) => isCatalogSkill(s.skill_id)).map((s) => ({ ...s, proficiency: s.proficiency ?? 'beginner' })),
   projects: [...p.projects],
   experience_summary: p.experience_summary ?? '',
   interests: [...p.interests],
@@ -62,7 +64,10 @@ const toProfile = (d: Draft): StudentProfile => ({
 function initialDraft(): Draft {
   try {
     const saved = sessionStorage.getItem(DRAFT_KEY)
-    if (saved) return { ...EMPTY, ...(JSON.parse(saved) as Draft) }
+    if (saved) {
+      const draft = { ...EMPTY, ...(JSON.parse(saved) as Draft) }
+      return { ...draft, skills: draft.skills.filter((s) => isCatalogSkill(s.skill_id)) }
+    }
   } catch {
     // ignore unreadable drafts
   }
@@ -72,159 +77,10 @@ function initialDraft(): Draft {
 
 const stepValid = (d: Draft, step: number) => (step === 0 ? d.education_level !== '' : step === 1 ? d.skills.length > 0 : true)
 
-const field = 'h-11 w-full rounded-ctl border border-line-2 bg-raised px-4 text-base outline-none transition-colors focus-visible:border-primary dark:border-line'
-const labelCls = 'mb-1.5 block text-sm font-bold'
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors',
-        active ? 'border-transparent bg-primary text-primary-foreground' : 'border-line-2 hover:bg-well',
-      )}
-    >
-      {active ? <Check className="size-3.5" aria-hidden /> : <Plus className="size-3.5" aria-hidden />}
-      {children}
-    </button>
-  )
-}
-
-function SkillsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) => void }) {
-  const [query, setQuery] = useState('')
-  const chosen = new Set(draft.skills.map((s) => s.skill_id))
-  const q = query.trim().toLowerCase()
-  const matches = SKILL_CATALOG.filter((s) => !chosen.has(s.skill_id) && (!q || s.name.toLowerCase().includes(q)))
-  const custom = q && !SKILL_CATALOG.some((s) => s.name.toLowerCase() === q) && !chosen.has(slugSkill(query))
-
-  const add = (s: { skill_id: string; name: string }) => {
-    set({ skills: [...draft.skills, { ...s, proficiency: 'beginner' }] })
-    setQuery('')
-  }
-  const update = (id: string, proficiency: Proficiency) => set({ skills: draft.skills.map((s) => (s.skill_id === id ? { ...s, proficiency } : s)) })
-  const remove = (id: string) => set({ skills: draft.skills.filter((s) => s.skill_id !== id) })
-
-  return (
-    <div className="grid gap-6">
-      <div>
-        <label htmlFor="skill-search" className={labelCls}>
-          Find a skill
-        </label>
-        <input
-          id="skill-search"
-          className={field}
-          placeholder="Search, e.g. Python, Excel, GIS…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key !== 'Enter') return
-            e.preventDefault()
-            if (matches[0]) add(matches[0])
-            else if (custom) add({ skill_id: slugSkill(query), name: query.trim() })
-          }}
-        />
-        <div className="mt-3 flex flex-wrap gap-2" aria-label="Suggestions">
-          {matches.slice(0, 14).map((s) => (
-            <Chip key={s.skill_id} active={false} onClick={() => add(s)}>
-              {s.name}
-            </Chip>
-          ))}
-          {custom && (
-            <Chip active={false} onClick={() => add({ skill_id: slugSkill(query), name: query.trim() })}>
-              Add “{query.trim()}”
-            </Chip>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <p className={labelCls}>Your skills ({draft.skills.length})</p>
-        {draft.skills.length === 0 ? (
-          <p className="rounded-tile border border-dashed border-line-2 p-4 text-muted-foreground">Add at least one skill to continue.</p>
-        ) : (
-          <ul className="grid gap-2">
-            {draft.skills.map((s) => (
-              <li key={s.skill_id} data-enter="item" className="flex flex-wrap items-center gap-3 rounded-tile bg-well p-2 pl-4">
-                <b className="min-w-[9rem] flex-1">{s.name}</b>
-                {!isCatalogSkill(s.skill_id) && (
-                  <Badge tone="warn" enter={false} className="text-2xs" title="Not in the role catalogue yet; it may not count toward any role">
-                    not in catalogue yet
-                  </Badge>
-                )}
-                <div role="radiogroup" aria-label={`${s.name} level`} className="flex rounded-full border border-line-2 bg-raised p-0.5">
-                  {LEVELS.map((l) => (
-                    <button
-                      key={l}
-                      type="button"
-                      role="radio"
-                      aria-checked={s.proficiency === l}
-                      onClick={() => update(s.skill_id, l)}
-                      className={cn('rounded-full px-3 py-1 text-xs font-bold capitalize transition-colors', s.proficiency === l ? 'bg-ink text-ink-foreground' : 'text-muted-foreground hover:text-foreground')}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-                <button type="button" aria-label={`Remove ${s.name}`} onClick={() => remove(s.skill_id)} className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-raised">
-                  <X className="size-4" aria-hidden />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="mt-2 text-xs text-muted-foreground">Levels are your own estimate. They are not verified and are treated that way.</p>
-      </div>
-    </div>
-  )
-}
-
 function ProjectsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) => void }) {
-  const [text, setText] = useState('')
-  const add = () => {
-    if (!text.trim()) return
-    set({ projects: [...draft.projects, text.trim()] })
-    setText('')
-  }
   return (
     <div className="grid gap-6">
-      <div>
-        <label htmlFor="project" className={labelCls}>
-          Projects you have done
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="project"
-            className={field}
-            placeholder="e.g. Sales dashboard in Excel for a club"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                add()
-              }
-            }}
-          />
-          <Button type="button" variant="secondary" onClick={add} disabled={!text.trim()}>
-            <Plus />
-            Add
-          </Button>
-        </div>
-        {draft.projects.length > 0 && (
-          <ul className="mt-3 grid gap-2">
-            {draft.projects.map((p, i) => (
-              <li key={`${p}-${i}`} data-enter="item" className="flex items-center gap-3 rounded-tile bg-well p-2 pl-4">
-                <span className="flex-1">{p}</span>
-                <button type="button" aria-label={`Remove ${p}`} onClick={() => set({ projects: draft.projects.filter((_, k) => k !== i) })} className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-raised">
-                  <X className="size-4" aria-hidden />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <ProjectsEditor projects={draft.projects} onChange={(projects) => set({ projects })} />
       <div>
         <label htmlFor="experience" className={labelCls}>
           Experience <span className="font-medium text-muted-foreground">(optional)</span>
@@ -238,13 +94,13 @@ function ProjectsStep({ draft, set }: { draft: Draft; set: (d: Partial<Draft>) =
           onChange={(e) => set({ experience_summary: e.target.value })}
         />
       </div>
-      <div className="flex items-center gap-3 rounded-tile border border-dashed border-line-2 p-4 opacity-80">
+      <div className="flex flex-wrap items-center gap-3 rounded-tile border border-dashed border-line-2 p-4">
         <FileUp className="size-5 flex-none text-muted-foreground" aria-hidden />
         <p className="flex-1 text-sm">
-          <b>Upload a CV</b> <span className="text-muted-foreground">to fill this in for you. Coming soon, once the secure parser is ready.</span>
+          <b>Have a CV?</b> <span className="text-muted-foreground">Upload a PDF and we’ll pre-fill your profile for you to check.</span>
         </p>
-        <Button type="button" variant="secondary" size="sm" disabled aria-disabled>
-          Coming soon
+        <Button asChild variant="secondary" size="sm">
+          <Link to="?path=cv">Upload CV (PDF)</Link>
         </Button>
       </div>
     </div>
@@ -319,13 +175,40 @@ function Review({ draft, goTo }: { draft: Draft; goTo: (s: number) => void }) {
   )
 }
 
+function PathSwitch({ cv }: { cv: boolean }) {
+  const options = [
+    { to: '/start', label: 'Fill in the form', icon: PenLine, active: !cv },
+    { to: '?path=cv', label: 'Upload CV (PDF)', icon: FileUp, active: cv },
+  ]
+  return (
+    <nav aria-label="How to build your profile" data-enter="head" className="mb-4">
+      <div className="flex w-fit max-w-full flex-wrap gap-1 rounded-full border border-line bg-glass-2 p-1 backdrop-blur-md">
+        {options.map((o) => (
+          <Link
+            key={o.to}
+            to={o.to}
+            aria-current={o.active ? 'page' : undefined}
+            className={cn('flex items-center gap-1.5 rounded-full px-4 py-2 text-md font-semibold whitespace-nowrap transition-colors', o.active ? 'bg-ink text-ink-foreground' : 'text-muted-foreground hover:text-foreground')}
+          >
+            <o.icon className="size-4" aria-hidden />
+            {o.label}
+          </Link>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
 /** Intake wizard: education → skills → projects & experience → interests → review → POST /profile/analyze. */
 export default function Start() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [params] = useSearchParams()
+  const cvPath = params.get('path') === 'cv'
   const toast = useToast()
   const [draft, setDraft] = useState<Draft>(initialDraft)
-  const [step, setStep] = useState(0)
+  // ?step=skills reopens the skills step, e.g. from the "no recognized skills" notice
+  const [step, setStep] = useState(() => (params.get('step') === 'skills' ? 1 : 0))
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
   const panel = useRef<HTMLDivElement>(null)
@@ -364,19 +247,24 @@ export default function Start() {
     toast('Demo student loaded. All of it is synthetic.', { icon: Sparkles })
   }
 
+  // both paths end here: the form and a confirmed CV review
+  const submit = async (profile: StudentProfile, source: ProfileSource, demo = false) => {
+    await analyzeAndStore(profile, { demo, source })
+    try {
+      sessionStorage.removeItem(DRAFT_KEY)
+    } catch {
+      // ignore
+    }
+    toast('Profile analysed. Finding roles that fit…', { icon: Check })
+    navigate('/dashboard')
+  }
+
   const analyze = async () => {
     setSubmitting(true)
     setError(null)
     try {
       const isDemo = JSON.stringify(toProfile(draft)) === JSON.stringify(toProfile(fromProfile(DEMO_PROFILE)))
-      await analyzeAndStore(toProfile(draft), { demo: isDemo })
-      try {
-        sessionStorage.removeItem(DRAFT_KEY)
-      } catch {
-        // ignore
-      }
-      toast('Profile analysed. Finding roles that fit…', { icon: Check })
-      navigate('/dashboard')
+      await submit(toProfile(draft), 'form', isDemo)
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ kind: 'http', status: 0, code: 'UNKNOWN', message: String(e) }))
     } finally {
@@ -389,14 +277,22 @@ export default function Start() {
   return (
     <Page
       title="Build your profile"
-      crumbs={[{ label: 'Workspace', to: '/dashboard' }, { label: 'Profile' }]}
-      subtitle="Five short steps. Nothing about your age, gender or background is asked or used."
-      actions={[
-        <Button key="demo" variant="secondary" onClick={loadDemo}>
-          <Sparkles />
-          Load demo student
-        </Button>,
-      ]}
+      crumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Profile' }]}
+      subtitle={
+        cvPath
+          ? 'Upload a PDF, check what we read, then confirm. Nothing about your age, gender or background is used.'
+          : 'Five short steps. Nothing about your age, gender or background is asked or used.'
+      }
+      actions={
+        cvPath
+          ? undefined
+          : [
+              <Button key="demo" variant="secondary" onClick={loadDemo}>
+                <Sparkles />
+                Load demo student
+              </Button>,
+            ]
+      }
     >
       {notFound && (
         <p data-enter="head" role="status" className="mb-4 rounded-tile border border-line bg-glass p-3 pl-4 text-sm">
@@ -404,108 +300,114 @@ export default function Start() {
         </p>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <Card className="h-fit p-3 sm:p-3">
-          <ol className="grid gap-1" aria-label="Steps">
-            {STEPS.map((s, i) => {
-              const done = i < step && stepValid(draft, i)
-              return (
-                <li key={s.label}>
-                  <button
-                    type="button"
-                    disabled={!reachable[i]}
-                    aria-current={i === step ? 'step' : undefined}
-                    onClick={() => goTo(i)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-[16px] px-3 py-2.5 text-left font-semibold transition-colors disabled:opacity-40',
-                      i === step ? 'bg-ink text-ink-foreground' : 'hover:bg-well',
-                    )}
-                  >
-                    <span className={cn('grid size-8 flex-none place-items-center rounded-full text-sm', i === step ? 'bg-white/15' : done ? 'bg-primary text-primary-foreground' : 'bg-well')}>
-                      {done ? <Check className="size-4" aria-hidden /> : i + 1}
-                    </span>
-                    {s.label}
-                  </button>
-                </li>
-              )
-            })}
-          </ol>
-        </Card>
+      <PathSwitch cv={cvPath} />
 
-        <Card>
-          <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-full bg-well" aria-hidden>
-              <Current.icon className="size-5" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground">
-                Step {step + 1} of {STEPS.length}
-              </p>
-              <h2 className="text-2xl font-extrabold tracking-[-0.02em]">{Current.label}</h2>
+      {cvPath ? (
+        <CvIntake onConfirm={(profile) => submit(profile, 'cv')} resume={params.get('step') === 'review'} />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <Card className="h-fit p-3 sm:p-3">
+            <ol className="grid gap-1" aria-label="Steps">
+              {STEPS.map((s, i) => {
+                const done = i < step && stepValid(draft, i)
+                return (
+                  <li key={s.label}>
+                    <button
+                      type="button"
+                      disabled={!reachable[i]}
+                      aria-current={i === step ? 'step' : undefined}
+                      onClick={() => goTo(i)}
+                      className={cn(
+                        'flex w-full items-center gap-3 rounded-[16px] px-3 py-2.5 text-left font-semibold transition-colors disabled:opacity-40',
+                        i === step ? 'bg-ink text-ink-foreground' : 'hover:bg-well',
+                      )}
+                    >
+                      <span className={cn('grid size-8 flex-none place-items-center rounded-full text-sm', i === step ? 'bg-white/15' : done ? 'bg-primary text-primary-foreground' : 'bg-well')}>
+                        {done ? <Check className="size-4" aria-hidden /> : i + 1}
+                      </span>
+                      {s.label}
+                    </button>
+                  </li>
+                )
+              })}
+            </ol>
+          </Card>
+
+          <Card>
+            <div className="mb-5 flex items-center gap-3">
+              <span className="grid size-10 place-items-center rounded-full bg-well" aria-hidden>
+                <Current.icon className="size-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Step {step + 1} of {STEPS.length}
+                </p>
+                <h2 className="text-2xl font-extrabold tracking-[-0.02em]">{Current.label}</h2>
+              </div>
             </div>
-          </div>
 
-          <div ref={panel}>
-            {step === 0 && (
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label htmlFor="level" className={labelCls}>
-                    Level of study
-                  </label>
-                  <select id="level" className={field} value={draft.education_level} onChange={(e) => set({ education_level: e.target.value })}>
-                    <option value="">Choose one…</option>
-                    {EDUCATION_LEVELS.map((l) => (
-                      <option key={l.value} value={l.value}>
-                        {l.label}
-                      </option>
-                    ))}
-                  </select>
+            <div ref={panel}>
+              {step === 0 && (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label htmlFor="level" className={labelCls}>
+                      Level of study
+                    </label>
+                    <select id="level" className={field} value={draft.education_level} onChange={(e) => set({ education_level: e.target.value })}>
+                      <option value="">Choose one…</option>
+                      {EDUCATION_LEVELS.map((l) => (
+                        <option key={l.value} value={l.value}>
+                          {l.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="degree" className={labelCls}>
+                      Degree or programme
+                    </label>
+                    <input id="degree" className={field} placeholder="e.g. BSc Data Science" value={draft.degree} onChange={(e) => set({ degree: e.target.value })} />
+                  </div>
+                  <div>
+                    <label htmlFor="semester" className={labelCls}>
+                      Semester <span className="font-medium text-muted-foreground">(optional)</span>
+                    </label>
+                    <input id="semester" type="number" min={1} max={14} className={field} value={draft.semester} onChange={(e) => set({ semester: e.target.value })} />
+                  </div>
                 </div>
-                <div>
-                  <label htmlFor="degree" className={labelCls}>
-                    Degree or programme
-                  </label>
-                  <input id="degree" className={field} placeholder="e.g. BSc Data Science" value={draft.degree} onChange={(e) => set({ degree: e.target.value })} />
-                </div>
-                <div>
-                  <label htmlFor="semester" className={labelCls}>
-                    Semester <span className="font-medium text-muted-foreground">(optional)</span>
-                  </label>
-                  <input id="semester" type="number" min={1} max={14} className={field} value={draft.semester} onChange={(e) => set({ semester: e.target.value })} />
-                </div>
+              )}
+              {step === 1 && <SkillPicker skills={draft.skills} onChange={(skills) => set({ skills })} />}
+              {step === 2 && <ProjectsStep draft={draft} set={set} />}
+              {step === 3 && <InterestsStep draft={draft} set={set} />}
+              {step === 4 && <Review draft={draft} goTo={goTo} />}
+            </div>
+
+            {error && (
+              <div className="mt-5">
+                <ErrorNotice error={error} onRetry={analyze} />
               </div>
             )}
-            {step === 1 && <SkillsStep draft={draft} set={set} />}
-            {step === 2 && <ProjectsStep draft={draft} set={set} />}
-            {step === 3 && <InterestsStep draft={draft} set={set} />}
-            {step === 4 && <Review draft={draft} goTo={goTo} />}
-          </div>
 
-          {error && (
-            <div className="mt-5">
-              <ErrorNotice error={error} onRetry={analyze} />
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-5">
+              <Button type="button" variant="ghost" onClick={() => goTo(step - 1)} disabled={step === 0 || submitting}>
+                <ArrowLeft />
+                Back
+              </Button>
+              {step < STEPS.length - 1 ? (
+                <Button type="button" onClick={() => goTo(step + 1)} disabled={!canNext}>
+                  Next
+                  <ArrowRight />
+                </Button>
+              ) : (
+                <Button type="button" magnetic onClick={analyze} disabled={submitting || !reachable[4]}>
+                  {submitting ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+                  {submitting ? 'Analysing…' : 'Analyze my profile'}
+                </Button>
+              )}
             </div>
-          )}
-
-          <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-5">
-            <Button type="button" variant="ghost" onClick={() => goTo(step - 1)} disabled={step === 0 || submitting}>
-              <ArrowLeft />
-              Back
-            </Button>
-            {step < STEPS.length - 1 ? (
-              <Button type="button" onClick={() => goTo(step + 1)} disabled={!canNext}>
-                Next
-                <ArrowRight />
-              </Button>
-            ) : (
-              <Button type="button" magnetic onClick={analyze} disabled={submitting || !reachable[4]}>
-                {submitting ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
-                {submitting ? 'Analysing…' : 'Analyze my profile'}
-              </Button>
-            )}
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      )}
     </Page>
   )
 }

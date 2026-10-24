@@ -26,9 +26,34 @@ from app.services.matching_provider import FixtureMatchingProvider
 
 EMPTY_PROFILE = {"interests": [], "skills": [], "projects": []}
 SQL_PROFILE = {"interests": [], "skills": [{"skill_id": "sql", "name": "SQL"}], "projects": []}
+# Milestone 13C-4: data_analyst's own required skills minus the optional
+# "excel" and "sql" (kept deliberately unheld, matching the original
+# EMPTY_PROFILE-based test's intent of leaving at least one mandatory
+# skill genuinely missing) — needed because with 30 roles in the
+# catalog, an actually-empty profile's alphabetical tie-break no longer
+# guarantees data_analyst appears in a limit-bounded top-N response.
+# Verified empirically (see Milestone 13C-4 report) to rank data_analyst
+# #1 of 30 roles, comfortably inside any limit from 1 to 6.
+DATA_ANALYST_PARTIAL_PROFILE = {
+    "interests": [], "projects": [],
+    "skills": [
+        {"skill_id": sid, "name": sid}
+        for sid in ("critical_thinking", "mathematics", "complex_problem_solving",
+                    "data_visualization", "systems_analysis", "python")
+    ],
+}
+# Milestone 13C-4: Jawad's catalog expanded from the original 8 verified
+# roles to the full 30-role target — the original 8 are unchanged, 22
+# new O*NET occupations were added.
 CACHED_ROLE_IDS = {
-    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
-    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    "accountant", "actuary", "aerospace_engineer", "biomedical_engineer", "budget_analyst",
+    "chemical_engineer", "civil_engineer", "computer_systems_analyst", "data_analyst",
+    "data_scientist", "database_administrator", "electrical_engineer", "environmental_engineer",
+    "environmental_scientist", "financial_analyst", "financial_risk_specialist", "hydrologist",
+    "industrial_engineer", "information_security_analyst", "logistician", "management_analyst",
+    "market_research_analyst", "mechanical_engineer", "operations_research_analyst",
+    "public_health_analyst", "software_developer", "statistician", "surveyor",
+    "urban_regional_planner", "web_developer",
 }
 
 
@@ -341,9 +366,14 @@ def test_unknown_skill_is_interpreted_via_runpod_with_partial_credit(client: Tes
         "skills": [{"skill_id": "database_querying", "name": "Database Querying"}],
         "projects": [],
     }
+    # Milestone 13C-4: limit raised from 4 to 6 (the contract's max) —
+    # with only interpreted/partial sql credit and 30 roles now in the
+    # catalog, data_analyst ranks 6th rather than comfortably top-4 as
+    # it did among the original 8 roles (verified empirically; not a
+    # knife's-edge tie — rank 5 and 6 are a full point apart).
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
-        response = client.post("/api/v1/careers/match", json={"profile": profile, "limit": 4})
+        response = client.post("/api/v1/careers/match", json={"profile": profile, "limit": 6})
     finally:
         _clear_override()
 
@@ -671,7 +701,7 @@ def test_all_eight_roles_match_without_crashing_in_hussain_mode(monkeypatch):
 
         provider = get_matching_provider(settings)
         results = provider.match(StudentProfile(**EMPTY_PROFILE), roles, None, [])
-        assert len(results) == 8
+        assert len(results) == 30  # Milestone 13C-4: the full 30-role catalog, up from 8
         for match in results:
             assert 0.0 <= match.score <= 100.0
             assert 0.0 <= match.score_breakdown.prerequisites <= 100.0
@@ -681,10 +711,20 @@ def test_all_eight_roles_match_without_crashing_in_hussain_mode(monkeypatch):
 
 def test_optional_skills_never_appear_as_missing_in_hussain_mode_via_api(client: TestClient):
     """End-to-end through the real endpoint: data_analyst's optional
-    "excel" must never be presented as a mandatory missing-skill gap."""
+    "excel" must never be presented as a mandatory missing-skill gap.
+
+    Milestone 13C-4: uses DATA_ANALYST_PARTIAL_PROFILE, not EMPTY_PROFILE
+    — with the catalog now at 30 roles, an empty profile's alphabetical
+    score tie-break no longer guarantees data_analyst lands in a
+    limit=4 response (it previously did, by coincidence, among only 8
+    tied roles). The replacement profile still deliberately omits "sql"
+    (so a genuinely-missing required skill is still exercised) and
+    "excel" (optional, the actual thing under test)."""
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
-        response = client.post("/api/v1/careers/match", json={"profile": EMPTY_PROFILE, "limit": 4})
+        response = client.post(
+            "/api/v1/careers/match", json={"profile": DATA_ANALYST_PARTIAL_PROFILE, "limit": 4}
+        )
     finally:
         _clear_override()
 
@@ -756,6 +796,10 @@ def test_unsupported_role_projects_are_not_invented_in_hussain_mode(client: Test
 
 
 def test_hussain_mode_warnings_disclose_offline_operation_not_runpod_or_hiring(client: TestClient):
+    """Milestone 13E-4: the disclosure must reach students without the
+    internal mode name or the teammate who wrote the algorithm — neither
+    is meaningful to a student's decision, and showing them reads as
+    backend debug output, not a confidence caveat."""
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
         response = client.post("/api/v1/careers/match", json={"profile": SQL_PROFILE, "limit": 4})
@@ -765,7 +809,8 @@ def test_hussain_mode_warnings_disclose_offline_operation_not_runpod_or_hiring(c
     body = response.json()
     assert body["data_mode"] == "fixture"
     warnings_text = " ".join(body["warnings"]).lower()
-    assert "hussain" in warnings_text
+    assert "hussain" not in warnings_text
+    assert "matching_mode" not in warnings_text
     assert "offline" in warnings_text
     assert "no runpod" in warnings_text or "runpod" in warnings_text
     assert "not a validated model" in warnings_text
@@ -809,17 +854,34 @@ def test_matching_mode_warning_never_falsely_claims_semantic_matching_is_disable
 def test_cached_provenance_warning_still_names_the_active_matcher_accurately(client: TestClient):
     """Step 5: catalog_provenance_warnings() must describe whichever
     matching algorithm is actually active, not always say
-    "FixtureMatchingProvider" even when Hussain's is running."""
+    "FixtureMatchingProvider" even when Hussain's is running.
+
+    Milestone 13E-4: the description must do this in student-safe terms
+    (deterministic vs. illustrative/placeholder) — never the internal
+    class name FixtureMatchingProvider, nor the teammate who wrote the
+    real algorithm. Checked by confirming the two modes actually produce
+    different, correctly-matched descriptions, not just absence of the
+    old literal strings."""
     _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached")
     try:
         response = client.post("/api/v1/careers/match", json={"profile": SQL_PROFILE, "limit": 4})
     finally:
         _clear_override()
+    hussain_text = " ".join(response.json()["warnings"]).lower()
 
-    warnings_text = " ".join(response.json()["warnings"]).lower()
-    assert "cached" in warnings_text
-    assert "fixturematchingprovider" not in warnings_text
-    assert "hussain" in warnings_text
+    _override_settings(MATCHING_MODE="fixture", CATALOG_MODE="cached")
+    try:
+        response = client.post("/api/v1/careers/match", json={"profile": SQL_PROFILE, "limit": 4})
+    finally:
+        _clear_override()
+    fixture_text = " ".join(response.json()["warnings"]).lower()
+
+    for text in (hussain_text, fixture_text):
+        assert "cached" in text
+        assert "fixturematchingprovider" not in text
+        assert "hussain" not in text
+    assert "deterministic" in hussain_text and "illustrative" not in hussain_text
+    assert "illustrative" in fixture_text and "deterministic" not in fixture_text
 
 
 def test_data_mode_caveat_does_not_falsely_claim_fixture_for_cached_roles(client: TestClient):
@@ -836,6 +898,105 @@ def test_data_mode_caveat_does_not_falsely_claim_fixture_for_cached_roles(client
 
     for match in response.json()["data"]["matches"]:
         assert "Fixture role for testing" not in " ".join(match["caveats"])
+
+
+# --- Milestone 13E-4: internal config/debug notes stripped from students --
+
+
+INTERNAL_DIAGNOSTIC_TERMS = (
+    "matching_mode",  # the env var name, not the English word "matching"
+    "catalog_mode",
+    "runpod_api_key",
+    "runpod_endpoint_id",
+    "fixturematchingprovider",
+    "hussain",
+    "jawad",
+    "app/services",
+    "app/data/cached",
+    "data_mode remains",
+)
+
+
+def test_careers_match_warnings_and_caveats_never_leak_internal_config_or_debug_notes(client: TestClient):
+    """Milestone 13E-4: under the real cached/hussain configuration, a
+    student-facing /careers/match response must read as explanations and
+    caveats, never as backend configuration or debug output — no env var
+    name, teammate name, internal class name, internal module/file path,
+    or internal data_mode-enum explanation, in ANY warning or caveat.
+
+    The profile is built to surface, in one request, every disclosure
+    category this cleanup must NOT remove: a limited-coverage role
+    (financial_analyst's own required skills), an unrecognised skill that
+    is a fragment of a longer catalogue name ("Accounting" → Accounting
+    Software), and a skill name containing a known skill ("Python
+    (pandas)" → partial credit, confirm). Ambiguous-interpretation and
+    stale-source caveats need a configured embedding interpreter or a
+    different endpoint respectively, so they are covered by
+    test_interpretation.py's own ambiguity tests and are not re-asserted
+    here — this test only proves the ones reachable through this exact
+    endpoint, offline, survive the cleanup."""
+    _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached", ENABLE_FIXTURES=False)
+    try:
+        response = client.post(
+            "/api/v1/careers/match",
+            json={
+                "profile": {
+                    "interests": [], "projects": [],
+                    "skills": [
+                        {"skill_id": sid, "name": sid}
+                        for sid in ("attention_to_detail", "excel", "financial_analysis_software",
+                                    "sql", "analytical_scientific_software", "vba")
+                    ] + [
+                        {"skill_id": "x1", "name": "Accounting"},
+                        {"skill_id": "x2", "name": "Python (pandas)"},
+                    ],
+                },
+                "limit": 6,
+            },
+        )
+    finally:
+        _clear_override()
+
+    assert response.status_code == 200
+    body = response.json()
+    all_text = " ".join(body["warnings"] + [c for m in body["data"]["matches"] for c in m["caveats"]]).lower()
+
+    # --- internal config/debug notes absent -------------------------------
+    for term in INTERNAL_DIAGNOSTIC_TERMS:
+        assert term not in all_text, term
+
+    # --- meaningful disclosures still present -----------------------------
+    assert "not a hiring probability" in all_text  # alignment estimate, not a guaranteed outcome
+    assert "hiring-demand" in all_text or "hiring demand" in all_text  # GitHub activity != hiring demand
+    by_id = {m["role_id"]: m for m in body["data"]["matches"]}
+    assert "financial_analyst" in by_id  # the profile is designed to surface it
+    assert any("coverage" in c.lower() and "catalogue" in c.lower() for c in by_id["financial_analyst"]["caveats"])
+    assert "did you mean accounting software" in all_text  # unrecognised-skill suggestion
+    assert "please confirm" in all_text  # partial-credit contained-skill prompt
+    assert "not a validated model" in all_text  # confidence caveat on the methodology itself
+
+
+def test_scenarios_simulate_warnings_never_leak_internal_config_or_debug_notes(client: TestClient):
+    """Same cleanup, the other student-facing route that shares these
+    helper functions: /scenarios/simulate must not leak the config/debug
+    notes either, while still disclosing the GitHub-activity-is-not-
+    hiring-demand caveat for the scenario's own trend-signal adjustment."""
+    _override_settings(MATCHING_MODE="hussain", CATALOG_MODE="cached", ENABLE_FIXTURES=False)
+    try:
+        response = client.post(
+            "/api/v1/scenarios/simulate",
+            json={"profile": SQL_PROFILE, "scenario_id": "moderate"},
+        )
+    finally:
+        _clear_override()
+
+    assert response.status_code == 200
+    body = response.json()
+    all_text = " ".join(body["warnings"] + [c for m in body["data"]["matches"] for c in m["caveats"]]).lower()
+    for term in INTERNAL_DIAGNOSTIC_TERMS:
+        assert term not in all_text, term
+    assert "not a hiring probability" in all_text
+    assert "hiring-demand" in all_text or "hiring demand" in all_text
 
 
 # --- Existing dependency overrides remain functional ----------------------
@@ -921,11 +1082,13 @@ def test_get_matching_provider_fixture_mode_still_returns_fixture_matching_provi
 # --- Milestone 6D-2A Extension: 8-role catalog regression tests ----------
 
 
-def test_matching_service_returns_top_6_of_8_cached_roles(db_session):
+def test_matching_service_returns_top_6_of_30_cached_roles(db_session):
     """MatchingService.match()'s existing matches[:request.limit] truncation,
-    unmodified by the catalog expansion, applied to the real 8-role
-    cached catalog — catalog_coverage.verified must report 8, not a
-    stale hardcoded 4."""
+    unmodified by the catalog expansion, applied to the real, now
+    30-role cached catalog — catalog_coverage.verified must report 30
+    (and, as of Milestone 13C-4, verified == total_target for the first
+    time: the project's long-standing 30-role target is now fully met,
+    not just declared)."""
     from app.schemas.matching import MatchRequest
     from app.services.matching_service import MatchingService
     from app.services.profile_service import ProfileService
@@ -942,7 +1105,7 @@ def test_matching_service_returns_top_6_of_8_cached_roles(db_session):
     outcome = service.match(MatchRequest(profile=profile))
 
     assert len(outcome.payload.matches) == 6
-    assert outcome.payload.catalog_coverage.verified == 8
+    assert outcome.payload.catalog_coverage.verified == 30
     assert outcome.payload.catalog_coverage.total_target == 30
 
 

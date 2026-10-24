@@ -68,7 +68,7 @@ export function CurtainProvider({ children }: { children: React.ReactNode }) {
       <div
         ref={panel}
         aria-hidden
-        className="grid-tex invisible fixed inset-0 z-[180] grid place-items-center bg-[radial-gradient(120%_90%_at_30%_10%,#0e7c99,#0f2a31_55%,#071417)] px-[var(--gutter)] text-[#e6f2f3]"
+        className="grid-tex invisible fixed inset-0 z-[180] grid place-items-center bg-[radial-gradient(120%_90%_at_30%_10%,#0e7c99,var(--deep-ink)_55%,#071417)] px-[var(--gutter)] text-[#e6f2f3]"
       >
         <div data-curtain-inner className="grid w-full max-w-xl justify-items-start gap-8">
           <BrandMark className="size-16" />

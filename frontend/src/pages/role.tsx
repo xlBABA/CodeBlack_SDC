@@ -6,6 +6,7 @@ import { LearningPipeline } from '@/components/dashboard/learning-pipeline'
 import { TrendSnapshot } from '@/components/dashboard/trend-snapshot'
 import { DataModeBadge } from '@/components/data-mode-badge'
 import { NoProfile } from '@/components/no-profile'
+import { NoRecognizedSkills } from '@/components/no-recognized-skills'
 import { Page } from '@/components/page/page'
 import { OverviewTab } from '@/components/role/overview-tab'
 import { ProjectList } from '@/components/role/projects-tab'
@@ -22,6 +23,7 @@ import { useNavPill } from '@/hooks/use-nav-pill'
 import { useRequest } from '@/hooks/use-request'
 import { api } from '@/lib/api'
 import { useStoredProfile } from '@/lib/profile-store'
+import { lacksRecognizedSkills } from '@/lib/recognized-skills'
 import { roleTitleFromId } from '@/lib/role-copy'
 import { cn } from '@/lib/utils'
 
@@ -103,7 +105,9 @@ export default function Role() {
   const sdgs = useRequest(open('sdgs') ? `sdgs:${roleId}` : null, (signal) => api.getSdgs(roleId, { signal }))
 
   const env = match.status === 'ok' ? match.data : null
-  const rank = env ? env.data.matches.findIndex((m) => m.role_id === roleId) : -1
+  // without a recognised skill there is no meaningful rank or score to show
+  const unranked = !!env && !!stored && lacksRecognizedSkills(stored.profile, env.data.matches)
+  const rank = env && !unranked ? env.data.matches.findIndex((m) => m.role_id === roleId) : -1
   const role = rank >= 0 ? env!.data.matches[rank] : undefined
   const title = role?.role_title ?? roleTitleFromId(roleId)
 
@@ -135,8 +139,9 @@ export default function Role() {
               <>
                 {match.status === 'loading' && <Skeleton className="h-[360px] rounded-card" />}
                 {match.status === 'error' && <ErrorState error={match.error} onRetry={retryMatch} />}
+                {unranked && <NoRecognizedSkills source={stored.source} warnings={env.warnings} />}
                 {env && role && <OverviewTab match={role} rank={rank} envelope={env} />}
-                {env && !role && (
+                {env && !unranked && !role && (
                   <Card>
                     <EmptyState
                       title="Not among your matches"
@@ -156,8 +161,8 @@ export default function Role() {
             )}
 
             {tab === 'trends' && (
-              <TabFrame title="Skill trends" subtitle={`Dated demand signals for ${title}`} icon={TrendingUp} state={trends[0]} retry={trends[1]}>
-                {(d) => (d.signals?.length ? <TrendSnapshot trends={d} /> : <EmptyState title="No signals yet" body="No dated trend signals have been collected for this role." />)}
+              <TabFrame title="Skill trends" subtitle={`Dated GitHub developer-activity signals for ${title} skills`} icon={TrendingUp} state={trends[0]} retry={trends[1]}>
+                {(d) => <TrendSnapshot trends={d} />}
               </TabFrame>
             )}
 

@@ -1,6 +1,6 @@
-/* Mustaqbal AI design tokens. Our own palette, built from ideas in the Rapport / Mender /
-   Halden references (warm glass surfaces, emerald accent, solid colour tiles, accent picker).
-   Light is the default; <html data-theme="dark"> switches, <html data-accent="…"> recolours. */
+/* Mustaqbal AI design tokens: one palette (the landing page's teal set) for every page.
+   Light is the default; <html data-theme="dark"> switches, <html data-accent="…"> swaps
+   only the accent tokens (--primary, --primary-2, --on-primary). */
 
 :root {
   --font: 'Urbanist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -15,137 +15,6 @@
   --fs-lg: 1.0625rem;
   --fs-xl: 1.125rem;
 
-  --bg: #ece8df;
-  --mesh-a: #f3d2bb;
-  --mesh-b: #c6ded0;
-  --mesh-c: #efe1b6;
-  --glass: #ffffff80;
-  --glass-2: #ffffffb3;
-  --solid: #f7f5f0;
-  --raised: #fdfcf9;
-  --rim: #ffffffc4;
-  --well: #18201d0f;
-  --line: #18201d17;
-  --line-2: #18201d2b;
-  --hatch: #8e958f;
-  --shadow: 0 1px 0 #ffffffb3 inset, 0 24px 48px -30px #3c2f1f47;
-  --shadow-pop: 0 24px 60px -18px #2a1e1452, 0 2px 6px #2a1e1414;
-
-  --text: #16201c;
-  --muted: #5d6561;
-  --faint: #7d8580;
-
-  --primary: #146c54;
-  --primary-2: #0d4c3b;
-  --on-primary: #f6faf8;
-  /* deep backdrops (hero window, footer): stay dark in both themes so white text reads */
-  --deep-a: #1a8566;
-  --deep-b: #0d3b2e;
-
-  --ink: #16201c;
-  --on-ink: #f8f5ef;
-  --butter: #f0c64a;
-  --on-butter: #16201c;
-  --tomato: #c9471f;
-  --on-tomato: #fbf7f1;
-  --emerald: #146c54;
-  --sky: #3b6fd1;
-  --plum: #7b4fc0;
-  --teal: #12707a;
-  --good: #2b7a52;
-  --warn: #8f5b00;
-  --bad: #c23a2a;
-  --slate: #66706b;
-  --soft: 14%;
-
-  --r-card: 26px;
-  --r-tile: 20px;
-  --r-ctl: 999px;
-  --gap: 16px;
-  --gutter: clamp(16px, 1.8vw, 30px);
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-
-  color-scheme: light;
-}
-
-:root[data-theme='dark'] {
-  --bg: #0f1412;
-  --mesh-a: #c9471f40;
-  --mesh-b: #146c5470;
-  --mesh-c: #f0c64a17;
-  --glass: #ffffff0c;
-  --glass-2: #ffffff15;
-  --solid: #1a201d;
-  --raised: #222926;
-  --rim: #ffffff12;
-  --well: #ffffff0e;
-  --line: #ffffff14;
-  --line-2: #ffffff29;
-  --hatch: #6d7671;
-  --shadow: 0 1px 0 #ffffff0d inset, 0 24px 48px -30px #000000b3;
-  --shadow-pop: 0 24px 60px -18px #000000b3, 0 0 0 1px #ffffff14;
-
-  --text: #eef1ec;
-  --muted: #a5ada8;
-  --faint: #7f8782;
-
-  --primary: #4fcf9f;
-  --primary-2: #2a9c74;
-  --on-primary: #062419;
-  --deep-a: #176a52;
-  --deep-b: #0a2a21;
-
-  --ink: #eef1ec;
-  --on-ink: #16201c;
-  --butter: #f2cd5c;
-  --tomato: #e8653e;
-  --emerald: #4fcf9f;
-  --sky: #84a9f5;
-  --plum: #b494f0;
-  --teal: #4fb9c4;
-  --good: #6cc79a;
-  --warn: #efb547;
-  --bad: #f08a74;
-  --slate: #a1aaa5;
-  --soft: 20%;
-
-  color-scheme: dark;
-}
-
-/* Accent picker (idea from Halden): only the primary pair changes. Not applied on the
-   landing page, which always uses the landing palette below. */
-:root[data-accent='petrol']:not([data-palette]) {
-  --primary: #0f6c78;
-  --primary-2: #0a4a52;
-}
-:root[data-accent='indigo']:not([data-palette]) {
-  --primary: #4549b8;
-  --primary-2: #2f3283;
-}
-:root[data-accent='tomato']:not([data-palette]) {
-  --primary: #b9431d;
-  --primary-2: #842e13;
-}
-:root[data-theme='dark'][data-accent='petrol']:not([data-palette]) {
-  --primary: #5cc6d2;
-  --primary-2: #2f8e99;
-  --on-primary: #04252a;
-}
-:root[data-theme='dark'][data-accent='indigo']:not([data-palette]) {
-  --primary: #9a9ef7;
-  --primary-2: #6a6ee0;
-  --on-primary: #121345;
-}
-:root[data-theme='dark'][data-accent='tomato']:not([data-palette]) {
-  --primary: #f08a65;
-  --primary-2: #cf5e37;
-  --on-primary: #2e0e03;
-}
-
-/* Landing palette: a cool teal set mapped onto the same token names, so the landing keeps
-   the shared layout with its own look. Set by the landing page (and by the pre-paint
-   script in index.html) as <html data-palette="landing">. */
-:root[data-palette='landing'] {
   --bg: #edf3f3;
   --mesh-a: #22aabe3d;
   --mesh-b: #ff966e2e;
@@ -177,7 +46,8 @@
   --butter: #9fe3ec;
   --on-butter: #062a31;
   --tomato: #e8603b;
-  --on-tomato: #fff;
+  /* dark text: white on this orange is only 3.4:1 */
+  --on-tomato: #2e0e03;
   --emerald: #23926a;
   --sky: #3a6fd4;
   --plum: #d6466c;
@@ -187,9 +57,28 @@
   --bad: #c4352c;
   --slate: #63737b;
   --soft: 14%;
+
+  /* fixed colours for content on the deep backdrops (hero window, footer, curtain, intro),
+     which stay dark in both themes */
+  --on-deep: #f6faf8;
+  --deep-ink: #0f2a31;
+  --deep-glow: #9fe3ec;
+  --deep-warm: #ffb38f;
+  --node: #f0c64a;
+  /* share of the accent in the deep hero card */
+  --deep-mix: 44%;
+
+  --r-card: 26px;
+  --r-tile: 20px;
+  --r-ctl: 999px;
+  --gap: 16px;
+  --gutter: clamp(16px, 1.8vw, 30px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: light;
 }
 
-:root[data-palette='landing'][data-theme='dark'] {
+:root[data-theme='dark'] {
   --bg: #0b1517;
   --mesh-a: #28b4c82e;
   --mesh-b: #ff825f14;
@@ -215,6 +104,8 @@
   --on-primary: #04222a;
   --deep-a: #0d5f70;
   --deep-b: #0c191c;
+  /* the bright dark-theme accents need less, so muted text on the card keeps AA */
+  --deep-mix: 32%;
 
   --ink: #e9f3f4;
   --on-ink: #0b1517;
@@ -232,6 +123,37 @@
   --bad: #f58b7f;
   --slate: #9fb0b7;
   --soft: 20%;
+
+  color-scheme: dark;
+}
+
+/* Accent picker: only the accent tokens change. Teal (the default) is the palette above. */
+:root[data-accent='emerald'] {
+  --primary: #146c54;
+  --primary-2: #0d4c3b;
+}
+:root[data-accent='indigo'] {
+  --primary: #4549b8;
+  --primary-2: #2f3283;
+}
+:root[data-accent='tomato'] {
+  --primary: #b9431d;
+  --primary-2: #842e13;
+}
+:root[data-theme='dark'][data-accent='emerald'] {
+  --primary: #4fcf9f;
+  --primary-2: #2a9c74;
+  --on-primary: #062419;
+}
+:root[data-theme='dark'][data-accent='indigo'] {
+  --primary: #9a9ef7;
+  --primary-2: #6a6ee0;
+  --on-primary: #121345;
+}
+:root[data-theme='dark'][data-accent='tomato'] {
+  --primary: #f08a65;
+  --primary-2: #cf5e37;
+  --on-primary: #2e0e03;
 }
 
 /* The 17 official UN SDG colours. */

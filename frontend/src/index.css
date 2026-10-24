@@ -54,6 +54,11 @@
   --color-warn: var(--warn);
   --color-bad: var(--bad);
   --color-slate: var(--slate);
+  --color-on-deep: var(--on-deep);
+  --color-deep-ink: var(--deep-ink);
+  --color-deep-glow: var(--deep-glow);
+  --color-deep-warm: var(--deep-warm);
+  --color-node: var(--node);
 
   --radius-card: var(--r-card);
   --radius-tile: var(--r-tile);
@@ -251,13 +256,9 @@ html.theming *::after {
     animation: breathe 2.4s ease-in-out infinite;
   }
 
-  .is-flash {
-    animation: flash 0.9s var(--ease);
-  }
-
   /* boot-sequence text (landing intro and the landing → app curtain) */
   .boot-prompt {
-    color: #9fe3ec;
+    color: var(--deep-glow);
   }
   .boot-demo {
     color: #efb547;
@@ -271,7 +272,7 @@ html.theming *::after {
   }
   .boot-cursor {
     margin-left: 2px;
-    color: #9fe3ec;
+    color: var(--deep-glow);
     animation: blink 1.1s steps(1) infinite;
   }
 
@@ -300,11 +301,6 @@ html.theming *::after {
   }
   60% {
     box-shadow: 0 0 0 6px transparent;
-  }
-}
-@keyframes flash {
-  from {
-    color: var(--coral);
   }
 }
 @keyframes blink {

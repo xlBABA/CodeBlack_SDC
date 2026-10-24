@@ -78,6 +78,17 @@ class Settings(BaseSettings):
     RUNPOD_ENDPOINT_ID: Optional[str] = None  # identifier, not a secret
     TREND_SOURCE_API_KEY: Optional[SecretStr] = None
 
+    # Milestone 11B: CV PDF -> GLM-5.3 extraction. Deliberately separate
+    # from RUNPOD_ENDPOINT_ID above (f0phohhegtydji) — that ID belongs to
+    # Hussain's embedding provider (app/services/hussain_matching); mixing
+    # the two would risk a future config change to one silently breaking
+    # the other. The GLM endpoint is addressed via a full base URL
+    # (RunPod's OpenAI-compatible route already encodes its own endpoint
+    # ID), not a second bare RUNPOD_ENDPOINT_ID-style variable. The API
+    # key is shared (same RunPod account) — RUNPOD_API_KEY above.
+    RUNPOD_GLM_BASE_URL: str = "https://api.runpod.ai/v2/b1dd8hy2hqo1nb/openai/v1"
+    RUNPOD_GLM_MODEL: str = "glm-5.3"
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]

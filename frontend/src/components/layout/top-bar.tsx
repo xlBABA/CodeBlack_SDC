@@ -51,7 +51,7 @@ export function TopBar() {
             to="/start"
             data-shell-top
             aria-label="Your profile"
-            className="grid size-11 place-items-center rounded-full border-2 border-rim bg-[linear-gradient(140deg,#f3c9a8,#e08a5c)] text-[#3b1a08] shadow-card"
+            className="grid size-11 place-items-center rounded-full border-2 border-rim bg-[linear-gradient(140deg,color-mix(in_srgb,var(--tomato)_55%,#fff),var(--tomato))] text-deep-ink shadow-card"
           >
             <UserRound className="size-5" aria-hidden />
           </Link>

@@ -11,7 +11,6 @@ import { Quote } from '@/components/landing/quote'
 import { Mesh } from '@/components/mesh'
 import { PRODUCT_NAME, PRODUCT_TAGLINE, STORAGE_PREFIX } from '@/config/product'
 import { ScrollTrigger } from '@/lib/gsap'
-import { syncThemeColor } from '@/lib/theme'
 import { prefersReducedMotion } from '@/lib/motion'
 import { useSmoothScroll } from '@/lib/smooth-scroll'
 
@@ -39,17 +38,6 @@ export default function Landing() {
   useLayoutEffect(() => {
     document.title = `${PRODUCT_NAME} — ${PRODUCT_TAGLINE}`
     window.scrollTo(0, 0)
-  }, [])
-
-  // the landing wears its own teal palette; the app keeps its own colours
-  useLayoutEffect(() => {
-    const html = document.documentElement
-    html.dataset.palette = 'landing'
-    syncThemeColor()
-    return () => {
-      delete html.dataset.palette
-      syncThemeColor()
-    }
   }, [])
 
   // keep the page still while the intro covers it

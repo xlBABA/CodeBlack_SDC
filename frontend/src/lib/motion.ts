@@ -106,7 +106,8 @@ export function drawRings(targets: Targets, delay = 0) {
 export const COUNT_FORMATS = {
   int: (v: number) => Math.round(v).toLocaleString('en-MY'),
   percent: (v: number) => `${Math.round(v)}%`,
-  hours: (v: number) => `${Math.round(v)} h`,
+  /** a published floor, e.g. "600,000+" */
+  plus: (v: number) => `${Math.round(v).toLocaleString('en-MY')}+`,
   /** for hour totals the API returns with a decimal, e.g. 19.2 */
   hours1: (v: number) => `${v.toFixed(1)} h`,
   decimal: (v: number) => v.toFixed(1),
@@ -180,13 +181,4 @@ export function pressPop(el: Element) {
   if (prefersReducedMotion()) return
   const target = el.querySelector('svg') ?? el
   gsap.fromTo(target, { scale: 0.72 }, { scale: 1, duration: 0.55, ease: EASE.pop, overwrite: true })
-}
-
-/** A value just changed: nudge it and flash it coral. */
-export function flashValue(el: HTMLElement) {
-  el.classList.remove('is-flash')
-  void el.offsetWidth
-  el.classList.add('is-flash')
-  if (prefersReducedMotion()) return
-  gsap.fromTo(el, { y: -4, scale: 1.06 }, { y: 0, scale: 1, duration: 0.55, ease: 'back.out(2.4)', overwrite: 'auto', clearProps: 'transform' })
 }

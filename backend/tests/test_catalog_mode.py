@@ -15,9 +15,18 @@ from app.core.config import Settings, get_settings
 from app.main import app
 from app.services.role_catalog import RoleCatalogProvider
 
+# Milestone 13C-4: Jawad's catalog expanded from the original 8 verified
+# roles to the full 30-role target (TOTAL_TARGET_ROLES in matcher.py) —
+# the original 8 are unchanged, 22 new O*NET occupations were added.
 CACHED_ROLE_IDS = {
-    "data_analyst", "financial_analyst", "mechanical_engineer", "public_health_analyst",
-    "software_developer", "accountant", "civil_engineer", "environmental_scientist",
+    "accountant", "actuary", "aerospace_engineer", "biomedical_engineer", "budget_analyst",
+    "chemical_engineer", "civil_engineer", "computer_systems_analyst", "data_analyst",
+    "data_scientist", "database_administrator", "electrical_engineer", "environmental_engineer",
+    "environmental_scientist", "financial_analyst", "financial_risk_specialist", "hydrologist",
+    "industrial_engineer", "information_security_analyst", "logistician", "management_analyst",
+    "market_research_analyst", "mechanical_engineer", "operations_research_analyst",
+    "public_health_analyst", "software_developer", "statistician", "surveyor",
+    "urban_regional_planner", "web_developer",
 }
 OVERLAP_ROLE_IDS = {"data_analyst", "financial_analyst"}
 CACHED_ONLY_ROLE_IDS = {"mechanical_engineer", "public_health_analyst"}
@@ -372,11 +381,18 @@ def test_cached_mode_sdgs_endpoint_is_honest_empty_for_a_fixture_only_role(clien
 
 
 def test_cached_mode_resource_catalog_matches_by_skill_id_not_role_id(client: TestClient):
-    """public_health_analyst requires critical_thinking, mathematics,
-    sql, python — as of Milestone 6D-2D, CachedResourceCatalog covers
-    all four, so all four now produce a real roadmap step, keyed by
-    skill_id (never role-scoped, never a resource reassigned between
-    roles)."""
+    """public_health_analyst's required skills are keyed by skill_id (never
+    role-scoped, never a resource reassigned between roles).
+
+    As of Milestone 13D-9 (Jawad's approved "Option C" rebuild,
+    origin/feat/jawad-ph-fix @ 1cf9b74), the role's required skills are
+    critical_thinking, complex_problem_solving, science, systems_analysis,
+    mathematics and analytical_scientific_software (sql and python became
+    optional). CachedResourceCatalog covers only 3 of those 6 so far
+    (complex_problem_solving, science and systems_analysis have no resource
+    yet); per the "do not invent missing resources" rule, those gaps are
+    omitted with a warning rather than fabricated — see the omission
+    warnings this test also checks for."""
     _override_settings(CATALOG_MODE="cached")
     try:
         response = client.post(
@@ -389,7 +405,11 @@ def test_cached_mode_resource_catalog_matches_by_skill_id_not_role_id(client: Te
     assert response.status_code == 200
     body = response.json()
     step_skill_ids = {s["skill_id"] for s in body["data"]["steps"]}
-    assert step_skill_ids == {"critical_thinking", "mathematics", "sql", "python"}
+    assert step_skill_ids == {"critical_thinking", "mathematics", "analytical_scientific_software"}
+    for missing in ("complex_problem_solving", "science", "systems_analysis"):
+        assert any(
+            f"No placeholder resource is available yet for skill '{missing}'" in w for w in body["warnings"]
+        ), missing
     fixture_resource_ids = {
         "resource_sql_basics_001", "resource_python_basics_001", "resource_dataviz_basics_001",
         "resource_excel_basics_001", "resource_finmodel_basics_001", "resource_cad_basics_001",

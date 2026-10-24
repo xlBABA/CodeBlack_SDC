@@ -47,7 +47,7 @@ export function TopMatchCard({ match, eyebrow = 'Your strongest alignment right 
             </li>
           ))}
           {missing.map((s) => (
-            <li key={s.skill_id} data-enter="item" className="rounded-full border border-dashed border-white/35 px-3 py-1 text-sm font-semibold text-[#f6faf8c4]">
+            <li key={s.skill_id} data-enter="item" className="rounded-full border border-dashed border-white/35 px-3 py-1 text-sm font-semibold text-on-deep/77">
               <span className="sr-only">Missing: </span>
               {s.name}
             </li>
@@ -61,7 +61,7 @@ export function TopMatchCard({ match, eyebrow = 'Your strongest alignment right 
             <span className="text-muted-foreground">{missing.length} to build</span>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-white/15">
-            <i data-enter="bar" className="block h-full rounded-full bg-[linear-gradient(90deg,#bff0d9,#f0c64a)]" style={{ width: `${total ? (matched / total) * 100 : 0}%` }} />
+            <i data-enter="bar" className="block h-full rounded-full bg-[linear-gradient(90deg,var(--deep-glow),var(--node))]" style={{ width: `${total ? (matched / total) * 100 : 0}%` }} />
           </div>
         </div>
       </div>
@@ -75,14 +75,14 @@ export function TopMatchCard({ match, eyebrow = 'Your strongest alignment right 
               <b>{Math.round(match.score_breakdown[key])}</b>
             </div>
             <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/15">
-              <i data-enter="bar" className="block h-full rounded-full bg-[#f6faf8]" style={{ width: `${match.score_breakdown[key]}%` }} />
+              <i data-enter="bar" className="block h-full rounded-full bg-on-deep" style={{ width: `${match.score_breakdown[key]}%` }} />
             </div>
           </div>
         ))}
         {workspaceLink && (
           <Link
             to={`/roles/${match.role_id}`}
-            className="mt-auto inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#f6faf8] px-5 font-bold whitespace-nowrap text-[#0d2a20] transition hover:bg-white"
+            className="mt-auto inline-flex h-11 items-center justify-center gap-2 rounded-full bg-on-deep px-5 font-bold whitespace-nowrap text-deep-ink transition hover:bg-white"
           >
             Open workspace
             <ArrowUpRight className="size-4" aria-hidden />

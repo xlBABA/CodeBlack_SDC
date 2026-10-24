@@ -3,7 +3,7 @@ import { api } from '@/lib/api'
 import type { StoredProfile } from '@/lib/profile-store'
 import type { APIEnvelope, MatchPayload } from '@/types/api'
 
-// One match call per analysed profile, shared by the overview, roles and role pages.
+// One match call per analysed profile, shared by the dashboard, roles and role pages.
 const cache = new Map<string, Promise<APIEnvelope<MatchPayload>>>()
 
 function matchOnce(stored: StoredProfile) {

@@ -31,8 +31,8 @@ export function BrandMark({ className, flat = false }: { className?: string; fla
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="36.5" cy="14.5" r="7" fill="#f0c64a" opacity=".25" />
-      <circle cx="36.5" cy="14.5" r="3.8" fill="#f0c64a" />
+      <circle cx="36.5" cy="14.5" r="7" fill="var(--node)" opacity=".25" />
+      <circle cx="36.5" cy="14.5" r="3.8" fill="var(--node)" />
     </svg>
   )
 }

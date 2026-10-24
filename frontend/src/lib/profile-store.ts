@@ -7,11 +7,15 @@ import { api } from './api'
 // The analysed profile lives here and in sessionStorage, so a refresh keeps it. The whole
 // profile is kept (not only profile_id) because every endpoint takes the profile itself.
 
+/** Which intake the profile came from, so the app can send the student back to it. */
+export type ProfileSource = 'form' | 'cv'
+
 export type StoredProfile = {
   profile: StudentProfile
   data_mode: DataMode
   analyzed_at: string
   demo: boolean
+  source?: ProfileSource
 }
 
 const KEY = `${STORAGE_PREFIX}:profile`
@@ -50,9 +54,9 @@ export const getProfile = () => current
 export const useStoredProfile = () => useSyncExternalStore(subscribe, () => current)
 
 /** Sends the draft to POST /profile/analyze and keeps the normalised result. */
-export async function analyzeAndStore(draft: StudentProfile, { demo = false, signal }: { demo?: boolean; signal?: AbortSignal } = {}) {
+export async function analyzeAndStore(draft: StudentProfile, { demo = false, source, signal }: { demo?: boolean; source?: ProfileSource; signal?: AbortSignal } = {}) {
   const res = await api.analyzeProfile(draft, { signal })
-  write({ profile: res.data, data_mode: res.data_mode, analyzed_at: res.generated_at, demo })
+  write({ profile: res.data, data_mode: res.data_mode, analyzed_at: res.generated_at, demo, source })
   return res
 }
 

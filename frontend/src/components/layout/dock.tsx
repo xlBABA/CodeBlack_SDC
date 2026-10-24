@@ -1,4 +1,4 @@
-import { House, SwatchBook, UserRoundPen } from 'lucide-react'
+import { House, UserRoundPen } from 'lucide-react'
 import { Link } from 'react-router'
 import { AccentPicker } from '@/components/accent-picker'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -7,7 +7,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 const ACTIONS = [
   { to: '/', label: 'Landing page', Icon: House },
   { to: '/start', label: 'Build my profile', Icon: UserRoundPen },
-  { to: '/design', label: 'Design system', Icon: SwatchBook },
 ]
 
 /**
