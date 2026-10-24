@@ -83,9 +83,9 @@ function Path() {
   return (
     <div>
       <ExampleTag />
-      <ol className="grid">
+      <ol className="grid grid-cols-1">
         {EXAMPLE_PATH.map((step, i) => (
-          <li key={step.resource_id} className="relative grid pt-5 first:pt-0">
+          <li key={step.resource_id} className="relative grid grid-cols-1 pt-5 first:pt-0">
             {i > 0 && <span aria-hidden className="absolute top-0 left-1/2 h-5 border-l-2 border-dotted border-line-2" />}
             <div className="flex items-center justify-between gap-3 rounded-[16px] border border-rim bg-raised px-4 py-3 shadow-card dark:border-line">
               <span className="min-w-0">
