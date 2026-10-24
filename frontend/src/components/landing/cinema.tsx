@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Check } from 'lucide-react'
 import { BrandMark } from '@/components/brand'
-import { CINEMA } from '@/content/landing'
+import { CINEMA, EXAMPLE_LABEL, EXAMPLE_ROLES } from '@/content/landing'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { gsap, REDUCED_MOTION, useGSAP } from '@/lib/gsap'
 import { canHover } from '@/lib/motion'
@@ -16,27 +16,21 @@ const FROM = [
 const SPOTS = ['top-[6%] left-1/2 -translate-x-1/2', 'top-1/2 right-[-6%] -translate-y-1/2', 'bottom-[6%] left-1/2 -translate-x-1/2', 'top-1/2 left-[-6%] -translate-y-1/2']
 
 function Report() {
-  const rows: [string, number][] = [['Data analyst', 76], ['Financial analyst', 65], ['Sustainability coordinator', 59], ['Mechanical design engineer', 40]]
   return (
     <div className="glass w-[min(420px,86vw)] rounded-card bg-raised p-6 shadow-pop">
-      <p className="text-sm font-semibold text-muted-foreground">Demo student · sample report</p>
+      <p className="text-sm font-semibold text-muted-foreground">{EXAMPLE_LABEL} · real roles from the catalogue</p>
       <p className="mt-1 text-2xl font-extrabold tracking-[-0.03em]">{CINEMA.title}</p>
       <ul className="mt-4 grid gap-3">
-        {rows.map(([t, n]) => (
-          <li key={t}>
-            <div className="flex justify-between text-sm font-semibold">
-              <span>{t}</span>
-              <span>
-                {n} <small className="font-medium text-muted-foreground">alignment estimate</small>
-              </span>
-            </div>
-            <div className="mt-1 h-2 overflow-hidden rounded-full bg-well">
-              <i className="block h-full rounded-full bg-primary" style={{ width: `${n}%` }} />
-            </div>
+        {EXAMPLE_ROLES.map((role) => (
+          <li key={role.role_id} className="flex justify-between gap-3 text-sm font-semibold">
+            <span>{role.role_title}</span>
+            <small className="font-medium text-muted-foreground">
+              O*NET {role.onet_soc_code} · {role.core_skills} core skills
+            </small>
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-xs text-muted-foreground">Estimates use self-rated skills. Treat them as a starting point.</p>
+      <p className="mt-4 text-xs text-muted-foreground">Your alignment estimates appear here once you build a profile. They use self-rated skills, so treat them as a starting point.</p>
     </div>
   )
 }
