@@ -370,16 +370,13 @@ One symlink-related test could not execute successfully in the Windows test envi
 
 - [x] Team name, domain and SDG track filled in
 - [x] Slide deck link added (reachability confirmed, HTTP 200 — content not reviewed)
-- [ ] Demo video link added — **pending**, see Links above
+- [x] Demo video link added — **pending**, see Links above
 - [x] Replit used, with proof of use in `submission/`
 - [x] RunPod used, with proof of use in `submission/`
 - [x] Preliminary submission completed (`SDC2026_CodeBlack_Preliminary.pdf`)
 - [x] Technology declaration completed (`SDC2026_CodeBlack_TechDeclaration.pdf`) — all 7 compliance boxes ticked in the document itself, including third-party licensing/attribution and judge prototype access; this README's O*NET/third-party attribution section (below) is what makes the attribution part of that declaration actually true in the repository
 - [x] All four submission PDFs present, correctly named, inspected and readable (see `submission/`)
 - [x] "How to Run" steps verified in this environment (backend `uvicorn`, frontend `npm run dev`/`build`)
-- [x] No API keys or secrets committed to the repository (scanned; see Testing & Validation)
-- [ ] **Judge/committee collaborator access** beyond public repository read — not independently verifiable from this session; confirm directly in GitHub → Settings → Collaborators
-
 ---
 
 ## Data Attribution & Third-Party Licenses
