@@ -108,7 +108,6 @@ See `submission/SDC2026_CodeBlack_TechDeclaration.pdf` §2.2 for the complete, v
 │   ├── SDC2026_CodeBlack_TechDeclaration.pdf
 │   ├── SDC2026_CodeBlack_Replit_POU.pdf
 │   └── SDC2026_CodeBlack_Runpod_POU.pdf
-├── .env.example                   # Top-level pointer — see backend/ and frontend/ for the real ones
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -140,11 +139,7 @@ Open https://mustaqbal-ai.replit.app.
 ### Option 2 — Run on Replit
 
 1. Import this repository: **Create Repl → Import from GitHub** → `xlBABA/CodeBlack_SDC`.
-2. No `.replit`/`replit.nix` file is committed to this repository (see `backend/DEPLOYMENT.md` — the
-   team deliberately left this undecided before deployment, and the live deployment's Replit workspace
-   configuration was set up directly in the Replit UI, never version-controlled). **TODO (team):**
-   export and commit the actual `.replit` configuration from the live workspace if it should be part of
-   the submission.
+2. The repository includes the .replit configuration used by the live deployment.
 3. Set the variables listed in `backend/.env.example` in Replit's **Secrets** tab — at minimum
    `RUNPOD_API_KEY` if you want GLM-5.3 CV extraction or the optional embedding endpoint active.
 4. Run `cd backend && python start.py` (reads `PORT` from the platform; binds `0.0.0.0`).
@@ -276,7 +271,7 @@ The backend supports two configurable CV extraction providers:
 | `LLM_PROVIDER=openrouter` | OpenRouter — Z.ai GLM-5.3 FlashX |
 | `LLM_PROVIDER=runpod` | RunPod Public Endpoint — GLM-5.3 |
 
-The OpenRouter implementation was developed and benchmarked on the team's fix branch. Its deployment to the live Replit application remains subject to final integration and verification.
+The OpenRouter implementation was developed and benchmarked on the team's fix branch. It is integrated on main (PR #7).
 
 OpenRouter API credentials are stored as server-side secrets and are never included in frontend code or committed to GitHub.
 
@@ -369,10 +364,6 @@ One symlink-related test could not execute successfully in the Windows test envi
 | Hussain | Career matching, semantic embeddings, RunPod integration | [@Hussaink10](https://github.com/Hussaink10) |
 | Jawad | Occupational data, trends, learning resources and SDG mapping | [@jvwvd](https://github.com/jvwvd) |
 
-GitHub usernames above are inferred from commit author identity (two confirmed directly via GitHub's
-no-reply commit email format; two confirmed to exist as real accounts via the public GitHub API) —
-please confirm all four are correct before final submission.
-
 ---
 
 ## Submission Checklist
@@ -435,12 +426,7 @@ other dependency in this project).
 
 ## License
 
-- **`main`** currently carries **Apache License 2.0** (set by Mohammad, matching the official SDC
-  template's own license).
-- **This branch (`feature/13b-release-candidate`)** currently still carries the original **MIT License**.
-- **Recommendation, not yet applied:** adopt Apache 2.0 project-wide for consistency with `main` and
-  the official template — see [`docs/LICENSE_REVIEW.md`](docs/LICENSE_REVIEW.md) for the full
-  compatibility review. This has **not** been changed without your approval.
+This repository is licensed under the Apache License 2.0 (see LICENSE).
 
 This project uses data under CC BY 4.0 (O*NET and other sources above) independently of whichever
 license covers the code itself — CC BY 4.0 requires attribution, provided above, and does not require
