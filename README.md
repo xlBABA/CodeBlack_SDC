@@ -12,7 +12,7 @@
 | **Team Domain** | Domain 1 — AIVERSECITY |
 | **SDG Track** | SDG 4, 5, 8, 9, 10 (declared track); **primary focus SDG 8** — Decent Work and Economic Growth, **supporting SDG 4** — Quality Education |
 | **Team Leader** | Rehan Anjum |
-| **University** | UCSI University, Malaysia (team affiliation on record — individual members are not all assumed to attend UCSI) |
+| **University** | UCSI University, Malaysia |
 | **Number of Members** | 4 |
 
 ## Links
