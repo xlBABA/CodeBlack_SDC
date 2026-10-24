@@ -22,6 +22,7 @@
 | GitHub Repository | https://github.com/xlBABA/CodeBlack_SDC |
 | Live Demo | https://mustaqbal-ai.replit.app |
 | RunPod Endpoints | https://api.runpod.ai/v2/f0phohhegtydji |
+| CV Extraction API Provider | https://openrouter.ai |
 | Slide Deck | https://canva.link/pf4g0a1ofti915u |
 | Demo Video | **TODO:** `[ADD_DEMO_VIDEO_URL]` — not yet supplied |
 
@@ -35,34 +36,41 @@ University students and recent graduates often struggle to identify suitable car
 
 ### Solution
 
-Mustaqbal AI is a web-based career exploration platform. A student builds a profile manually or uploads a CV PDF; GLM-5.3 (via a RunPod Public Endpoint) drafts a structured profile that the student reviews and must confirm before anything is scored. A deterministic, explainable matching engine then ranks 30 curated occupational roles against the student's skills, discloses exactly which skills matched and which are missing, and surfaces a learning roadmap, portfolio project ideas, cached GitHub trend signals, and UN SDG links for each role.
+Mustaqbal AI is an AI-assisted career exploration platform designed to help university students identify suitable career paths based on their education, skills, interests and experience.
 
-This supports **SDG 8** (Target 8.6 — reducing the proportion of youth not in employment, education or training) by helping students identify realistic career pathways, and **SDG 4** (Target 4.4 — increasing youth with skills relevant to employment) by surfacing concrete, free learning resources for each skill gap.
+Students can create their profiles manually or upload a PDF resume. The application integrates **OpenRouter with Z.ai GLM-5.3 FlashX** to extract structured information from uploaded CVs into editable profiles, which students must review and confirm before proceeding.
+
+For intelligent skill interpretation, Mustaqbal AI integrates **RunPod Serverless GPU infrastructure**, hosting the **all-MiniLM-L6-v2 embedding model** to identify semantically related skills and improve skill matching. The application also retains its existing RunPod GLM-5.3 CV extraction integration as a configurable alternative, where supported by the deployed configuration.
+
+Career recommendations are generated using a deterministic, explainable weighted scoring engine that ranks 30 curated O*NET-derived occupational roles. Students receive career recommendations, skill-gap insights, personalized learning roadmaps, portfolio project suggestions, cached GitHub-based trend indicators and relevant United Nations Sustainable Development Goal (SDG) connections.
+
+The platform supports **SDG 8 — Decent Work and Economic Growth** and **SDG 4 — Quality Education** by helping students explore career opportunities and identify skills they can develop for future employment.
 
 ### Key Features
 
-- **Manual student profile entry** — degree, semester, interests, skills and project text, mapped to a shared 20-skill vocabulary.
-- **PDF CV upload** with local text extraction (never written to disk).
-- **GLM-5.3-assisted extraction** — structured draft (education, skills with an exact supporting quote, projects, experience, certifications) via a RunPod Public Endpoint; a 30-second timeout falls back to manual entry rather than guessing.
-- **Editable draft and user confirmation** — nothing is scored until the student reviews and confirms; unmatched CV skills can be manually mapped to a catalogue skill.
-- **Deterministic career recommendations** — a written, weighted scoring formula, not a black box; every score ships with an explanation.
-- **Skill normalization and skill-gap analysis** — exact/alias matching, contained-phrase detection ("Python (pandas)" → Python, partial credit), and "Did you mean…?" suggestions for unrecognised fragments.
-- **Thirty-role occupational catalogue**, sourced from O*NET, across Technology & AI, Business & Finance, Engineering & Manufacturing, and Healthcare & Sustainability.
-- **Learning resources and project recommendations** — cached, checked, free-to-access resources with real or team-estimated hours; portfolio projects on real open datasets, linked not copied.
-- **Cached GitHub-based trend signals** — developer-activity counts for 12 of the 20 skills, always labelled as developer activity, never hiring demand.
-- **SDG mappings** — every role and skill linked to a UN Sustainable Development Goal with a one-sentence reason.
-- **Explainability and graceful fallback** — every match carries caveats (limited coverage, degraded semantic matching, unrecognised skills); nothing is silently dropped or invented.
+- **AI-Assisted CV Extraction** — Students can upload PDF resumes and extract education, technical skills, experience, projects and certifications into structured profile drafts. The application supports Z.ai GLM-5.3 FlashX through OpenRouter and the existing GLM-5.3 integration through a RunPod Public Endpoint, selected through backend configuration.
+- **Manual Profile Entry** — Students can create profiles manually without uploading a CV.
+- **Editable CV Review and Confirmation** — AI-extracted information must be reviewed and confirmed by the student before career matching. Manual entry remains available when extraction is unavailable.
+- **Explainable Career Recommendations** — A deterministic weighted matching engine evaluates student skills against 30 curated O*NET-derived occupational roles and provides transparent matching explanations.
+- **RunPod-Powered Semantic Skill Matching** — A RunPod Serverless GPU endpoint hosts the `all-MiniLM-L6-v2` embedding model to recognize semantically related skills, such as interpreting "Database Querying" as SQL. If the service is unavailable, matching falls back to exact skills with an appropriate warning.
+- **Skill Normalization and Gap Analysis** — Identifies recognized skills, aliases, transferable skills and missing competencies relevant to selected careers.
+- **Career Learning Roadmaps** — Provides curated learning resources and suggested next steps for developing career-related skills.
+- **Portfolio Project Recommendations** — Recommends practical portfolio projects where catalogue coverage is available. The current dataset includes 17 projects across 8 career roles.
+- **Cached Technology Trend Insights** — Displays GitHub repository-activity snapshots for selected skills, clearly distinguished from job-market demand.
+- **Sustainable Development Goal Alignment** — Connects career exploration with relevant United Nations SDGs, particularly SDG 8 and SDG 4.
+- **Responsible AI and Graceful Fallback** — Provides profile confirmation, transparent scoring caveats, semantic-matching degradation notices and manual CV-entry alternatives.
 
 ### Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS |
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
 | Backend | Python, FastAPI, Pydantic |
-| Database | SQLite (via SQLAlchemy) |
-| AI — CV extraction | Z.ai **GLM-5.3**, via a RunPod **Public Endpoint** |
-| AI — optional matching | `sentence-transformers/all-MiniLM-L6-v2`, via our own RunPod **Serverless** worker |
-| Hosting | Replit (Autoscale Deployment) |
+| Database | SQLite, SQLAlchemy |
+| AI CV Extraction | OpenRouter API — Z.ai GLM-5.3 FlashX (`z-ai/glm-5.3-flashx`) |
+| Semantic Skill Matching | RunPod Serverless — `all-MiniLM-L6-v2` |
+| Career Recommendation | Explainable weighted matching algorithm |
+| Hosting | Replit |
 
 See `submission/SDC2026_CodeBlack_TechDeclaration.pdf` §2.2 for the complete, version-pinned dependency list with individual licenses.
 
@@ -116,7 +124,7 @@ Full data-flow diagram and component breakdown: [`docs/architecture/README.md`](
 
 Short version:
 ```
-Student → React frontend → FastAPI backend → (manual profile | CV → GLM-5.3 → draft)
+Student → React frontend → FastAPI backend → (manual profile | CV → GLM-5.3 RunPod/ DeepSeek Paid → draft)
         → student review & confirmation → skill normalization → matching engine
         → career recommendations, roadmap, projects, SDG mapping, trend signals
 ```
@@ -196,32 +204,83 @@ npm run build
 
 ## How We Use RunPod
 
-Mustaqbal AI uses **two separate RunPod integrations** — see [`runpod/README.md`](runpod/README.md)
-for the full breakdown. In short:
+RunPod is an official SDC Hackathon sponsor resource used in Mustaqbal AI for GPU-powered artificial intelligence capabilities.
 
-1. **GLM-5.3 (CV extraction)** — a RunPod **Public Endpoint** (`b1dd8hy2hqo1nb`) running Z.ai's
-   GLM-5.3, called from `backend/app/services/glm_client.py` to turn an uploaded CV's text into a
-   structured, student-reviewed draft profile.
-2. **Optional embedding similarity (matching)** — our **own RunPod Serverless worker**
-   (`runpod-worker/`, endpoint `f0phohhegtydji`), running `sentence-transformers/all-MiniLM-L6-v2`,
-   deployed and live-tested on 2026-10-23. When reachable, it gives partial credit for related skills
-   and interprets free-text skills; when not, matching falls back to exact-skill matching only, and
-   every affected result is visibly labelled "degraded."
+### 1. Semantic Skill Matching — RunPod Serverless
 
-Example request (embedding endpoint, no real key shown):
-```bash
-curl -X POST "https://api.runpod.ai/v2/f0phohhegtydji/runsync" \
-  -H "Authorization: Bearer $RUNPOD_API_KEY" -H "Content-Type: application/json" \
-  -d '{"input": {"texts": ["SQL", "Database Querying"]}}'
-```
+The application integrates a RunPod Serverless GPU endpoint hosting the pre-trained `sentence-transformers/all-MiniLM-L6-v2` embedding model.
 
-**Whether the optional embedding endpoint is active on the live Replit deployment is a single-test,
-point-in-time finding, not a confirmed permanent state.** Jawad made one real `POST /careers/match`
-test against the live deployment on 2026-10-24 (~19:43 UTC, invented profile, no CV upload); every
-match in that one response was labelled "degraded" — semantic matching was off at that moment. This
-does not confirm RunPod's state generally; credentials can be added, removed, or temporarily
-unreachable independently of any single check. See [`runpod/README.md`](runpod/README.md) for the
-full, dated evidence and its caveats.
+The model generates semantic representations of skills, allowing the application to identify relationships between different expressions of related skills.
+
+For example, "Database Querying" may be interpreted as SQL based on semantic similarity.
+
+**RunPod Serverless Endpoint:**
+
+https://api.runpod.ai/v2/f0phohhegtydji
+
+The integration uses server-side `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID` configuration. No credentials are included in the repository.
+
+If semantic matching is unavailable, the application falls back to exact skill matching and displays an appropriate limitation.
+
+### 2. GLM-5.3 — RunPod Public Endpoint
+
+The application also retains its original Z.ai GLM-5.3 CV extraction integration through a RunPod Public Endpoint.
+
+This integration converts extracted PDF resume text into a structured, editable student profile draft.
+
+The provider can be selected using `LLM_PROVIDER=runpod`.
+
+**RunPod GLM Public Endpoint ID:** `b1dd8hy2hqo1nb`
+
+The student must review and confirm extracted profile information before career matching.
+
+### 3. RunPod Sponsor Usage
+
+RunPod sponsor-provided credits were used to deploy and test the semantic embedding worker and to support the original GLM-5.3 CV extraction integration.
+
+The actual embedding worker implementation is available in `runpod-worker/`.
+
+Detailed integration documentation is available in [`runpod/README.md`](runpod/README.md).
+
+**RunPod Proof of Use:**
+
+[SDC2026_CodeBlack_Runpod_POU.pdf](submission/SDC2026_CodeBlack_Runpod_POU.pdf)
+
+Additional evidence:
+
+- [RunPod deployment proof](docs/proof/runpod/README.md)
+- [RunPod live testing records](docs/proof/runpod/live-run.md)
+
+The RunPod embedding endpoint was deployed and successfully tested by the team. Its activation in the currently published Replit configuration must be verified separately.
+
+---
+
+## How We Use OpenRouter
+
+Mustaqbal AI also supports fast AI-assisted CV extraction using OpenRouter.
+
+**API Provider:** OpenRouter
+
+**Model:** Z.ai GLM-5.3 FlashX (`z-ai/glm-5.3-flashx`)
+
+**API Base URL:** https://openrouter.ai/api/v1
+
+**Purpose:** Extract structured education, skills, experience, projects and certifications from uploaded PDF resume text.
+
+**Access Tier:** Paid API credits arranged by the team, separate from RunPod sponsor credits.
+
+The backend supports two configurable CV extraction providers:
+
+| Configuration | CV Extraction Provider |
+|---|---|
+| `LLM_PROVIDER=openrouter` | OpenRouter — Z.ai GLM-5.3 FlashX |
+| `LLM_PROVIDER=runpod` | RunPod Public Endpoint — GLM-5.3 |
+
+The OpenRouter implementation was developed and benchmarked on the team's fix branch. Its deployment to the live Replit application remains subject to final integration and verification.
+
+OpenRouter API credentials are stored as server-side secrets and are never included in frontend code or committed to GitHub.
+
+All AI-generated CV information remains subject to student review and confirmation before matching.
 
 📄 Proof of use: [`submission/SDC2026_CodeBlack_Runpod_POU.pdf`](submission/SDC2026_CodeBlack_Runpod_POU.pdf)
 · detailed evidence: [`docs/proof/runpod/README.md`](docs/proof/runpod/README.md),
@@ -231,22 +290,47 @@ full, dated evidence and its caveats.
 
 ## Testing & Validation
 
-Results from this submission-preparation session (2026-10-25):
+Mustaqbal AI has undergone backend regression testing, frontend validation, RunPod worker testing, CV extraction benchmarking and security checks.
 
-| Check | Result |
+The following results represent separate verified development snapshots and should not be interpreted as a completed end-to-end validation of the final integrated production build.
+
+| Test / Validation | Reported Result |
 |---|---|
-| Backend regression suite (`pytest tests app/services/hussain_matching/tests`) | **800 passed, 13 skipped** |
-| Frontend lint (`oxlint`) | **Passed**, 0 issues |
-| Frontend production build (`vite build`) | **Passed** |
-| `runpod-worker` unit tests (mocked, no GPU/model) | **9 passed** |
-| Secret scan (tracked files, common key patterns, committed databases/PDFs) | **Clean** — no real keys, no committed `.db`/`.sqlite` files, no PDFs/CVs tracked |
-| GitHub public read access | **Confirmed** (`git ls-remote` succeeds with no auth) |
+| Submission preparation branch — Backend regression suite | 810 passed, 13 skipped |
+| Submission preparation branch — Frontend lint | Passed |
+| Submission preparation branch — Frontend production build | Passed |
+| RunPod embedding worker — Unit tests | 9 passed |
+| OpenRouter GLM-5.3 FlashX — CV extraction benchmark | 15 calls across 5 test CVs, 100% successful in the reported sample |
+| OpenRouter GLM-5.3 FlashX — Median CV extraction latency | Approximately 2.2 seconds in the reported benchmark |
+| OpenRouter/CV-specific automated tests | 16 passed |
+| Mohammad's security/CV fix branch — Backend suite | 846 passed, 13 skipped, 1 environment-related failure |
+| Secret scanning | No exposed API credentials reported in the reviewed files |
 
-AI-generated code was reviewed through tests, diffs and cross-review rather than line-by-line reading
-of every change — see `submission/SDC2026_CodeBlack_TechDeclaration.pdf` §4.3 and
-[`docs/AI_USAGE_LOG.md`](docs/AI_USAGE_LOG.md) (Hussain's matching work, dated 2026-10-21; brought over
-from `origin/feature/hussain-matching`, unmodified) for the full AI-usage disclosure.
+### OpenRouter Performance
 
+The GLM-5.3 FlashX integration was benchmarked using five sample CVs across 15 API calls.
+
+The reported median extraction latency was approximately 2.2 seconds, with successful extraction across the tested sample.
+
+These are development benchmark results, not guaranteed response times for all users or production conditions.
+
+### Security Validation
+
+The backend includes a path-traversal protection fix for SPA static-file serving.
+
+The security test suite covers encoded traversal attempts, path normalization, absolute paths and symlink escapes.
+
+One symlink-related test could not execute successfully in the Windows test environment because the operating-system account lacked symbolic-link creation privileges. This test requires verification in a suitable environment before final release.
+
+### Responsible AI
+
+- Students must review and confirm AI-extracted CV information.
+- Matching scores are experimental estimates, not employment predictions.
+- RunPod semantic matching has an exact-match fallback.
+- API credentials are kept in server-side environment secrets.
+- External AI processing and provider usage are disclosed in the Technical & Tools Declaration.
+
+**Final integration status:** Combined OpenRouter, RunPod and backend changes require a final regression run and deployment verification before the results can be described as production-validated.
 ---
 
 ## Known Limitations & Responsible AI
