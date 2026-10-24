@@ -230,6 +230,30 @@ def test_not_equivalent_pairs_use_real_skill_ids():
         assert f"| {a} / {b} |" in register, (a, b)
 
 
+ORIGINAL_12_PAIRS = [
+    ["python", "javascript"], ["python", "matlab"], ["excel", "vba"], ["excel", "accounting_software"],
+    ["accounting_software", "financial_analysis_software"], ["critical_thinking", "complex_problem_solving"],
+    ["complex_problem_solving", "systems_analysis"], ["mathematics", "science"], ["git", "programming"],
+    ["cad_software", "gis"], ["data_visualization", "gis"], ["matlab", "analytical_scientific_software"],
+]
+NEW_PAIRS = [["git", "gis"], ["financial_analysis_software", "analytical_scientific_software"]]  # Hussain: 0.74 and 0.67
+
+
+def test_fourteen_not_equivalent_pairs_with_reasons():
+    root = Path(__file__).resolve().parents[3]
+    pairs = json.loads((root / "data" / "skill_not_equivalent.json").read_text(encoding="utf-8"))["not_equivalent"]
+    assert len(pairs) == 14
+    assert pairs[:12] == ORIGINAL_12_PAIRS  # the original 12 unchanged, in order
+    assert pairs[12:] == NEW_PAIRS
+    unordered = [frozenset(p) for p in pairs]
+    assert len(set(unordered)) == 14, "duplicate pair (a/b and b/a count as the same)"
+    assert all(len(p) == 2 and p[0] != p[1] and set(p) <= set(SKILLS) for p in pairs)
+    assert not set(unordered) & {frozenset(["programming", "python"]), frozenset(["programming", "javascript"])}
+    register = (root / "docs" / "source-register.md").read_text(encoding="utf-8")
+    for a, b in pairs:
+        assert f"| {a} / {b} |" in register, (a, b)
+
+
 def test_cv_aliases_resolve_and_never_collide():
     import re
     key = lambda s: re.sub(r"[^a-z0-9+#]", "", s.lower())  # same rule as Hussain's SkillNormalizer._key

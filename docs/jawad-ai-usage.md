@@ -41,6 +41,7 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | 8cd1166 | 30-role section in the source register, link-check report (85 URLs, all OK), this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | feat/jawad-ph-fix | Claude Code analysed the Public Health Analyst ranking problem Hussain reported and applied the fix that Rehan and Hussain approved ("Option C"): the role was rebuilt with the same O*NET rule as the 22 newer roles and marked limited coverage | `data/roles.json` (public_health_analyst only), `docs/source-register.md`, tests |
 | feat/jawad-ph-fix | Claude Code checked mechanical_engineer against O*NET 17-2141.00 (read-only) and wrote the findings up as a known limitation; Rehan decided to leave the record unchanged for this release | `docs/source-register.md`, `docs/jawad-ai-usage.md` |
+| feat/jawad-ph-fix | Added 2 `not_equivalent` pairs (git/gis, financial_analysis_software/analytical_scientific_software). Claude Code gathered the O*NET category evidence and wrote the change; Hussain measured the similarity scores (0.74 and 0.67) and Rehan approved | `data/skill_not_equivalent.json`, `docs/source-register.md`, tests |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 

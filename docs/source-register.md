@@ -187,6 +187,8 @@ Hussain's matcher uses these pairs to give a similarity of 0, so one skill never
 | cad_software / gis | Drawing parts and buildings vs mapping places |
 | data_visualization / gis | Charts and dashboards vs maps |
 | matlab / analytical_scientific_software | MATLAB vs statistics packages (SPSS, SAS, Stata) |
+| git / gis | Version control (O*NET "File versioning software" and "Application server software") vs mapping (O*NET "Geographic information system" and "Map creation software"); the names are one letter apart and no role uses both. Hussain measured an embedding similarity of 0.74 (above his 0.60 threshold), so without this pair one would earn credit for the other |
+| financial_analysis_software / analytical_scientific_software | Finance tools (O*NET "Financial analysis software") vs statistics packages (O*NET "Analytical or scientific software"), listed as separate categories by O*NET, even within one occupation (Financial Risk Specialists). Hussain measured an embedding similarity of 0.67. Side effect: financial_analyst, financial_risk_specialist and actuary use both, so in those roles a student with only SPSS/SAS/Stata gets no partial credit for financial analysis software, and the reverse |
 
 ## Learning-resource hours (`data/resources.json` and roadmap steps)
 
