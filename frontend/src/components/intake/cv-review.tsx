@@ -201,6 +201,13 @@ export function CvReview({ result, initial, onConfirm, onRestart }: CvReviewProp
           <p className="text-muted-foreground">
             {result.data.page_count} page{result.data.page_count === 1 ? '' : 's'} read. Edit anything that is wrong; nothing is saved until you confirm.
           </p>
+          {result.data.status === 'manual_review' && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              AI extraction was unavailable. We found possible skills in your CV's skills list,
+              but they are not verified or selected. Review and add only the ones that are correct.
+              Complete your education, projects and experience manually.
+            </p>
+          )}
         </div>
         <DataModeBadge mode={result.data_mode} />
       </div>
@@ -253,7 +260,11 @@ export function CvReview({ result, initial, onConfirm, onRestart }: CvReviewProp
       {needsReview.length > 0 && (
         <Section
           title="Skills that need your confirmation"
-          hint="Your CV named these, but we couldn’t find a quote that backs them up, so they were not added. Add or map one only if it is accurate."
+          hint={
+            result.data.status === 'manual_review'
+              ? "Possible catalogue skills found in your CV skills list. They are not AI-verified or selected; add only those you confirm."
+              : "Your CV named these, but we couldn’t find a quote that backs them up, so they were not added. Add or map one only if it is accurate."
+          }
         >
           <ul className="grid gap-2">
             {needsReview.map((s) => {

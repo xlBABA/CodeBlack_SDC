@@ -243,6 +243,35 @@ def test_glm_timeout_or_network_failure_falls_back_to_manual_review(client: Test
     assert body["data"]["extracted_text_preview"] == VALID_CV_TEXT
 
 
+
+def test_timeout_offers_unconfirmed_skills_from_explicit_list(client: TestClient):
+    """GLM timeout offers unconfirmed skills without accepting them."""
+    pdf = _build_text_pdf(
+        "Technical Skills: Python, SQL, JavaScript"
+    )
+
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        side_effect=GlmExtractionError("The extraction service timed out."),
+    ):
+        response = _post_cv(client, pdf)
+
+    assert response.status_code == 200
+    data = response.json()["data"]
+    assert data["status"] == "manual_review"
+
+    draft = data["draft"]
+    suggestions = {
+        item["name"].lower()
+        for item in draft["skills_requiring_review"]
+    }
+
+    assert {"python", "sql", "javascript"} <= suggestions
+    assert "science" not in suggestions
+    assert draft["mapped_skills"] == []
+    assert draft["suggested_profile"]["skills"] == []
+
+
 def test_malformed_glm_json_falls_back_to_manual_review_not_a_crash(client: TestClient):
     """Milestone 12C-8E: this payload has no usable field anywhere (a
     garbage top-level key, and a 'skills' value that isn't even a list)

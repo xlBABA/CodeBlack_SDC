@@ -354,6 +354,56 @@ def _empty_draft() -> CvDraftProfile:
     )
 
 
+
+def _offline_skill_suggestions(cv_text: str) -> list[CvSkillNeedsReview]:
+    """Suggest catalogue skills only from explicit CV skill-list lines.
+
+    Never infer skills from education, job titles or narrative text.
+    Suggestions remain unconfirmed and are not added to the profile.
+    """
+    normalizer = SkillNormalizer(_load_skill_catalogue())
+    sections = []
+
+    for line in cv_text.splitlines():
+        match = re.match(
+            r"^\s*(?:technical\s+skills|skills|technologies|tools)"
+            r"\s*[:\\-]\s*(.+)$",
+            line,
+            flags=re.IGNORECASE,
+        )
+        if match:
+            sections.append(match.group(1))
+
+    if not sections:
+        return []
+
+    found = normalizer.find_in_text("\\n".join(sections))
+    suggestions = []
+
+    for skill_id in sorted(found, key=normalizer.name_of):
+        name = normalizer.name_of(skill_id)
+
+        if len(name.strip()) < 3:
+            continue
+
+        suggestions.append(
+            CvSkillNeedsReview(
+                name=name,
+                reason=(
+                    "Possible skill detected in an explicit CV skills list. "
+                    "Not AI-verified; confirm before adding."
+                ),
+            )
+        )
+
+    return suggestions[:20]
+
+
+def _fallback_draft_with_suggestions(cv_text: str) -> CvDraftProfile:
+    draft = _empty_draft()
+    draft.skills_requiring_review = _offline_skill_suggestions(cv_text)
+    return draft
+
 def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tuple[CvParseData, list[str]]:
     """Returns (CvParseData, warnings). Never raises — every failure path
     is represented as a status + warning, per requirement 6."""
@@ -381,7 +431,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
         return (
             CvParseData(
                 status="manual_review",
-                draft=_empty_draft(),
+                draft=_fallback_draft_with_suggestions(pdf_result.text),
                 page_count=pdf_result.page_count,
                 # A short, bounded preview only in this fallback path
                 # (requirement 6) — never the full document, and never
@@ -401,7 +451,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
         return (
             CvParseData(
                 status="manual_review",
-                draft=_empty_draft(),
+                draft=_fallback_draft_with_suggestions(pdf_result.text),
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
@@ -412,7 +462,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
         return (
             CvParseData(
                 status="manual_review",
-                draft=_empty_draft(),
+                draft=_fallback_draft_with_suggestions(pdf_result.text),
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
@@ -426,7 +476,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
         return (
             CvParseData(
                 status="manual_review",
-                draft=_empty_draft(),
+                draft=_fallback_draft_with_suggestions(pdf_result.text),
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),

@@ -11,7 +11,7 @@ import { CvReview, type CvReviewState } from './cv-review'
 import { CvUpload } from './cv-upload'
 import { field, labelCls } from './form'
 
-/** manual_review and no_extractable_text: an honestly empty draft, so the student continues with the form. */
+/** Empty manual_review and no_extractable_text results continue with the manual form. */
 function CvFallback({ result, onRestart }: { result: APIEnvelope<CvParsePayload>; onRestart: () => void }) {
   const heading = useRef<HTMLHeadingElement>(null)
   const preview = result.data.extracted_text_preview
@@ -87,7 +87,11 @@ export function CvIntake({ onConfirm, resume = false }: { onConfirm: (profile: S
       </Card>
     )
   }
-  if (result.data.status === 'ok') {
+  const hasFallbackSuggestions =
+    result.data.status === 'manual_review' &&
+    (result.data.draft.skills_requiring_review?.length ?? 0) > 0
+
+  if (result.data.status === 'ok' || hasFallbackSuggestions) {
     const confirm = async (profile: StudentProfile, state: CvReviewState) => {
       await onConfirm(profile)
       lastReview = { result, state }
