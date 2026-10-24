@@ -72,8 +72,28 @@ class Settings(BaseSettings):
     # from starting. SecretStr keeps them out of accidental repr()/str()
     # logging (e.g. `logger.info(settings)`) — they render as "**********"
     # instead of the real value. Never log/return .get_secret_value().
-    LLM_PROVIDER: Optional[str] = None
+    # Which LLM backs CV extraction (app/services/cv_extraction_service.py).
+    # "runpod" (default; unset or blank also means "runpod"): RUNPOD_API_KEY
+    # + RUNPOD_GLM_BASE_URL/RUNPOD_GLM_MODEL below, unchanged. "openrouter":
+    # LLM_API_KEY + LLM_BASE_URL + LLM_MODEL only — never RUNPOD_API_KEY;
+    # if any of the three is missing, CV parsing falls back to manual
+    # review. No model or URL is hardcoded for it (examples:
+    # LLM_BASE_URL=https://openrouter.ai/api/v1, LLM_MODEL=z-ai/glm-5.3-flashx).
+    # Any other value fails Settings() construction.
+    # Embeddings (app/services/hussain_matching) always use RUNPOD_API_KEY.
+    LLM_PROVIDER: Literal["runpod", "openrouter"] = "runpod"
     LLM_API_KEY: Optional[SecretStr] = None
+    LLM_BASE_URL: Optional[str] = None
+    LLM_MODEL: Optional[str] = None
+    LLM_TIMEOUT_SECONDS: float = Field(default=60.0, gt=0)
+
+    @field_validator("LLM_PROVIDER", mode="before")
+    @classmethod
+    def _blank_llm_provider_means_runpod(cls, value: object) -> object:
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return "runpod"
+        return value.strip() if isinstance(value, str) else value
+
     RUNPOD_API_KEY: Optional[SecretStr] = None
     RUNPOD_ENDPOINT_ID: Optional[str] = None  # identifier, not a secret
     TREND_SOURCE_API_KEY: Optional[SecretStr] = None

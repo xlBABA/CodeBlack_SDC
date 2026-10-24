@@ -259,7 +259,9 @@ def test_malformed_glm_json_falls_back_to_manual_review_not_a_crash(client: Test
     assert response.status_code == 200
     body = response.json()
     assert body["data"]["status"] == "manual_review"
-    assert "did not contain any usable fields" in " ".join(body["warnings"])
+    assert body["warnings"] == [
+        "We couldn't read your CV automatically right now. Please review or fill in your details below."
+    ]
 
 
 def test_glm_output_with_no_recognizable_fields_at_all_falls_back_to_manual_review(client: TestClient):
@@ -656,3 +658,155 @@ def test_endpoint_never_calls_the_real_glm_client_in_any_test_above():
     import app.services.cv_extraction_service as service_module
 
     assert service_module.extract_cv_fields.__module__ == "app.services.glm_client"
+
+
+# --- Fenced replies and invalid top-level scalars ----------------------------
+
+
+@pytest.mark.parametrize(
+    "content",
+    ['```json\n{"skills": ["Python"]}\n```', '```\n{"skills": ["Python"]}\n```', '  ```JSON {"skills": ["Python"]} ```  '],
+)
+def test_glm_client_unwraps_a_markdown_json_fence(content):
+    import httpx
+
+    from app.services.glm_client import extract_cv_fields
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+
+    result = extract_cv_fields(
+        "some cv text", api_key="dummy", base_url="https://llm.invalid/v1", model="m",
+        client=httpx.Client(transport=httpx.MockTransport(_handler)),
+    )
+    assert result.raw_json == {"skills": ["Python"]}
+
+
+def test_glm_client_still_rejects_prose_around_a_fence():
+    import httpx
+
+    from app.services.glm_client import extract_cv_fields
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        content = 'Here you go: ```json {"skills": []} ```'
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+
+    with pytest.raises(GlmExtractionError):
+        extract_cv_fields(
+            "some cv text", api_key="dummy", base_url="https://llm.invalid/v1", model="m",
+            client=httpx.Client(transport=httpx.MockTransport(_handler)),
+        )
+
+
+@pytest.mark.parametrize(
+    "bad_fields",
+    [{"name": {"first": "Jane"}}, {"summary": ["CS", "undergraduate"]}, {"name": 42, "summary": "x" * 2001}],
+)
+def test_invalid_top_level_name_or_summary_becomes_none_and_keeps_the_rest(client: TestClient, bad_fields):
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json={**FAKE_GLM_JSON, **bad_fields}),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    data = response.json()["data"]
+    assert data["status"] == "ok"
+    for field in bad_fields:
+        assert data["draft"][field] is None
+    assert {s["skill_id"] for s in data["draft"]["mapped_skills"]} == {"python", "sql"}
+    assert data["draft"]["education"]
+
+
+def test_evidence_must_match_whole_words():
+    from app.services.cv_extraction_service import _evidence_is_supported
+
+    text = "Digital marketing intern. Built a JavaScript page with C++ and Python (pandas)."
+    assert _evidence_is_supported("git", text) is False  # inside "Digital"
+    assert _evidence_is_supported("Java", text) is False  # inside "JavaScript"
+    assert _evidence_is_supported("Script", text) is False
+    assert _evidence_is_supported("JavaScript", text) is True
+    assert _evidence_is_supported("C++", text) is True
+    assert _evidence_is_supported("Python (pandas)", text) is True
+    assert _evidence_is_supported("marketing intern.", text) is True
+
+
+def test_skill_whose_evidence_is_only_part_of_a_word_is_flagged_for_review(client: TestClient):
+    pdf = _build_text_pdf("Digital marketing intern who wrote Python scripts")
+    glm_json = {"skills": [{"name": "Git", "evidence": "git"}, {"name": "Python", "evidence": "Python"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        draft = _post_cv(client, pdf).json()["data"]["draft"]
+
+    assert [s["skill_id"] for s in draft["mapped_skills"]] == ["python"]
+    assert [s["name"] for s in draft["skills_requiring_review"]] == ["Git"]
+    assert [s["skill_id"] for s in draft["suggested_profile"]["skills"]] == ["python"]
+
+
+# --- Contained-skill fallback ------------------------------------------------
+
+
+def test_skill_name_containing_one_catalogue_phrase_maps_pending_confirmation(client: TestClient):
+    pdf = _build_text_pdf("Skills: Python (pandas), Advanced Excel, Statistics")
+    glm_json = {"skills": [
+        {"name": "Python (pandas)", "evidence": "Python (pandas)"},  # contains "Python"
+        {"name": "Advanced Excel", "evidence": "Advanced Excel"},  # an exact alias
+        {"name": "Statistics", "evidence": "Statistics"},  # contains no catalogue phrase
+    ]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        body = _post_cv(client, pdf).json()
+
+    draft = body["data"]["draft"]
+    by_id = {s["skill_id"]: s for s in draft["mapped_skills"]}
+    assert by_id["python"]["raw_text"] == "Python (pandas)"
+    assert by_id["python"]["needs_confirmation"] is True
+    assert by_id["excel"]["needs_confirmation"] is False
+    assert draft["unmapped_skills"] == [{"raw_text": "Statistics", "evidence": "Statistics"}]
+    assert {s["skill_id"] for s in draft["suggested_profile"]["skills"]} == {"python", "excel"}
+    assert any('"Python (pandas)"' in w and "please confirm" in w for w in body["warnings"])
+
+
+def test_contained_skill_fallback_still_requires_evidence(client: TestClient):
+    pdf = _build_text_pdf("Skills: SQL reporting for a student club")
+    glm_json = {"skills": [{"name": "Python (pandas)", "evidence": "Python (pandas)"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        draft = _post_cv(client, pdf).json()["data"]["draft"]
+
+    assert draft["mapped_skills"] == []
+    assert [s["name"] for s in draft["skills_requiring_review"]] == ["Python (pandas)"]
+
+
+def test_name_containing_two_catalogue_phrases_is_not_guessed(client: TestClient):
+    pdf = _build_text_pdf("Skills: Python and SQL scripting")
+    glm_json = {"skills": [{"name": "Python and SQL scripting", "evidence": "Python and SQL scripting"}]}
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json=glm_json),
+    ):
+        draft = _post_cv(client, pdf).json()["data"]["draft"]
+
+    assert draft["mapped_skills"] == []
+    assert [s["raw_text"] for s in draft["unmapped_skills"]] == ["Python and SQL scripting"]
+
+
+@pytest.mark.parametrize("content", [None, "", '{"name": "Jane", "skills": [{"name": "Py'])
+def test_glm_client_null_empty_or_truncated_content_is_an_extraction_error(content):
+    import httpx
+
+    from app.services.glm_client import extract_cv_fields
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}, "finish_reason": "length"}]})
+
+    with pytest.raises(GlmExtractionError):
+        extract_cv_fields(
+            "some cv text", api_key="dummy", base_url="https://llm.invalid/v1", model="m",
+            client=httpx.Client(transport=httpx.MockTransport(_handler)),
+        )

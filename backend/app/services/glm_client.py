@@ -4,7 +4,10 @@ Deliberately separate from app/services/hussain_matching/runpod_client.py
 — that module is Hussain's embedding provider (RUNPOD_ENDPOINT_ID=
 f0phohhegtydji) and is never touched or imported here. This module only
 ever reads RUNPOD_API_KEY and the two new RUNPOD_GLM_* settings
-(app/core/config.py).
+(app/core/config.py) — or, with LLM_PROVIDER=openrouter, whatever
+LLM_API_KEY/LLM_BASE_URL/LLM_MODEL cv_extraction_service.py passes in
+(the same OpenAI-compatible request; see _build_payload for the two
+providers' differences).
 
 The API key is read fresh from Settings for each call (never cached on
 an instance, never logged, never included in any exception message or
@@ -16,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 
 import httpx
@@ -28,6 +32,9 @@ logger = logging.getLogger(__name__)
 # keeping the request small and the cost/latency predictable.
 MAX_INPUT_CHARS = 12_000
 MAX_OUTPUT_TOKENS = 1_200
+# OpenRouter's z-ai/glm-5.3-flashx always reasons before answering; even at
+# low effort it needs headroom so a long CV's JSON isn't cut off.
+OPENROUTER_MAX_OUTPUT_TOKENS = 2_500
 REQUEST_TIMEOUT_SECONDS = 30.0
 
 _SYSTEM_PROMPT = (
@@ -79,9 +86,24 @@ class GlmExtractionResult:
     raw_json: dict
 
 
-def _build_payload(cv_text: str, model: str) -> dict:
+_JSON_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL | re.IGNORECASE)
+
+
+def _strip_json_fence(content: str) -> str:
+    """Models sometimes wrap a JSON reply in a ```json ... ``` markdown
+    fence despite being asked not to; unwrap it rather than discarding an
+    otherwise valid reply. Anything else (including a non-string, e.g. a
+    null content) is returned unchanged for json.loads to reject."""
+    if not isinstance(content, str):
+        return content
+    stripped = content.strip()
+    match = _JSON_FENCE.match(stripped)
+    return match.group(1) if match else stripped
+
+
+def _build_payload(cv_text: str, model: str, provider: str = "runpod") -> dict:
     truncated = cv_text[:MAX_INPUT_CHARS]
-    return {
+    payload = {
         "model": model,
         "messages": [
             {"role": "system", "content": _SYSTEM_PROMPT},
@@ -89,12 +111,19 @@ def _build_payload(cv_text: str, model: str) -> dict:
         ],
         "max_tokens": MAX_OUTPUT_TOKENS,
         "temperature": 0.0,
+        "response_format": {"type": "json_object"},
+    }
+    if provider == "openrouter":
+        # OpenRouter's own reasoning control (not reasoning_effort): low
+        # effort keeps reasoning tokens from crowding out the JSON answer.
+        payload["reasoning"] = {"effort": "low"}
+        payload["max_tokens"] = OPENROUTER_MAX_OUTPUT_TOKENS
+    else:
         # Best-effort: honored by models/gateways that support it
         # (requirement 2: "low reasoning effort ... where supported"),
         # silently ignored otherwise — never required for correctness.
-        "reasoning_effort": "low",
-        "response_format": {"type": "json_object"},
-    }
+        payload["reasoning_effort"] = "low"
+    return payload
 
 
 def extract_cv_fields(
@@ -104,6 +133,9 @@ def extract_cv_fields(
     base_url: str,
     model: str,
     client: httpx.Client | None = None,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+    provider: str = "runpod",
+    key_name: str = "RUNPOD_API_KEY",
 ) -> GlmExtractionResult:
     """Calls RunPod's OpenAI-compatible GLM-5.3 endpoint. Raises
     GlmExtractionError (never a raw httpx/JSON exception) on any
@@ -116,10 +148,10 @@ def extract_cv_fields(
     if not cv_text.strip():
         raise GlmExtractionError("No text was provided to extract from.")
 
-    payload = _build_payload(cv_text, model)
+    payload = _build_payload(cv_text, model, provider)
     url = f"{base_url.rstrip('/')}/chat/completions"
     owns_client = client is None
-    http_client = client or httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS)
+    http_client = client or httpx.Client(timeout=timeout)
     try:
         response = http_client.post(
             url,
@@ -130,7 +162,7 @@ def extract_cv_fields(
             },
         )
     except httpx.TimeoutException as exc:
-        logger.warning("GLM request timed out after %.0fs", REQUEST_TIMEOUT_SECONDS)
+        logger.warning("GLM request timed out after %.0fs", timeout)
         raise GlmExtractionError("The extraction service timed out.") from exc
     except httpx.HTTPError as exc:
         logger.warning("GLM request failed (%s)", type(exc).__name__)
@@ -140,7 +172,7 @@ def extract_cv_fields(
             http_client.close()
 
     if response.status_code == 401 or response.status_code == 403:
-        logger.warning("GLM request rejected: HTTP %d (check RUNPOD_API_KEY)", response.status_code)
+        logger.warning("GLM request rejected: HTTP %d (check %s)", response.status_code, key_name)
         raise GlmExtractionError("The extraction service rejected the request.")
     if response.status_code >= 400:
         logger.warning("GLM request failed: HTTP %d", response.status_code)
@@ -148,9 +180,12 @@ def extract_cv_fields(
 
     try:
         body = response.json()
-        content = body["choices"][0]["message"]["content"]
-        parsed = json.loads(content)
-    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        choice = body["choices"][0]
+        if choice.get("finish_reason") == "length":
+            logger.warning("GLM reply was cut off at max_tokens (finish_reason=length)")
+        content = choice["message"]["content"]
+        parsed = json.loads(_strip_json_fence(content))
+    except (KeyError, IndexError, TypeError, ValueError, AttributeError) as exc:
         logger.warning("GLM response was not usable (%s)", type(exc).__name__)
         raise GlmExtractionError("The extraction service returned an unreadable result.") from exc
 

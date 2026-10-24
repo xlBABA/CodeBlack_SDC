@@ -23,21 +23,18 @@ router = APIRouter()
 
 _FIXTURE_WARNING = (
     "No real trend source is connected yet; any signals shown are "
-    "synthetic, clearly-labeled hypothetical placeholders demonstrating "
-    "the contract shape, not sourced evidence or live job-market data."
+    "synthetic examples that only show the format, not sourced evidence "
+    "or live job-market data."
 )
 _CACHED_WARNING = (
-    "CATALOG_MODE=cached: these are Jawad's real, dated, cached GitHub "
-    "developer-activity signals (app/data/cached/trend_snapshots) — "
-    "GitHub repository creation/activity volume, NOT verified hiring "
-    "demand or job vacancies. Not every skill has a covered signal; see "
-    "each signal's confidence_note for its exact source and retrieval date."
+    "These are real, dated GitHub developer-activity signals saved on the "
+    "date shown (how many new repositories mention a skill), NOT verified "
+    "hiring demand or job vacancies. Not every skill has a signal; each "
+    "signal's note gives its exact source and retrieval date."
 )
 _CACHED_NO_SIGNALS_WARNING = (
-    "No cached trend signal is currently available for this request — the "
-    "snapshot directory may be missing/unreadable, or no covered skill "
-    "matches the given role_id. This is an honest empty result, never a "
-    "fixture signal shown in its place."
+    "No saved trend signal is available for this request right now. "
+    "Nothing has been made up to fill the gap."
 )
 
 

@@ -191,7 +191,8 @@ def test_cached_mode_provenance_warning_propagates_to_roadmap_and_projects(clien
     assert any("cached" in w.lower() for w in roadmap.json()["warnings"])
     assert any("cached" in w.lower() for w in projects.json()["warnings"])
     assert any("fixture" in w.lower() for w in roadmap.json()["warnings"])
-    assert any("fixture" in w.lower() for w in projects.json()["warnings"])
+    # MATCHING_MODE is still fixture here: the scoring disclosure must say so.
+    assert any("illustrative, placeholder algorithm" in w for w in projects.json()["warnings"])
 
 
 def test_cached_mode_all_five_matching_dependent_endpoints_stay_fixture_labeled(client: TestClient):
@@ -323,7 +324,7 @@ def test_cached_mode_projects_recommend_is_honest_empty_for_a_fixture_only_role(
     assert response.status_code == 200
     body = response.json()
     assert body["data"]["projects"] == []
-    assert any("mechanical_design_engineer" in w for w in body["warnings"])
+    assert "Projects are available for 8 of 30 roles." in " ".join(body["warnings"])
 
 
 def test_cached_mode_projects_recommend_now_finds_real_projects_for_previously_empty_role(client: TestClient):
@@ -406,9 +407,9 @@ def test_cached_mode_resource_catalog_matches_by_skill_id_not_role_id(client: Te
     body = response.json()
     step_skill_ids = {s["skill_id"] for s in body["data"]["steps"]}
     assert step_skill_ids == {"critical_thinking", "mathematics", "analytical_scientific_software"}
-    for missing in ("complex_problem_solving", "science", "systems_analysis"):
+    for missing in ("Complex Problem Solving", "Science", "Systems Analysis"):
         assert any(
-            f"No placeholder resource is available yet for skill '{missing}'" in w for w in body["warnings"]
+            f"No learning resource is available yet for {missing};" in w for w in body["warnings"]
         ), missing
     fixture_resource_ids = {
         "resource_sql_basics_001", "resource_python_basics_001", "resource_dataviz_basics_001",

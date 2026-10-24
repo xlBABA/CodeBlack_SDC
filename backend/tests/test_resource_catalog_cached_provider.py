@@ -139,8 +139,8 @@ def test_required_skills_without_a_resource_produce_an_honest_warning_not_a_step
     step_skill_ids = {s.skill_id for s in outcome.payload.steps}
     assert "attention_to_detail" not in step_skill_ids
     assert "complex_problem_solving" not in step_skill_ids
-    assert any("attention_to_detail" in w for w in outcome.warnings)
-    assert any("complex_problem_solving" in w for w in outcome.warnings)
+    assert any("Attention to Detail" in w for w in outcome.warnings)
+    assert any("Complex Problem Solving" in w for w in outcome.warnings)
 
 
 # --- 6. Unknown skills and honest-empty behavior ---------------------------

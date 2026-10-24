@@ -29,8 +29,9 @@ export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true'
 
 const TIMEOUT_MS = 20_000
 const RETRY_DELAYS_MS = [700, 1600]
-// The CV parser waits up to 30 s for its language model, so uploads get a longer limit.
-const UPLOAD_TIMEOUT_MS = 60_000
+// CV upload limit: the backend waits up to 60 s for its language model (LLM_TIMEOUT_SECONDS), plus
+// upload and PDF parsing time. The only upload timeout in the app.
+export const UPLOAD_TIMEOUT_MS = 100_000
 
 export type ApiErrorKind = 'http' | 'validation' | 'network' | 'timeout'
 

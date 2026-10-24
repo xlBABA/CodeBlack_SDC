@@ -56,3 +56,19 @@ Jawad checked the titles and codes of the 22 newer O*NET pages in a browser on 2
 
 ## Not used in my part
 I did not use RunPod, Replit, or a Gemini/OpenAI model in my part. The app is deployed on Replit by Rehan (https://mustaqbal-ai.replit.app). I only read it with GET requests to check what it shows.
+
+## AI services the app uses at runtime (backend, branch `fix/rc-security-cv`)
+
+This section covers the deployed app's own AI calls, not Jawad's data work above.
+
+| Service | Model | Used for | Configuration (environment variable names only) |
+|---|---|---|---|
+| **OpenRouter** (provider endpoint: Z.AI, Singapore) | `z-ai/glm-5.3-flashx` | CV upload: reads the text of an uploaded PDF CV and suggests a draft profile. Every suggested skill must be quoted word-for-word from the CV and is mapped to our 20-skill catalogue by fixed rules. The student reviews and confirms everything; nothing is stored until they do. | `LLM_PROVIDER=openrouter`, `LLM_API_KEY`, `LLM_BASE_URL` (e.g. `https://openrouter.ai/api/v1`), `LLM_MODEL` (e.g. `z-ai/glm-5.3-flashx`), `LLM_TIMEOUT_SECONDS` (default 60). If any of the first four is missing, CV upload falls back to manual entry; it never uses the RunPod key. |
+| **RunPod** (alternative CV extraction provider, the default) | GLM-5.3 | Same CV extraction, when `LLM_PROVIDER` is `runpod` or unset | `RUNPOD_API_KEY`, `RUNPOD_GLM_BASE_URL`, `RUNPOD_GLM_MODEL` |
+| **RunPod** Serverless | `sentence-transformers/all-MiniLM-L6-v2` (embeddings) | Optional semantic skill similarity in matching (partial credit for a closely related skill). Without it, matching uses exact skills only and says so on every match. | `RUNPOD_API_KEY`, `RUNPOD_ENDPOINT_ID` |
+
+What is sent: up to 12,000 characters of the CV's text go to the CV extraction provider. Only skill names go to the embedding endpoint. Scores, profiles and IDs are never sent to either. OpenRouter's published data policy for the Z.AI endpoint (checked 2026-10-25 on https://openrouter.ai/z-ai/glm-5.3-flashx): no training on prompts, prompts not retained, not published. See `docs/cv-llm-benchmark.md` for the measured accuracy, latency and cost.
+
+**Not AI-decided:** scores still come only from the fixed, documented matching formula; no language model scores a student.
+
+**Data credit:** the role and skill data are from O*NET. The app shows this credit in the landing-page footer and on every role page: "Source: O*NET OnLine by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)."

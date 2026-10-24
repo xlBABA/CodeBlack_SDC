@@ -150,7 +150,7 @@ def test_trends_cached_mode_unknown_role_id_is_honestly_unavailable(client: Test
     body = response.json()
     assert body["data"]["signals"] == []
     assert body["data"]["source_status"] == "unavailable"
-    assert any("no cached trend signal" in w.lower() for w in body["warnings"])
+    assert any("no saved trend signal" in w.lower() for w in body["warnings"])
 
 
 def test_trends_cached_mode_limit_still_truncates(client: TestClient):

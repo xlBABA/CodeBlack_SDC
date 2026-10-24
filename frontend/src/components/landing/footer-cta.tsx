@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router'
 import { BrandMark, Wordmark } from '@/components/brand'
+import { OnetAttribution } from '@/components/onet-attribution'
 import { CharText } from '@/components/page/char-text'
 import { FOOTER_LINE, SDG_SOURCE, UN_DISCLAIMER } from '@/content/landing'
 import { gsap, useGSAP } from '@/lib/gsap'
@@ -54,6 +55,7 @@ export function FooterCta() {
           </a>
           . {UN_DISCLAIMER}
         </p>
+        <OnetAttribution className="mt-2 text-left text-on-deep/70" linkClassName="text-on-deep" />
       </div>
     </footer>
   )

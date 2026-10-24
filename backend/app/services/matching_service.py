@@ -95,6 +95,10 @@ class MatchingService:
         )
         return MatchOutcome(payload=payload, warnings=[self._matching_mode_warning], profile=profile)
 
+    def role_ids(self) -> list[str]:
+        """Every role_id in the current role catalog."""
+        return [role.role_id for role in self._catalog.list_roles()]
+
     def match_role(
         self, profile: StudentProfile, role_id: str, scenario_id: ScenarioId | None = None
     ) -> RoleMatchResolution | None:

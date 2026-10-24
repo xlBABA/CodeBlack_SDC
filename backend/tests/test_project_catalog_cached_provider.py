@@ -180,7 +180,9 @@ def test_unknown_role_returns_honest_empty_recommendation(db_session):
     outcome = service.recommend(RoleProfileRequest(profile=profile, role_id="does_not_exist_anywhere"))
 
     assert outcome.projects == []
-    assert any("does_not_exist_anywhere" in w for w in outcome.warnings)
+    assert outcome.warnings == [
+        "No portfolio projects are available yet for this role. Projects are available for 8 of 30 roles."
+    ]
 
 
 def test_fixture_only_role_returns_honest_empty_recommendation_against_cached_catalog(db_session):

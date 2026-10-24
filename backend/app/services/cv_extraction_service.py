@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
 
 from pydantic import BaseModel, ValidationError
 
@@ -51,7 +52,7 @@ from app.schemas.cv import (
 )
 from app.schemas.profile import SkillRef, StudentProfile
 from app.services.cv_pdf import PdfExtractionResult
-from app.services.glm_client import GlmExtractionError, extract_cv_fields
+from app.services.glm_client import REQUEST_TIMEOUT_SECONDS, GlmExtractionError, extract_cv_fields
 from app.services.hussain_matching.normalizer import SkillNormalizer
 from app.services.role_catalog_cached import _load_json
 
@@ -62,10 +63,6 @@ NO_TEXT_WARNING = (
     "image). Please fill in your profile manually — automatic text "
     "recognition (OCR) is not performed."
 )
-MANUAL_REVIEW_WARNING = (
-    "Automatic extraction was unavailable, so this is an empty draft for "
-    "manual entry. Nothing was fabricated in its place."
-)
 MISSING_EVIDENCE_REASON = (
     "No supporting quote was provided for this skill, so it was not "
     "added automatically. Add it yourself if it's accurate."
@@ -74,6 +71,11 @@ UNVERIFIED_EVIDENCE_REASON = (
     "The supporting quote for this skill could not be found in your CV "
     "text, so it was not added automatically. Add it yourself if it's "
     "accurate."
+)
+# Generic, student-facing text for when automatic extraction can't run.
+CV_UNAVAILABLE_WARNING = (
+    "We couldn't read your CV automatically right now. Please review or "
+    "fill in your details below."
 )
 # Guards against a trivially short "evidence" string (e.g. a single
 # letter) that would make the substring check meaningless.
@@ -87,6 +89,54 @@ _LIST_FIELD_MODELS: dict[str, type[BaseModel]] = {
     "experience": CvExperienceEntry,
     "certifications": CvCertificationEntry,
 }
+
+
+@dataclass(frozen=True)
+class _LlmCallConfig:
+    api_key: str
+    base_url: str
+    model: str
+    timeout: float
+    provider: str
+    key_name: str
+
+
+def _llm_call_config(settings: Settings) -> _LlmCallConfig | None:
+    """The LLM endpoint CV extraction calls, per LLM_PROVIDER.
+
+    "runpod" is unchanged: RUNPOD_API_KEY + RUNPOD_GLM_*, with
+    glm_client's own default timeout (a missing key is still reported by
+    extract_cv_fields itself). "openrouter" uses only LLM_API_KEY,
+    LLM_BASE_URL and LLM_MODEL — never RUNPOD_API_KEY — and returns None,
+    after logging which variable names are missing (never their values),
+    if any of them is unset."""
+    if settings.LLM_PROVIDER == "openrouter":
+        api_key = settings.LLM_API_KEY.get_secret_value() if settings.LLM_API_KEY else ""
+        values = {"LLM_API_KEY": api_key, "LLM_BASE_URL": settings.LLM_BASE_URL, "LLM_MODEL": settings.LLM_MODEL}
+        missing = [name for name, value in values.items() if not (value or "").strip()]
+        if missing:
+            logger.warning(
+                "CV extraction skipped: LLM_PROVIDER=openrouter but %s not set; "
+                "falling back to manual review",
+                ", ".join(missing),
+            )
+            return None
+        return _LlmCallConfig(
+            api_key=api_key.strip(),
+            base_url=settings.LLM_BASE_URL.strip(),
+            model=settings.LLM_MODEL.strip(),
+            timeout=settings.LLM_TIMEOUT_SECONDS,
+            provider="openrouter",
+            key_name="LLM_API_KEY",
+        )
+    return _LlmCallConfig(
+        api_key=settings.RUNPOD_API_KEY.get_secret_value() if settings.RUNPOD_API_KEY else "",
+        base_url=settings.RUNPOD_GLM_BASE_URL,
+        model=settings.RUNPOD_GLM_MODEL,
+        timeout=REQUEST_TIMEOUT_SECONDS,
+        provider="runpod",
+        key_name="RUNPOD_API_KEY",
+    )
 
 
 def _load_skill_catalogue() -> list[dict]:
@@ -210,12 +260,24 @@ def _clean_glm_json(raw_json: dict) -> dict:
     """Pre-processes GLM's raw JSON so a single malformed list entry (a
     null list, a legacy-format skill string, an oversized/mistyped
     field) never fails the whole GlmCvExtraction.model_validate() call
-    below (Milestone 12C-8E). Top-level scalar fields (name/summary) are
-    left untouched; if THEY are the wrong type, model_validate() is still
-    the final, honest fallback-to-manual_review safety net — this
-    function only ever removes or repairs individual list entries, never
-    invents a value GLM didn't actually provide."""
+    below (Milestone 12C-8E). An invalid top-level name/summary is set
+    to None (never replaced with a guessed value); model_validate() is
+    still the final, honest fallback-to-manual_review safety net for
+    anything else. This function only ever removes or repairs values,
+    never invents one GLM didn't actually provide."""
     cleaned = dict(raw_json)
+    for field_name in ("name", "summary"):
+        # An invalid top-level scalar (wrong type, oversized) becomes None
+        # instead of failing the whole extraction below.
+        if cleaned.get(field_name) is not None:
+            try:
+                GlmCvExtraction.model_validate({field_name: cleaned[field_name]})
+            except ValidationError as exc:
+                logger.info(
+                    "Dropping an invalid GLM %r value (the rest of the extraction is kept): %s",
+                    field_name, _validation_error_summary(exc),
+                )
+                cleaned[field_name] = None
     if "skills" in cleaned:
         cleaned["skills"] = _clean_skills_field(cleaned["skills"])
     for field_name, model_cls in _LIST_FIELD_MODELS.items():
@@ -253,17 +315,29 @@ def _normalize_whitespace(text: str) -> str:
 
 
 def _evidence_is_supported(evidence: str | None, cv_text: str) -> bool:
-    """True only if `evidence` is a real, non-trivial, word-for-word
-    (modulo whitespace) substring of the locally-extracted CV text.
-    Never a fuzzy/semantic match — an unrelated or hallucinated quote
-    must fail this check (requirement 4)."""
+    """True only if `evidence` appears word-for-word (modulo whitespace
+    and case) in the locally-extracted CV text, as whole words — "git"
+    inside "Digital" or "Java" inside "JavaScript" does not count (the
+    same word-boundary rule as SkillNormalizer.find_in_text). Never a
+    fuzzy/semantic match — an unrelated or hallucinated quote must fail
+    this check (requirement 4)."""
     if not evidence:
         return False
     normalized_evidence = _normalize_whitespace(evidence).lower()
     if len(normalized_evidence) < MIN_EVIDENCE_CHARS:
         return False
     normalized_text = _normalize_whitespace(cv_text).lower()
-    return normalized_evidence in normalized_text
+    pattern = r"(?<![a-z0-9])" + re.escape(normalized_evidence) + r"(?![a-z0-9])"
+    return re.search(pattern, normalized_text) is not None
+
+
+def _contained_skill(normalizer: SkillNormalizer, name: str) -> str | None:
+    """skill_id when `name` contains exactly one catalogue skill name or
+    alias as a whole phrase, via SkillNormalizer.read_profile_skills with
+    no interpreter (so only its deterministic "contains" rule applies)."""
+    reading = normalizer.read_profile_skills([{"name": name}])
+    interpretations = [i for i in reading.interpreted.values() if i.contains is not None]
+    return interpretations[0].skill_id if len(interpretations) == 1 else None
 
 
 def _validate_and_map_skills(
@@ -291,12 +365,22 @@ def _validate_and_map_skills(
             continue
         evidence = entry.evidence.strip()  # non-empty/non-None, guaranteed by the check above
         result = normalizer.normalize(name)
-        if result.skill_id and result.skill_id not in seen_ids:
+        skill_id, skill_name, needs_confirmation = result.skill_id, result.name, False
+        if not skill_id:
+            # The matcher's own rule, no embeddings: a name containing exactly
+            # one catalogue skill phrase ("Python (pandas)") maps to it.
+            contained = _contained_skill(normalizer, name)
+            if contained is not None:
+                skill_id, skill_name, needs_confirmation = contained, normalizer.name_of(contained), True
+        if skill_id and skill_id not in seen_ids:
             mapped.append(
-                CvMappedSkill(skill_id=result.skill_id, name=result.name, raw_text=name, evidence=evidence)
+                CvMappedSkill(
+                    skill_id=skill_id, name=skill_name, raw_text=name, evidence=evidence,
+                    needs_confirmation=needs_confirmation,
+                )
             )
-            seen_ids.add(result.skill_id)
-        elif not result.skill_id:
+            seen_ids.add(skill_id)
+        elif not skill_id:
             unmapped.append(CvUnmappedSkill(raw_text=name, evidence=evidence))
     return mapped, unmapped, needs_review
 
@@ -347,7 +431,7 @@ def _empty_draft() -> CvDraftProfile:
     """An honestly-empty draft for the manual_review/no_extractable_text
     states. Takes no warning text — CvDraftProfile has no warnings field
     of its own; the caller already returns the matching warning
-    (NO_TEXT_WARNING/MANUAL_REVIEW_WARNING) separately in CvParseData's
+    (NO_TEXT_WARNING/CV_UNAVAILABLE_WARNING) separately in CvParseData's
     sibling warnings list."""
     return CvDraftProfile(
         suggested_profile=StudentProfile(interests=[], skills=[], projects=[]),
@@ -368,13 +452,26 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             [NO_TEXT_WARNING],
         )
 
-    api_key = settings.RUNPOD_API_KEY.get_secret_value() if settings.RUNPOD_API_KEY else ""
+    llm = _llm_call_config(settings)
+    if llm is None:
+        return (
+            CvParseData(
+                status="manual_review",
+                draft=_empty_draft(),
+                page_count=pdf_result.page_count,
+                extracted_text_preview=pdf_result.text[:500],
+            ),
+            [CV_UNAVAILABLE_WARNING],
+        )
     try:
         result = extract_cv_fields(
             pdf_result.text,
-            api_key=api_key,
-            base_url=settings.RUNPOD_GLM_BASE_URL,
-            model=settings.RUNPOD_GLM_MODEL,
+            api_key=llm.api_key,
+            base_url=llm.base_url,
+            model=llm.model,
+            timeout=llm.timeout,
+            provider=llm.provider,
+            key_name=llm.key_name,
         )
     except GlmExtractionError as exc:
         logger.warning("CV extraction fell back to manual review (%s)", exc.reason)
@@ -388,7 +485,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 # returned at all in the successful "ok" path below.
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, f"Extraction service issue: {exc.reason}"],
+            [CV_UNAVAILABLE_WARNING],
         )
 
     try:
@@ -405,7 +502,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, "The extraction service's output did not match the expected format."],
+            [CV_UNAVAILABLE_WARNING],
         )
     except Exception:
         logger.warning("GLM output could not be interpreted; falling back to manual review")
@@ -416,7 +513,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, "The extraction service's output did not match the expected format."],
+            [CV_UNAVAILABLE_WARNING],
         )
 
     if _is_effectively_empty(extraction):
@@ -430,7 +527,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, "The extraction service's output did not contain any usable fields."],
+            [CV_UNAVAILABLE_WARNING],
         )
 
     mapped_skills, unmapped_skills, skills_requiring_review = _validate_and_map_skills(
@@ -456,6 +553,11 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             f"{len(unmapped_skills)} skill(s) were not recognized against the current catalogue "
             "and were not added to your profile automatically; review them below."
         )
+    for skill in mapped_skills:
+        if skill.needs_confirmation:
+            warnings.append(
+                f'"{skill.raw_text}" from your CV was matched to {skill.name}; please confirm it is right.'
+            )
     if skills_requiring_review:
         warnings.append(
             f"{len(skills_requiring_review)} skill(s) could not be automatically verified against "

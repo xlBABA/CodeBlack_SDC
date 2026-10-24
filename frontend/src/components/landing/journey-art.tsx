@@ -1,15 +1,24 @@
 import { SdgIcon } from '@/components/sdg-icon'
-import { DOMAIN_SDGS, type JourneyStep } from '@/content/landing'
+import { formatHours } from '@/content/catalog'
+import { DOMAIN_SDGS, EXAMPLE_LABEL, EXAMPLE_PATH, EXAMPLE_ROLES, type JourneyStep } from '@/content/landing'
+import { skillName } from '@/content/skills'
 
-// Small illustrative "screens" for each journey step. Static demo content.
+// Small illustrative "screens" for each journey step, built from real catalogue entries.
+
+function ExampleTag() {
+  return <p className="mb-2 text-xs font-semibold text-muted-foreground">{EXAMPLE_LABEL}</p>
+}
 
 function Skills() {
-  const rows: [string, number][] = [['Excel', 3], ['Python', 2], ['Statistics', 2], ['SQL', 1], ['Communication', 3]]
+  // real catalogue skills; the self-rated levels (1-3) are illustrative
+  const rows: [string, number][] = [['excel', 3], ['python', 2], ['sql', 1], ['data_visualization', 2], ['mathematics', 3]]
   return (
-    <ul className="grid gap-2">
+    <div>
+      <ExampleTag />
+      <ul className="grid gap-2">
       {rows.map(([s, lvl]) => (
         <li key={s} className="flex items-center justify-between rounded-full bg-raised px-4 py-2.5 shadow-card">
-          <b>{s}</b>
+          <b>{skillName(s)}</b>
           <span className="flex gap-1" aria-label={`level ${lvl} of 3`}>
             {[1, 2, 3].map((n) => (
               <i key={n} className={n <= lvl ? 'size-2.5 rounded-full bg-primary' : 'size-2.5 rounded-full bg-well'} />
@@ -17,7 +26,8 @@ function Skills() {
           </span>
         </li>
       ))}
-    </ul>
+      </ul>
+    </div>
   )
 }
 // Change in new GitHub repositories per topic, last 30 days vs the 30 before, from the team's
@@ -48,40 +58,49 @@ function Trends() {
     </div>
   )
 }
+const TILE_COLORS = ['bg-ink text-ink-foreground', 'bg-primary text-primary-foreground', 'bg-tomato text-tomato-foreground', 'bg-butter text-butter-foreground']
+
 function Roles() {
-  const tiles: [string, number, string][] = [
-    ['Data analyst', 76, 'bg-ink text-ink-foreground'],
-    ['Financial analyst', 65, 'bg-primary text-primary-foreground'],
-    ['Sustainability coordinator', 59, 'bg-tomato text-tomato-foreground'],
-    ['Mechanical design engineer', 40, 'bg-butter text-butter-foreground'],
-  ]
   return (
-    <div className="grid grid-cols-2 gap-2.5">
-      {tiles.map(([t, n, cls]) => (
-        <div key={t} className={`flex min-h-[110px] flex-col justify-between rounded-[18px] p-3 ${cls}`}>
-          <b className="text-sm leading-tight">{t}</b>
-          <span>
-            <b className="text-2xl">{n}</b> <small className="text-2xs opacity-80">alignment estimate</small>
-          </span>
-        </div>
-      ))}
+    <div>
+      <ExampleTag />
+      <div className="grid grid-cols-2 gap-2.5">
+        {EXAMPLE_ROLES.map((role, i) => (
+          <div key={role.role_id} className={`flex min-h-[110px] flex-col justify-between rounded-[18px] p-3 ${TILE_COLORS[i % TILE_COLORS.length]}`}>
+            <b className="text-sm leading-tight">{role.role_title}</b>
+            <span className="text-xs opacity-85">
+              O*NET {role.onet_soc_code}
+              <br />
+              {role.core_skills} core skills
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 function Path() {
-  const steps: [string, string][] = [['SQL joins & aggregation', '20 h'], ['Dashboard project', '30 h'], ['Data storytelling', '12 h']]
   return (
-    <ol className="grid">
-      {steps.map(([t, h], i) => (
-        <li key={t} className="relative grid pt-5 first:pt-0">
-          {i > 0 && <span aria-hidden className="absolute top-0 left-1/2 h-5 border-l-2 border-dotted border-line-2" />}
-          <div className="flex items-center justify-between rounded-[16px] border border-rim bg-raised px-4 py-3 shadow-card dark:border-line">
-            <b>{t}</b>
-            <span className="rounded-full bg-well px-2 py-0.5 text-sm font-semibold">{h}</span>
-          </div>
-        </li>
-      ))}
-    </ol>
+    <div>
+      <ExampleTag />
+      <ol className="grid grid-cols-1">
+        {EXAMPLE_PATH.map((step, i) => (
+          <li key={step.resource_id} className="relative grid grid-cols-1 pt-5 first:pt-0">
+            {i > 0 && <span aria-hidden className="absolute top-0 left-1/2 h-5 border-l-2 border-dotted border-line-2" />}
+            <div className="flex items-center justify-between gap-3 rounded-[16px] border border-rim bg-raised px-4 py-3 shadow-card dark:border-line">
+              <span className="min-w-0">
+                <b className="block truncate">{step.title}</b>
+                <small className="text-xs text-muted-foreground">
+                  {step.provider}
+                  {step.provider_stated ? '' : ' · team estimate'}
+                </small>
+              </span>
+              <span className="flex-none rounded-full bg-well px-2 py-0.5 text-sm font-semibold">{formatHours(step.hours)}</span>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }
 function Sdg() {

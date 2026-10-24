@@ -82,6 +82,8 @@ Every entry in `mapped_skills`/`unmapped_skills` now carries an **`evidence`** f
 
 A **new, additive** array, `draft.skills_requiring_review`, lists skills GLM named but whose evidence was missing or could not be found in the CV text (`{ "name": "...", "reason": "..." }`). These are **excluded from `mapped_skills`, `unmapped_skills`, and `suggested_profile.skills`** — never silently added. Show them in a clearly-labeled "needs manual confirmation" section, separate from the unmapped-but-verified skills above; a student who confirms one should add it to their profile explicitly (there's no auto-add endpoint for this — just edit `suggested_profile.skills` before submitting to `/profile/analyze`, the same as any other edit).
 
+Each `mapped_skills` entry also has an additive **`needs_confirmation`** boolean. It is `true` when the CV wording was not an exact catalogue name/alias but contains exactly one catalogue skill (e.g. "Python (pandas)" → Python); a warning asks the student to confirm it. Evidence is still required, and the draft is still only a suggestion until the student confirms it.
+
 `suggested_profile.skills[].proficiency` is always `null` — proficiency is never inferred from a CV, only ever set by the student.
 
 ## 3. Fallback states — `data.status` is not always `"ok"`

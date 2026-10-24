@@ -5,11 +5,13 @@ import { Card } from '@/components/ui/card'
 import { DEFAULT_CAVEAT } from '@/lib/role-copy'
 import type { RoleMatch } from '@/types/api'
 
+// The current score uses skills and experience only: no catalogue role defines prerequisites or
+// transferable skills yet, so the API's 0 for those two means "not assessed", not a low score.
 const PARTS = [
-  ['skills', 'Skills'],
-  ['experience', 'Experience'],
-  ['prerequisites', 'Prerequisites'],
-  ['transferable', 'Transferable'],
+  ['skills', 'Skills', true],
+  ['experience', 'Experience', true],
+  ['prerequisites', 'Prerequisites', false],
+  ['transferable', 'Transferable', false],
 ] as const
 
 /** Deep hero card for the best-aligned role (Halden idea): score, caveat, skill coverage, breakdown. */
@@ -68,15 +70,17 @@ export function TopMatchCard({ match, eyebrow = 'Your strongest alignment right 
 
       <div className="flex flex-col gap-3 border-t border-white/15 pt-5 md:border-t-0 md:border-l md:pt-0 md:pl-6">
         <p className="text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">Breakdown</p>
-        {PARTS.map(([key, label]) => (
+        {PARTS.map(([key, label, assessed]) => (
           <div key={key} data-enter="item">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">{label}</span>
-              <b>{Math.round(match.score_breakdown[key])}</b>
+              {assessed ? <b>{Math.round(match.score_breakdown[key])}</b> : <span className="text-muted-foreground">Not assessed</span>}
             </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/15">
-              <i data-enter="bar" className="block h-full rounded-full bg-on-deep" style={{ width: `${match.score_breakdown[key]}%` }} />
-            </div>
+            {assessed && (
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/15">
+                <i data-enter="bar" className="block h-full rounded-full bg-on-deep" style={{ width: `${match.score_breakdown[key]}%` }} />
+              </div>
+            )}
           </div>
         ))}
         {workspaceLink && (
