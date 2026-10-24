@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { X } from 'lucide-react'
-import { SKILL_CATALOG } from '@/content/skills'
+import { type CatalogSkill, searchSkills } from '@/content/skills'
 import { cn } from '@/lib/utils'
 import type { Proficiency, SkillRef } from '@/types/api'
 import { Chip, field, labelCls } from './form'
@@ -14,8 +14,6 @@ type SkillPickerProps = {
   evidence?: Record<string, string>
 }
 
-type CatalogSkill = (typeof SKILL_CATALOG)[number]
-
 type SkillSearchProps = {
   label: React.ReactNode
   /** skill_ids already chosen, left out of the suggestions */
@@ -28,8 +26,8 @@ type SkillSearchProps = {
 export function SkillSearch({ label, exclude, onPick, autoFocus }: SkillSearchProps) {
   const id = useId()
   const [query, setQuery] = useState('')
-  const q = query.trim().toLowerCase()
-  const matches = SKILL_CATALOG.filter((s) => !exclude.has(s.skill_id) && (!q || s.name.toLowerCase().includes(q)))
+  const hits = searchSkills(query)
+  const matches = hits.filter((h) => !exclude.has(h.skill.skill_id))
   const pick = (s: CatalogSkill) => {
     onPick(s)
     setQuery('')
@@ -50,17 +48,23 @@ export function SkillSearch({ label, exclude, onPick, autoFocus }: SkillSearchPr
         onKeyDown={(e) => {
           if (e.key !== 'Enter') return
           e.preventDefault()
-          if (matches[0]) pick(matches[0])
+          if (matches[0]) pick(matches[0].skill)
         }}
       />
       <div className="mt-3 flex flex-wrap gap-2" aria-label="Suggestions">
-        {matches.map((s) => (
-          <Chip key={s.skill_id} active={false} onClick={() => pick(s)}>
-            {s.name}
+        {matches.map(({ skill, alias }) => (
+          <Chip key={skill.skill_id} active={false} onClick={() => pick(skill)}>
+            {alias ? (
+              <span aria-label={`${alias}, counts as ${skill.name}`}>
+                {alias} <span className="text-muted-foreground">→ {skill.name}</span>
+              </span>
+            ) : (
+              skill.name
+            )}
           </Chip>
         ))}
       </div>
-      {q && !SKILL_CATALOG.some((s) => s.name.toLowerCase().includes(q)) && (
+      {query.trim() && hits.length === 0 && (
         <p className="mt-2 text-sm text-muted-foreground">No catalogue skill matches “{query.trim()}”. Only catalogue skills count toward a role.</p>
       )}
     </div>
