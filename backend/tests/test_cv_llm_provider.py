@@ -165,3 +165,41 @@ def test_matching_is_unchanged_by_the_cv_provider(client: TestClient):
         )
         results.append(client.post("/api/v1/careers/match", json={"profile": profile}).json()["data"]["matches"])
     assert results[0] == results[1]
+
+
+# --- /cv/parse never blocks the event loop ---------------------------------------
+
+
+def test_health_answers_while_a_slow_llm_call_is_in_flight(client: TestClient):
+    """`client` is requested only for its get_db override; both requests run
+    concurrently on one event loop through httpx's ASGI transport."""
+    import anyio
+    import httpx
+
+    from app.main import app
+
+    timings: dict[str, float] = {}
+
+    async def scenario() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+            async def parse() -> None:
+                await http.post("/api/v1/cv/parse", files={"file": ("cv.pdf", VALID_PDF, "application/pdf")})
+                timings["cv_done"] = anyio.current_time()
+
+            async def health() -> None:
+                await anyio.sleep(0.3)  # let the CV request reach the LLM call first
+                response = await http.get("/api/v1/health")
+                assert response.status_code == 200
+                timings["health_done"] = anyio.current_time()
+
+            async with anyio.create_task_group() as tg:
+                tg.start_soon(parse)
+                tg.start_soon(health)
+
+    with fake_llm_server(json.dumps(FAKE_GLM_JSON), delay_seconds=1.5) as openrouter:
+        _override_settings(**_openrouter_settings(openrouter.base_url))
+        anyio.run(scenario)
+        assert len(openrouter.requests) == 1
+
+    assert timings["health_done"] < timings["cv_done"] - 0.5

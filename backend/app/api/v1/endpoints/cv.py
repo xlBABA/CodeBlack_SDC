@@ -17,6 +17,7 @@ fallback/manual-review paths — see cv_extraction_service.py).
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError
@@ -75,13 +76,15 @@ async def parse_cv(
 
     file_bytes = await _read_bounded(file, MAX_PDF_BYTES)
 
+    # PDF parsing and the (blocking, up to the LLM timeout) extraction call
+    # run in the threadpool so a slow CV never stalls other requests.
     try:
-        pdf_result = validate_and_extract(file_bytes)
+        pdf_result = await run_in_threadpool(validate_and_extract, file_bytes)
     except CvPdfError as exc:
         raise AppError(code="INVALID_CV_FILE", message=exc.message, status_code=422) from exc
     finally:
         del file_bytes  # the raw upload is never needed again after this point
 
-    data, warnings = run_cv_extraction(pdf_result, settings)
+    data, warnings = await run_in_threadpool(run_cv_extraction, pdf_result, settings)
 
     return CvParseResponse(data=data, generated_at=utc_now_iso(), warnings=warnings)
