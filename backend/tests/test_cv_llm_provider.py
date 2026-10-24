@@ -82,6 +82,8 @@ def test_default_runpod_provider_is_unchanged(client: TestClient):
     assert request["authorization"] == f"Bearer {RUNPOD_DUMMY_KEY}"
     assert request["body"]["model"] == "glm-5.3"
     assert request["body"]["reasoning_effort"] == "low"
+    assert "reasoning" not in request["body"]
+    assert request["body"]["max_tokens"] == 1200
     assert request["body"]["response_format"] == {"type": "json_object"}
     assert request["body"]["temperature"] == 0.0
 
@@ -100,6 +102,8 @@ def test_openrouter_provider_uses_only_llm_settings(client: TestClient):
     assert request["authorization"] == f"Bearer {LLM_DUMMY_KEY}"
     assert request["body"]["model"] == "vendor/model-x"
     assert "reasoning_effort" not in request["body"]
+    assert request["body"]["reasoning"] == {"effort": "low"}
+    assert request["body"]["max_tokens"] == 2500
     assert request["body"]["response_format"] == {"type": "json_object"}
     assert request["body"]["temperature"] == 0.0
 
@@ -203,3 +207,14 @@ def test_health_answers_while_a_slow_llm_call_is_in_flight(client: TestClient):
         assert len(openrouter.requests) == 1
 
     assert timings["health_done"] < timings["cv_done"] - 0.5
+
+
+def test_a_reply_cut_off_at_max_tokens_is_logged_and_falls_back(client: TestClient, caplog):
+    truncated = '{"name": "Jane Student", "skills": [{"name": "Pyt'
+    with fake_llm_server(truncated, finish_reason="length") as openrouter:
+        _override_settings(**_openrouter_settings(openrouter.base_url))
+        with caplog.at_level(logging.WARNING):
+            response = _post_cv(client, VALID_PDF)
+
+    assert response.json()["data"]["status"] == "manual_review"
+    assert "cut off at max_tokens" in caplog.text

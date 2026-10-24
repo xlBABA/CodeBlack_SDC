@@ -97,7 +97,7 @@ class _LlmCallConfig:
     base_url: str
     model: str
     timeout: float
-    reasoning_effort: bool
+    provider: str
     key_name: str
 
 
@@ -126,7 +126,7 @@ def _llm_call_config(settings: Settings) -> _LlmCallConfig | None:
             base_url=settings.LLM_BASE_URL.strip(),
             model=settings.LLM_MODEL.strip(),
             timeout=settings.LLM_TIMEOUT_SECONDS,
-            reasoning_effort=False,
+            provider="openrouter",
             key_name="LLM_API_KEY",
         )
     return _LlmCallConfig(
@@ -134,7 +134,7 @@ def _llm_call_config(settings: Settings) -> _LlmCallConfig | None:
         base_url=settings.RUNPOD_GLM_BASE_URL,
         model=settings.RUNPOD_GLM_MODEL,
         timeout=REQUEST_TIMEOUT_SECONDS,
-        reasoning_effort=True,
+        provider="runpod",
         key_name="RUNPOD_API_KEY",
     )
 
@@ -470,7 +470,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             base_url=llm.base_url,
             model=llm.model,
             timeout=llm.timeout,
-            reasoning_effort=llm.reasoning_effort,
+            provider=llm.provider,
             key_name=llm.key_name,
         )
     except GlmExtractionError as exc:

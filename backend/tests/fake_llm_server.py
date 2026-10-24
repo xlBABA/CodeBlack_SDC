@@ -13,10 +13,13 @@ from typing import Iterator
 
 
 class FakeLlmServer:
-    def __init__(self, content: str, delay_seconds: float = 0.0, status: int = 200) -> None:
+    def __init__(
+        self, content: str, delay_seconds: float = 0.0, status: int = 200, finish_reason: str = "stop"
+    ) -> None:
         self.content = content
         self.delay_seconds = delay_seconds
         self.status = status
+        self.finish_reason = finish_reason
         self.requests: list[dict] = []
         server = self
 
@@ -31,7 +34,8 @@ class FakeLlmServer:
                 )
                 if server.delay_seconds:
                     time.sleep(server.delay_seconds)
-                reply = json.dumps({"choices": [{"message": {"role": "assistant", "content": server.content}}]})
+                choice = {"message": {"role": "assistant", "content": server.content}, "finish_reason": server.finish_reason}
+                reply = json.dumps({"choices": [choice]})
                 data = reply.encode()
                 self.send_response(server.status)
                 self.send_header("Content-Type", "application/json")
@@ -52,8 +56,10 @@ class FakeLlmServer:
 
 
 @contextmanager
-def fake_llm_server(content: str, delay_seconds: float = 0.0, status: int = 200) -> Iterator[FakeLlmServer]:
-    server = FakeLlmServer(content, delay_seconds, status)
+def fake_llm_server(
+    content: str, delay_seconds: float = 0.0, status: int = 200, finish_reason: str = "stop"
+) -> Iterator[FakeLlmServer]:
+    server = FakeLlmServer(content, delay_seconds, status, finish_reason)
     server.start()
     try:
         yield server
