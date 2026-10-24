@@ -159,6 +159,16 @@ All `required` flags are team estimates (cognitive skills with a bucket of 4 or 
 
 Not changed in this fix: `data/skills.json`. Its `source_ids` for science, analytical_scientific_software and gis do not yet include `onet_19_1041_00`, although O*NET lists them for this occupation.
 
+## Known limitation: mechanical_engineer
+
+Read-only check of `mechanical_engineer` against O*NET 17-2141.00 *Mechanical Engineers* (https://www.onetonline.org/link/details/17-2141.00 and its Software Skills CSV export, fetched by Claude Code on 2026-10-24), using the rule for the 22 newer roles:
+- **Missing cognitive skills with an O*NET score of 50 or more:** systems_analysis (O*NET 60) and science (O*NET 69).
+- **Team raises:** mathematics and complex_problem_solving are 5, where O*NET 69 gives 4 by the bucket rule.
+- **python** has importance 1. The 22 newer roles use 2 as their lowest tool value.
+- **O*NET-listed tools the role does not include:** gis, sql, vba and financial_analysis_software (cost estimating software).
+- **No catalog skill** for its main O*NET knowledge (Design 88, Mechanical 81).
+- **Why unchanged:** the record was built before the 22-role rule. It was intentionally left unchanged for release stability (decision: Rehan, 2026-10-24). Its importances above are therefore not all bucket-derived; see the methodology table above for which are team estimates.
+
 ## Close-but-different skill pairs (`data/skill_not_equivalent.json`)
 
 Hussain's matcher uses these pairs to give a similarity of 0, so one skill never earns credit for the other. They are team judgments, based on what each skill means. Their similarity scores were **not** measured by us. `programming`/`python` and `programming`/`javascript` are deliberately **not** listed, because a Python or JavaScript skill is a kind of programming.

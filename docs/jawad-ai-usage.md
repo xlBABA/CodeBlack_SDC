@@ -40,6 +40,7 @@ C:\Users\jawad\AppData\Local\Python\pythoncore-3.14-64\python.exe -m services.ca
 | d5b0535 | Tests for the 30-role catalog; the two tests that hardcoded 8 roles now check 30 | `services/catalog/tests/test_catalog.py`, `services/roadmaps/tests/test_projects.py` |
 | 8cd1166 | 30-role section in the source register, link-check report (85 URLs, all OK), this file | `docs/source-register.md`, `docs/link-check-report.md`, `docs/jawad-ai-usage.md` |
 | feat/jawad-ph-fix | Claude Code analysed the Public Health Analyst ranking problem Hussain reported and applied the fix that Rehan and Hussain approved ("Option C"): the role was rebuilt with the same O*NET rule as the 22 newer roles and marked limited coverage | `data/roles.json` (public_health_analyst only), `docs/source-register.md`, tests |
+| feat/jawad-ph-fix | Claude Code checked mechanical_engineer against O*NET 17-2141.00 (read-only) and wrote the findings up as a known limitation; Rehan decided to leave the record unchanged for this release | `docs/source-register.md`, `docs/jawad-ai-usage.md` |
 
 \* I made commit d54cfdf myself, but the changes in it were written by Claude.
 
