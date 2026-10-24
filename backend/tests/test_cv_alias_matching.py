@@ -168,8 +168,10 @@ def test_excluded_substitution_still_blocked_with_skills_catalogue_wired(monkeyp
     assert not any("Python" in note for note in data_analyst["caveats"])
 
 
-def test_all_twelve_exclusion_pairs_still_present_with_skills_catalogue_wired():
-    assert len(load_skill_not_equivalent_pairs()) == 12
+def test_all_fourteen_exclusion_pairs_still_present_with_skills_catalogue_wired():
+    # 14 since Milestone 13E-6 (git/gis and financial_analysis_software/
+    # analytical_scientific_software, approved by Jawad/Hussain/Rehan).
+    assert len(load_skill_not_equivalent_pairs()) == 14
 
 
 # --- 6. Python + SQL student's Data Analyst skill credit ---------------------

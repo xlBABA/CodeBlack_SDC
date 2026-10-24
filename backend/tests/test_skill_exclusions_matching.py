@@ -28,6 +28,11 @@ REAL_PAIRS = [
     ["critical_thinking", "complex_problem_solving"], ["complex_problem_solving", "systems_analysis"],
     ["mathematics", "science"], ["git", "programming"], ["cad_software", "gis"],
     ["data_visualization", "gis"], ["matlab", "analytical_scientific_software"],
+    # Added in Milestone 13E-6 (Jawad's approved final corrections,
+    # origin/feat/jawad-ph-fix @ b2c158a): Hussain measured embedding
+    # similarities of 0.74 (git~gis, both pass his 0.60 threshold) and
+    # 0.67 (financial_analysis_software~analytical_scientific_software).
+    ["git", "gis"], ["financial_analysis_software", "analytical_scientific_software"],
 ]
 
 NO_SIMILARITY = lambda a, b: 0.0  # noqa: E731
@@ -43,26 +48,26 @@ def _data_analyst():
     return next(r for r in CachedRoleCatalog().list_roles() if r.role_id == "data_analyst")
 
 
-# --- 1. Loading the 12 real exclusion pairs ---------------------------------
+# --- 1. Loading the 14 real exclusion pairs ---------------------------------
 
 
-def test_loads_the_real_twelve_exclusion_pairs():
+def test_loads_the_real_fourteen_exclusion_pairs():
     pairs = load_skill_not_equivalent_pairs()
-    assert len(pairs) == 12
+    assert len(pairs) == 14
     assert {frozenset(p) for p in pairs} == {frozenset(p) for p in REAL_PAIRS}
 
 
 def test_shared_hussain_provider_is_built_with_the_real_exclusion_pairs():
     provider = _get_shared_hussain_provider()
     assert provider.not_equivalent == load_skill_not_equivalent_pairs()
-    assert len(provider.not_equivalent) == 12
+    assert len(provider.not_equivalent) == 14
 
 
 def test_get_matching_provider_with_hussain_mode_carries_the_exclusion_pairs():
     settings = Settings(_env_file=None, MATCHING_MODE="hussain", CATALOG_MODE="cached")
     provider = get_matching_provider(settings)
     assert isinstance(provider, HussainMatchingProvider)
-    assert len(provider.not_equivalent) == 12
+    assert len(provider.not_equivalent) == 14
 
 
 # --- 2. Correct enforcement of exclusions (mechanism-level, real pairs) ----
@@ -220,6 +225,105 @@ def test_exact_match_unaffected_by_exclusions_even_with_real_degraded_fallback()
     result = provider.match(profile, [_data_analyst()], None, [])[0]
     matched_ids = {s["skill_id"] for s in result["matched_skills"]}
     assert {"python", "sql"} <= matched_ids
+
+
+# --- 8. Milestone 13E-6: the two new (14th and 13th) exclusion pairs -------
+
+
+def test_exclusion_list_blocks_a_pair_symmetrically_regardless_of_argument_order():
+    """Hussain's measured similarities (0.74, 0.67) came from comparing
+    two skills with no inherent order — the exclusion must block the
+    pair whichever way the caller happens to pass the two skill_ids."""
+
+    class _IdenticalVectorsModel:
+        def encode(self, texts):
+            return [[1.0, 0.0] for _ in texts]
+
+    provider = EmbeddingProvider(
+        {"git": ["Git"], "gis": ["GIS"],
+         "financial_analysis_software": ["Financial Analysis Software"],
+         "analytical_scientific_software": ["Analytical/Statistical Software"]},
+        model=_IdenticalVectorsModel(),
+        not_equivalent=[["git", "gis"], ["financial_analysis_software", "analytical_scientific_software"]],
+    )
+    assert provider("git", "gis") == 0.0
+    assert provider("gis", "git") == 0.0
+    assert provider("financial_analysis_software", "analytical_scientific_software") == 0.0
+    assert provider("analytical_scientific_software", "financial_analysis_software") == 0.0
+
+
+def test_git_gis_false_positive_gets_no_semantic_credit_in_a_real_match(monkeypatch):
+    """Reproduces Hussain's reported false positive (review-30-roles.md:
+    Git ~ GIS measured at 0.74, above his 0.60 threshold) end to end:
+    without the pair, a "Git" skill would earn partial credit toward a
+    role that only needs GIS. surveyor requires gis, not git."""
+    _patched_runpod_provider(monkeypatch)
+    profile = _profile(skills=[SkillRef(skill_id="x", name="Git")])
+    roles = CachedRoleCatalog().list_roles()
+
+    provider = HussainMatchingProvider(not_equivalent=load_skill_not_equivalent_pairs())
+    results = provider.match(profile, roles, None, [])
+    surveyor = next(m for m in results if m["role_id"] == "surveyor")
+
+    missing_ids = {s["skill_id"] for s in surveyor["missing_skills"]}
+    assert "gis" in missing_ids  # no credit for the excluded git->gis substitution
+    assert not any("GIS" in note for note in surveyor["caveats"])
+
+
+def test_financial_software_false_positive_gets_no_semantic_credit_in_a_real_match(monkeypatch):
+    """Reproduces Hussain's other reported false positive (Financial
+    Analysis Software ~ Analytical/Statistical Software measured at
+    0.67): without the pair, a statistics-software skill would earn
+    partial credit toward financial_analyst's financial-software
+    requirement."""
+    _patched_runpod_provider(monkeypatch)
+    profile = _profile(skills=[SkillRef(skill_id="x", name="Analytical/Statistical Software")])
+    roles = CachedRoleCatalog().list_roles()
+
+    provider = HussainMatchingProvider(not_equivalent=load_skill_not_equivalent_pairs())
+    results = provider.match(profile, roles, None, [])
+    financial_analyst = next(m for m in results if m["role_id"] == "financial_analyst")
+
+    missing_ids = {s["skill_id"] for s in financial_analyst["missing_skills"]}
+    assert "financial_analysis_software" in missing_ids
+    assert not any("Financial Analysis Software" in note for note in financial_analyst["caveats"])
+
+
+def test_all_fourteen_pairs_are_enforced_by_the_real_shared_matcher_adapter(monkeypatch):
+    """Not just the 2 new pairs in isolation: every one of the real 14
+    pairs, loaded exactly as the shared production provider loads them
+    (_get_shared_hussain_provider), actually blocks semantic credit."""
+    _patched_runpod_provider(monkeypatch)
+    provider = _get_shared_hussain_provider()
+    assert len(provider.not_equivalent) == 14
+
+    fake = _FakeSimilarityProvider({frozenset(p) for p in provider.not_equivalent})
+    for a, b in provider.not_equivalent:
+        assert fake(a, b) == 0.0, (a, b)
+        assert fake(b, a) == 0.0, (a, b)
+    # a pair that is NOT excluded must be unaffected (sanity check the fake itself)
+    assert fake("python", "sql") == 0.9
+
+
+def test_profile_with_both_new_pair_skills_gets_independent_exact_credit():
+    """A profile holding BOTH financial_analysis_software and
+    analytical_scientific_software as exact catalogue skill_ids (not
+    free text) must get full, independent credit for each — the
+    exclusion only suppresses the *semantic-similarity* fallback, never
+    an exact skill_id match. financial_analyst requires both."""
+    roles = CachedRoleCatalog().list_roles()
+    financial_analyst = next(r for r in roles if r.role_id == "financial_analyst")
+    profile = _profile(skills=[
+        SkillRef(skill_id="financial_analysis_software", name="Financial Analysis Software"),
+        SkillRef(skill_id="analytical_scientific_software", name="Analytical/Statistical Software"),
+    ])
+    provider = HussainMatchingProvider(not_equivalent=load_skill_not_equivalent_pairs())
+    result = provider.match(profile, [financial_analyst], None, [])[0]
+
+    matched_ids = {s["skill_id"] for s in result["matched_skills"]}
+    missing_ids = {s["skill_id"] for s in result["missing_skills"]}
+    assert {"financial_analysis_software", "analytical_scientific_software"} <= matched_ids
+    assert not {"financial_analysis_software", "analytical_scientific_software"} & missing_ids
 
 
 # --- 6. Python + SQL student's Data Analyst recommendation -----------------

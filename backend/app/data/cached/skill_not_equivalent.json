@@ -11,6 +11,8 @@
     ["git", "programming"],
     ["cad_software", "gis"],
     ["data_visualization", "gis"],
-    ["matlab", "analytical_scientific_software"]
+    ["matlab", "analytical_scientific_software"],
+    ["git", "gis"],
+    ["financial_analysis_software", "analytical_scientific_software"]
   ]
 }

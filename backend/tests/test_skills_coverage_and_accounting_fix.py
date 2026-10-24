@@ -247,10 +247,12 @@ def test_exact_skill_matches_still_work_after_the_normalizer_changes():
 
 
 def test_not_equivalent_exclusions_still_present_and_unaffected():
+    # 14 since Milestone 13E-6 (git/gis and financial_analysis_software/
+    # analytical_scientific_software, approved by Jawad/Hussain/Rehan).
     from app.services.skill_not_equivalent_cached import load_skill_not_equivalent_pairs
 
     pairs = load_skill_not_equivalent_pairs()
-    assert len(pairs) == 12
+    assert len(pairs) == 14
 
 
 # --- 7. No accidental change to weights/ranking for unrelated roles --------

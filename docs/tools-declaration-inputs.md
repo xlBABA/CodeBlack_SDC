@@ -16,6 +16,8 @@
 - Swapped out unsuitable datasets: SEC, then UCI Air Quality because it is research-only.
 - Gave the direct YouTube links and video lengths for the statistics and Excel videos.
 
+**Decisions Rehan made on my data (not me, not AI), 2026-10-24:** adding `onet_19_1041_00` to three skills' `source_ids` for the Public Health Analyst rebuild; adding the 2 new `skill_not_equivalent.json` pairs, after Hussain measured their embedding similarities (git/gis 0.74, financial_analysis_software/analytical_scientific_software 0.67) and Claude Code gathered the O*NET category evidence; leaving `mechanical_engineer` unchanged rather than rebuilding it under the 22-newer-roles rule, for release stability.
+
 **Not AI-decided:** no AI tool decides a student's score. Scores come from Hussain's fixed, documented formula.
 
 ## 30-role dataset
