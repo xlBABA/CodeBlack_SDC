@@ -16,8 +16,8 @@ const VARIANT = {
   glass: 'glass',
   solid: 'border border-line bg-raised shadow-card',
   // deep primary hero card with a fine grid texture (Halden idea)
-  // the accent mixed toward near-black keeps it deep (and white text legible) in both themes
-  deep: 'grid-tex bg-[linear-gradient(150deg,color-mix(in_srgb,var(--primary)_44%,#04140f),color-mix(in_srgb,var(--primary)_18%,#020806))] text-[#f6faf8] shadow-pop [&_.text-muted-foreground]:text-[#f6faf8b3]',
+  // the accent mixed toward the deep backdrop keeps it dark (and white text legible) in both themes
+  deep: 'grid-tex bg-[linear-gradient(150deg,color-mix(in_srgb,var(--primary)_var(--deep-mix),var(--deep-b)),color-mix(in_srgb,var(--primary)_18%,color-mix(in_srgb,var(--deep-b)_55%,#000)))] text-on-deep shadow-pop [&_.text-muted-foreground]:text-on-deep/70',
 }
 
 export function Card({ lift = false, enter = true, variant = 'glass', className, ref, ...props }: CardProps) {

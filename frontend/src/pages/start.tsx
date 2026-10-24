@@ -16,7 +16,7 @@ import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill } from '@/conten
 import { ApiError } from '@/lib/api'
 import { gsap } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
-import { analyzeAndStore, getProfile } from '@/lib/profile-store'
+import { analyzeAndStore, getProfile, type ProfileSource } from '@/lib/profile-store'
 import { cn } from '@/lib/utils'
 import type { SkillRef, StudentProfile } from '@/types/api'
 
@@ -207,7 +207,8 @@ export default function Start() {
   const cvPath = params.get('path') === 'cv'
   const toast = useToast()
   const [draft, setDraft] = useState<Draft>(initialDraft)
-  const [step, setStep] = useState(0)
+  // ?step=skills reopens the skills step, e.g. from the "no recognized skills" notice
+  const [step, setStep] = useState(() => (params.get('step') === 'skills' ? 1 : 0))
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
   const panel = useRef<HTMLDivElement>(null)
@@ -247,8 +248,8 @@ export default function Start() {
   }
 
   // both paths end here: the form and a confirmed CV review
-  const submit = async (profile: StudentProfile, demo = false) => {
-    await analyzeAndStore(profile, { demo })
+  const submit = async (profile: StudentProfile, source: ProfileSource, demo = false) => {
+    await analyzeAndStore(profile, { demo, source })
     try {
       sessionStorage.removeItem(DRAFT_KEY)
     } catch {
@@ -263,7 +264,7 @@ export default function Start() {
     setError(null)
     try {
       const isDemo = JSON.stringify(toProfile(draft)) === JSON.stringify(toProfile(fromProfile(DEMO_PROFILE)))
-      await submit(toProfile(draft), isDemo)
+      await submit(toProfile(draft), 'form', isDemo)
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ kind: 'http', status: 0, code: 'UNKNOWN', message: String(e) }))
     } finally {
@@ -276,7 +277,7 @@ export default function Start() {
   return (
     <Page
       title="Build your profile"
-      crumbs={[{ label: 'Workspace', to: '/dashboard' }, { label: 'Profile' }]}
+      crumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Profile' }]}
       subtitle={
         cvPath
           ? 'Upload a PDF, check what we read, then confirm. Nothing about your age, gender or background is used.'
@@ -302,7 +303,7 @@ export default function Start() {
       <PathSwitch cv={cvPath} />
 
       {cvPath ? (
-        <CvIntake onConfirm={submit} />
+        <CvIntake onConfirm={(profile) => submit(profile, 'cv')} resume={params.get('step') === 'review'} />
       ) : (
         <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
           <Card className="h-fit p-3 sm:p-3">

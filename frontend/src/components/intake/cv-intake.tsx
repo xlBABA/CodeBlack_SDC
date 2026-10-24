@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 import type { APIEnvelope, CvParsePayload, StudentProfile } from '@/types/api'
-import { CvReview } from './cv-review'
+import { CvReview, type CvReviewState } from './cv-review'
 import { CvUpload } from './cv-upload'
 import { field, labelCls } from './form'
 
@@ -57,9 +57,16 @@ function CvFallback({ result, onRestart }: { result: APIEnvelope<CvParsePayload>
   )
 }
 
-/** The "Upload CV" path of the intake: upload → review (or fallback) → confirm, which hands the profile to onConfirm. */
-export function CvIntake({ onConfirm }: { onConfirm: (profile: StudentProfile) => Promise<void> }) {
-  const [result, setResult] = useState<APIEnvelope<CvParsePayload> | null>(null)
+// The last confirmed review, in memory only (never browser storage), so a student sent back from
+// the results can fix their skills without uploading again. A page refresh forgets it.
+let lastReview: { result: APIEnvelope<CvParsePayload>; state: CvReviewState } | null = null
+
+/**
+ * The "Upload CV" path of the intake: upload → review (or fallback) → confirm, which hands the
+ * profile to onConfirm. With `resume`, it reopens the last confirmed review if it is still in memory.
+ */
+export function CvIntake({ onConfirm, resume = false }: { onConfirm: (profile: StudentProfile) => Promise<void>; resume?: boolean }) {
+  const [result, setResult] = useState<APIEnvelope<CvParsePayload> | null>(() => (resume ? (lastReview?.result ?? null) : null))
   const [restarted, setRestarted] = useState(false)
   const toast = useToast()
   const restart = () => {
@@ -80,6 +87,12 @@ export function CvIntake({ onConfirm }: { onConfirm: (profile: StudentProfile) =
       </Card>
     )
   }
-  if (result.data.status === 'ok') return <CvReview result={result} onConfirm={onConfirm} onRestart={restart} />
+  if (result.data.status === 'ok') {
+    const confirm = async (profile: StudentProfile, state: CvReviewState) => {
+      await onConfirm(profile)
+      lastReview = { result, state }
+    }
+    return <CvReview result={result} initial={lastReview?.result === result ? lastReview.state : undefined} onConfirm={confirm} onRestart={restart} />
+  }
   return <CvFallback result={result} onRestart={restart} />
 }

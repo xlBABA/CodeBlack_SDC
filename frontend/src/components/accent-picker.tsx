@@ -7,9 +7,9 @@ import { prefersReducedMotion, pressPop } from '@/lib/motion'
 import { ACCENTS, type Accent } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 
-const LABEL: Record<Accent, string> = { emerald: 'Emerald', petrol: 'Petrol', indigo: 'Indigo', tomato: 'Tomato' }
+const LABEL: Record<Accent, string> = { teal: 'Teal', emerald: 'Emerald', indigo: 'Indigo', tomato: 'Tomato' }
 // swatch colours are fixed so the picker shows every option, whatever the current accent
-const SWATCH: Record<Accent, string> = { emerald: '#146c54', petrol: '#0f6c78', indigo: '#4549b8', tomato: '#b9431d' }
+const SWATCH: Record<Accent, string> = { teal: '#0b6e85', emerald: '#146c54', indigo: '#4549b8', tomato: '#b9431d' }
 
 /**
  * Accent colour picker (Halden idea): a radio group of swatches; choosing one pops the swatch

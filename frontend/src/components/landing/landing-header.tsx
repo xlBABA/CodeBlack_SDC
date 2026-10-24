@@ -9,7 +9,6 @@ import { CURTAIN_LINES } from '@/content/landing'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
-import { DEMO_ENTRY } from './hero-ctas'
 
 const LINKS = [
   { href: '#journey', label: 'How it works' },
@@ -21,7 +20,7 @@ const LINKS = [
 export function LandingHeader({ ready, lenis }: { ready: boolean; lenis: RefObject<Lenis | null> }) {
   const root = useRef<HTMLElement>(null)
   const [scrolled, setScrolled] = useState(false)
-  const toApp = useCurtainLink(DEMO_ENTRY, CURTAIN_LINES.demo)
+  const toApp = useCurtainLink('/dashboard', CURTAIN_LINES.dashboard)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -58,21 +57,21 @@ export function LandingHeader({ ready, lenis }: { ready: boolean; lenis: RefObje
         <Link to="/" aria-label="Home" className="rounded-full">
           <Brand />
         </Link>
-        <nav aria-label="Sections" className="mx-auto hidden items-center gap-1 md:flex">
+        <nav aria-label="Sections" className="mx-auto hidden items-center gap-1 min-[900px]:flex">
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} onClick={(e) => jump(e, l.href)} className="rounded-full px-3.5 py-2 font-semibold text-muted-foreground transition-colors hover:bg-well hover:text-foreground">
               {l.label}
             </a>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
+        <div className="ml-auto flex items-center gap-2 min-[900px]:ml-0">
           <ThemeToggle />
           <Link
-            to={DEMO_ENTRY}
+            to="/dashboard"
             onClick={toApp}
             className="hidden h-11 items-center gap-2 rounded-full bg-ink px-5 font-bold text-ink-foreground transition hover:brightness-110 sm:inline-flex"
           >
-            Open the app
+            Dashboard
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>

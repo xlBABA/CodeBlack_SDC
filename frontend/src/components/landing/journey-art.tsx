@@ -1,4 +1,5 @@
-import type { JourneyStep } from '@/content/landing'
+import { SdgIcon } from '@/components/sdg-icon'
+import { DOMAIN_SDGS, type JourneyStep } from '@/content/landing'
 
 // Small illustrative "screens" for each journey step. Static demo content.
 
@@ -84,13 +85,24 @@ function Path() {
   )
 }
 function Sdg() {
+  const { main, related } = DOMAIN_SDGS
   return (
-    <div className="grid grid-cols-6 gap-1.5">
-      {Array.from({ length: 17 }, (_, i) => (
-        <span key={i} className="grid aspect-square place-items-center rounded-[10px] text-sm font-extrabold text-white" style={{ background: `var(--sdg-${i + 1})` }}>
-          {i + 1}
-        </span>
-      ))}
+    <div className="grid gap-2 md:gap-3">
+      <div className="flex items-center gap-3 rounded-[16px] bg-raised p-2 pr-3 shadow-card md:p-2.5">
+        <SdgIcon sdg={main} className="size-12 md:size-[clamp(56px,7svh,80px)]" />
+        <p className="text-xs leading-snug md:text-sm">
+          <b className="block text-2xs font-bold tracking-[0.1em] text-primary uppercase">Main goal</b>
+          {main.line}
+        </p>
+      </div>
+      <ul className="grid gap-y-2 md:grid-cols-2 md:gap-x-3 md:gap-y-2.5">
+        {related.map((g) => (
+          <li key={g.goal} className="flex items-start gap-2">
+            <SdgIcon sdg={g} className="size-8 md:size-[clamp(36px,5svh,48px)]" />
+            <span className="text-[0.6875rem] leading-snug md:text-xs">{g.line}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

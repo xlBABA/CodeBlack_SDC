@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { X } from 'lucide-react'
 import { SKILL_CATALOG } from '@/content/skills'
 import { cn } from '@/lib/utils'
@@ -14,49 +14,68 @@ type SkillPickerProps = {
   evidence?: Record<string, string>
 }
 
-/** Search the skill catalogue, add skills and set a self-reported level for each. Only catalogue ids can be added. */
-export function SkillPicker({ skills, onChange, evidence }: SkillPickerProps) {
-  const [query, setQuery] = useState('')
-  const chosen = new Set(skills.map((s) => s.skill_id))
-  const q = query.trim().toLowerCase()
-  const matches = SKILL_CATALOG.filter((s) => !chosen.has(s.skill_id) && (!q || s.name.toLowerCase().includes(q)))
+type CatalogSkill = (typeof SKILL_CATALOG)[number]
 
-  const add = (s: { skill_id: string; name: string }) => {
-    onChange([...skills, { ...s, proficiency: 'beginner' }])
+type SkillSearchProps = {
+  label: React.ReactNode
+  /** skill_ids already chosen, left out of the suggestions */
+  exclude: Set<string>
+  onPick: (skill: CatalogSkill) => void
+  autoFocus?: boolean
+}
+
+/** Search box over the skill catalogue. It can only ever return a catalogue skill. */
+export function SkillSearch({ label, exclude, onPick, autoFocus }: SkillSearchProps) {
+  const id = useId()
+  const [query, setQuery] = useState('')
+  const q = query.trim().toLowerCase()
+  const matches = SKILL_CATALOG.filter((s) => !exclude.has(s.skill_id) && (!q || s.name.toLowerCase().includes(q)))
+  const pick = (s: CatalogSkill) => {
+    onPick(s)
     setQuery('')
   }
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelCls}>
+        {label}
+      </label>
+      <input
+        id={id}
+        className={field}
+        placeholder="Search, e.g. Python, Excel, GIS…"
+        value={query}
+        autoFocus={autoFocus}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter') return
+          e.preventDefault()
+          if (matches[0]) pick(matches[0])
+        }}
+      />
+      <div className="mt-3 flex flex-wrap gap-2" aria-label="Suggestions">
+        {matches.map((s) => (
+          <Chip key={s.skill_id} active={false} onClick={() => pick(s)}>
+            {s.name}
+          </Chip>
+        ))}
+      </div>
+      {q && !SKILL_CATALOG.some((s) => s.name.toLowerCase().includes(q)) && (
+        <p className="mt-2 text-sm text-muted-foreground">No catalogue skill matches “{query.trim()}”. Only catalogue skills count toward a role.</p>
+      )}
+    </div>
+  )
+}
+
+/** Search the skill catalogue, add skills and set a self-reported level for each. Only catalogue ids can be added. */
+export function SkillPicker({ skills, onChange, evidence }: SkillPickerProps) {
+  const chosen = new Set(skills.map((s) => s.skill_id))
   const update = (id: string, proficiency: Proficiency) => onChange(skills.map((s) => (s.skill_id === id ? { ...s, proficiency } : s)))
   const remove = (id: string) => onChange(skills.filter((s) => s.skill_id !== id))
 
   return (
     <div className="grid gap-6">
-      <div>
-        <label htmlFor="skill-search" className={labelCls}>
-          Find a skill
-        </label>
-        <input
-          id="skill-search"
-          className={field}
-          placeholder="Search, e.g. Python, Excel, GIS…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key !== 'Enter') return
-            e.preventDefault()
-            if (matches[0]) add(matches[0])
-          }}
-        />
-        <div className="mt-3 flex flex-wrap gap-2" aria-label="Suggestions">
-          {matches.map((s) => (
-            <Chip key={s.skill_id} active={false} onClick={() => add(s)}>
-              {s.name}
-            </Chip>
-          ))}
-        </div>
-        {q && !SKILL_CATALOG.some((s) => s.name.toLowerCase().includes(q)) && (
-          <p className="mt-2 text-sm text-muted-foreground">No catalogue skill matches “{query.trim()}”. Only catalogue skills count toward a role.</p>
-        )}
-      </div>
+      <SkillSearch label="Find a skill" exclude={chosen} onPick={(s) => onChange([...skills, { ...s, proficiency: 'beginner' }])} />
 
       <div>
         <p className={labelCls}>Your skills ({skills.length})</p>

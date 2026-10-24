@@ -1,4 +1,5 @@
 import { FileSearch, Layers } from 'lucide-react'
+import { ApiWarnings } from '@/components/api-warnings'
 import { AssistCard } from '@/components/dashboard/assist-card'
 import { SkillGap } from '@/components/dashboard/skill-gap'
 import { TopMatchCard } from '@/components/dashboard/top-match-card'
@@ -46,6 +47,7 @@ export function OverviewTab({ match, rank, envelope }: { match: RoleMatch; rank:
           <p className="text-sm text-muted-foreground">No evidence records were returned for this role.</p>
         )}
       </Card>
+      <ApiWarnings items={envelope.warnings} open className="lg:col-span-12" />
     </div>
   )
 }
