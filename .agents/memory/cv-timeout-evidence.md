@@ -26,3 +26,15 @@ this approval is an experiment, not evidence of a root-cause fix.
 merges, pushes or publishing. For a future approved trial, restore 30 or remove the
 override if manual review persists, a browser/platform timeout occurs, or total
 duration reaches 50 seconds. Account for cached settings requiring process restart.
+
+Verify the running workflow's environment, not only the secret store or a newly
+started shell, before attributing a failure to a configured provider.
+
+**Why:** A development backend continued using the default RunPod path while the
+current shell and configured environment already selected OpenRouter. Restarting
+the development workflow loaded the intended provider and resolved the observed
+failure in a bounded synthetic extraction test.
+
+**How to apply:** Compare only non-secret provider/model/endpoint settings and key
+presence in the running process. If stale, restart the development workflow and
+verify again. Do not infer that production has refreshed or publish automatically.
