@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/card'
 import { useToast } from '@/components/ui/toast'
 import { STORAGE_PREFIX } from '@/config/product'
 import { DEMO_PROFILE } from '@/content/demo-profile'
-import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill } from '@/content/skills'
+import { EDUCATION_LEVELS, INTEREST_SUGGESTIONS, isCatalogSkill, SKILL_CATALOG } from '@/content/skills'
 import { ApiError } from '@/lib/api'
 import { gsap } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/motion'
@@ -377,7 +377,12 @@ export default function Start() {
                   </div>
                 </div>
               )}
-              {step === 1 && <SkillPicker skills={draft.skills} onChange={(skills) => set({ skills })} />}
+              {step === 1 && (
+                <div className="grid gap-4">
+                  <p className="text-sm text-muted-foreground">We match on {SKILL_CATALOG.length} core skills from O*NET. More skills are coming in Phase 2.</p>
+                  <SkillPicker skills={draft.skills} onChange={(skills) => set({ skills })} />
+                </div>
+              )}
               {step === 2 && <ProjectsStep draft={draft} set={set} />}
               {step === 3 && <InterestsStep draft={draft} set={set} />}
               {step === 4 && <Review draft={draft} goTo={goTo} />}
