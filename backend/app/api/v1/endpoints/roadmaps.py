@@ -42,11 +42,10 @@ def resource_provenance_warnings(settings: Settings) -> list[str]:
     if settings.CATALOG_MODE != "cached":
         return []
     return [
-        "CATALOG_MODE=cached: the learning resources in this roadmap come "
-        "from Jawad's verified, cached resource dataset — real course "
-        "titles, URLs and provider-stated or team-estimated hours, not "
-        "fixture placeholders. Which skills are selected for this roadmap "
-        "is still driven by the matching score above."
+        "The learning resources in this roadmap are real, checked courses "
+        "and guides, with hours stated by the provider or estimated by our "
+        "team. Which skills appear in it still depends on your matching "
+        "result."
     ]
 
 

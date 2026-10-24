@@ -259,7 +259,9 @@ def test_malformed_glm_json_falls_back_to_manual_review_not_a_crash(client: Test
     assert response.status_code == 200
     body = response.json()
     assert body["data"]["status"] == "manual_review"
-    assert "did not contain any usable fields" in " ".join(body["warnings"])
+    assert body["warnings"] == [
+        "We couldn't read your CV automatically right now. Please review or fill in your details below."
+    ]
 
 
 def test_glm_output_with_no_recognizable_fields_at_all_falls_back_to_manual_review(client: TestClient):

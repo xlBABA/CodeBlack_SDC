@@ -21,11 +21,10 @@ from app.services.sdg_service import SdgService
 router = APIRouter()
 
 _CACHED_PROVENANCE_WARNING = (
-    "CATALOG_MODE=cached: role and skill SDG mappings come from Jawad's "
-    "verified, cached dataset — these role/skill identifiers and SDG "
-    "rationale are real, not illustrative placeholders. This is still "
-    "not a United Nations endorsement or official certification, and "
-    "does not represent independently verified real-world impact."
+    "These role and skill links to the UN Sustainable Development Goals, "
+    "and their reasons, come from our checked dataset. They are not a "
+    "United Nations endorsement or official certification, and do not "
+    "measure independently verified real-world impact."
 )
 
 

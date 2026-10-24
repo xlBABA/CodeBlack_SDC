@@ -63,10 +63,6 @@ NO_TEXT_WARNING = (
     "image). Please fill in your profile manually — automatic text "
     "recognition (OCR) is not performed."
 )
-MANUAL_REVIEW_WARNING = (
-    "Automatic extraction was unavailable, so this is an empty draft for "
-    "manual entry. Nothing was fabricated in its place."
-)
 MISSING_EVIDENCE_REASON = (
     "No supporting quote was provided for this skill, so it was not "
     "added automatically. Add it yourself if it's accurate."
@@ -435,7 +431,7 @@ def _empty_draft() -> CvDraftProfile:
     """An honestly-empty draft for the manual_review/no_extractable_text
     states. Takes no warning text — CvDraftProfile has no warnings field
     of its own; the caller already returns the matching warning
-    (NO_TEXT_WARNING/MANUAL_REVIEW_WARNING) separately in CvParseData's
+    (NO_TEXT_WARNING/CV_UNAVAILABLE_WARNING) separately in CvParseData's
     sibling warnings list."""
     return CvDraftProfile(
         suggested_profile=StudentProfile(interests=[], skills=[], projects=[]),
@@ -489,7 +485,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 # returned at all in the successful "ok" path below.
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, f"Extraction service issue: {exc.reason}"],
+            [CV_UNAVAILABLE_WARNING],
         )
 
     try:
@@ -506,7 +502,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, "The extraction service's output did not match the expected format."],
+            [CV_UNAVAILABLE_WARNING],
         )
     except Exception:
         logger.warning("GLM output could not be interpreted; falling back to manual review")
@@ -517,7 +513,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, "The extraction service's output did not match the expected format."],
+            [CV_UNAVAILABLE_WARNING],
         )
 
     if _is_effectively_empty(extraction):
@@ -531,7 +527,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
                 page_count=pdf_result.page_count,
                 extracted_text_preview=pdf_result.text[:500],
             ),
-            [MANUAL_REVIEW_WARNING, "The extraction service's output did not contain any usable fields."],
+            [CV_UNAVAILABLE_WARNING],
         )
 
     mapped_skills, unmapped_skills, skills_requiring_review = _validate_and_map_skills(

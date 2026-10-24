@@ -13,8 +13,8 @@ from app.schemas.sdgs import RoleSdgMapping, SdgPayload, SkillSdgMapping
 from app.services.sdg_catalog import SdgCatalogProvider
 
 _DEFAULT_PROVENANCE_WARNING = (
-    "Illustrative demonstration SDG mappings only; not a United Nations "
-    "endorsement or official certification, and not yet Jawad's verified "
+    "Illustrative example SDG links only; not a United Nations "
+    "endorsement or official certification, and not the checked "
     "role/skill SDG dataset."
 )
 
@@ -43,8 +43,8 @@ class SdgService:
             return SdgOutcome(
                 payload=SdgPayload(role_sdg_mappings=[], skill_sdg_mappings=[]),
                 warnings=[
-                    f"No SDG mapping exists yet for role_id '{role_id}' in the "
-                    f"current catalog. {self._provenance_warning}"
+                    f"No SDG link exists yet for the role '{role_id}'. "
+                    f"{self._provenance_warning}"
                 ],
             )
 

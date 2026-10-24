@@ -69,13 +69,16 @@ class ProjectRecommendationService:
     def recommend(self, request: RoleProfileRequest) -> ProjectRecommendationOutcome:
         limit = request.limit if request.limit is not None else DEFAULT_RECOMMEND_LIMIT
 
-        candidates = [p for p in self._catalog.list_projects() if p.role_id == request.role_id]
+        all_projects = self._catalog.list_projects()
+        candidates = [p for p in all_projects if p.role_id == request.role_id]
         if not candidates:
+            role_ids = set(self._matching.role_ids())
+            covered = {p.role_id for p in all_projects} & role_ids
             return ProjectRecommendationOutcome(
                 projects=[],
                 warnings=[
-                    f"No placeholder projects exist yet for role_id "
-                    f"'{request.role_id}'; pending Jawad's verified project catalog."
+                    "No portfolio projects are available yet for this role. "
+                    f"Projects are available for {len(covered)} of {len(role_ids)} roles."
                 ],
             )
 
@@ -151,8 +154,7 @@ class ProjectSimulationService:
         warnings = [
             *baseline.warnings,
             "Simulated score is a hypothetical, deterministic recalculation "
-            "using whichever matching algorithm is currently configured for "
-            "/careers/match (fixture or Hussain's, per MATCHING_MODE); it is "
-            "not a validated prediction of real-world outcomes.",
+            "with the same matching method as your main results; it is not "
+            "a validated prediction of real-world outcomes.",
         ]
         return ProjectSimulationOutcome(payload=payload, warnings=warnings)

@@ -308,7 +308,7 @@ def catalog_provenance_warnings(settings: Settings) -> list[str]:
     return [
         "The role and skill catalog behind this response comes from a "
         "real, cached occupational dataset — these role and skill "
-        "identifiers are real, not fictional placeholders. Matching "
+        "identifiers are real, not invented examples. Matching "
         f"scores are still calculated by {scoring_description}, which is "
         "not yet a validated, real-world outcome."
     ]
