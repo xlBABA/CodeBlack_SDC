@@ -23,8 +23,8 @@
 | Live Demo | https://mustaqbal-ai.replit.app |
 | RunPod Endpoints | https://api.runpod.ai/v2/f0phohhegtydji |
 | CV Extraction API Provider | https://openrouter.ai |
-| Slide Deck | https://canva.link/pf4g0a1ofti915u |
-| Demo Video | **TODO:** `[ADD_DEMO_VIDEO_URL]` — not yet supplied |
+| Slide Deck | https://drive.google.com/file/d/1BT8s42cli9p-Q5nXa0CJn5SRnVuFVror/view?usp=sharing |
+| Demo Video |  |
 
 ---
 
