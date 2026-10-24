@@ -45,7 +45,10 @@ def install_provider(monkeypatch, handler):
 
 
 @pytest.mark.parametrize("length", [100, 11_000, 15_000])
-def test_synthetic_pdf_payload_and_seven_fields(client, db_session, monkeypatch, length):
+@pytest.mark.parametrize("read_timeout", [30.0, 40.0])
+def test_synthetic_pdf_payload_and_seven_fields(client, db_session, monkeypatch, length, read_timeout):
+    if read_timeout != 30:
+        monkeypatch.setenv("RUNPOD_GLM_READ_TIMEOUT_SECONDS", str(read_timeout))
     text = ("Python SQL synthetic CV " * 700)[:length]
     calls = []
 
@@ -59,9 +62,10 @@ def test_synthetic_pdf_payload_and_seven_fields(client, db_session, monkeypatch,
         assert payload["temperature"] == 0
         assert payload["reasoning_effort"] == "low"
         assert payload["response_format"] == {"type": "json_object"}
-        assert request.extensions["timeout"] == dict.fromkeys(
-            ["connect", "read", "write", "pool"], 30.0
-        )
+        assert request.extensions["timeout"] == {
+            "connect": 30.0, "read": read_timeout, "write": 30.0, "pool": 30.0,
+        }
+        assert payload["messages"][0]["content"] == glm_client._SYSTEM_PROMPT
         return httpx.Response(200, json={
             "choices": [{"message": {"content": json.dumps(FAKE_GLM_JSON)}}]
         })
@@ -86,13 +90,18 @@ def test_synthetic_pdf_payload_and_seven_fields(client, db_session, monkeypatch,
 @pytest.mark.parametrize("category", [
     httpx.ConnectTimeout, httpx.ReadTimeout, httpx.WriteTimeout, httpx.PoolTimeout,
 ])
+@pytest.mark.parametrize("read_timeout", [30.0, 40.0])
 def test_real_timeout_categories_safe_fallback(
-    client, db_session, monkeypatch, caplog, category,
+    client, db_session, monkeypatch, caplog, category, read_timeout,
 ):
+    monkeypatch.setenv("RUNPOD_GLM_READ_TIMEOUT_SECONDS", str(read_timeout))
     calls = []
 
     def handler(request):
         calls.append(request)
+        assert request.extensions["timeout"] == {
+            "connect": 30.0, "read": read_timeout, "write": 30.0, "pool": 30.0,
+        }
         raise category("PRIVATE provider body synthetic-secret", request=request)
 
     clients = install_provider(monkeypatch, handler)
@@ -106,6 +115,7 @@ def test_real_timeout_categories_safe_fallback(
     elapsed = time.monotonic() - started
     assert elapsed < 2
     assert response.status_code == 200
+    assert set(response.json()) == {"data", "data_mode", "generated_at", "warnings"}
     data = response.json()["data"]
     assert data["status"] == "manual_review"
     assert data["draft"]["suggested_profile"]["skills"] == []
@@ -117,10 +127,45 @@ def test_real_timeout_categories_safe_fallback(
     assert len(calls) == 1
     assert all(c.is_closed for c in clients)
     assert f"category={category.__name__}" in caplog.text
+    for phase, value in (("connect", 30), ("read", read_timeout), ("write", 30), ("pool", 30)):
+        assert f"{phase}_timeout_s={value:.1f}" in caplog.text
     assert "pdf_elapsed_ms=" in caplog.text
     assert "elapsed_ms=" in caplog.text
     for private in ("PRIVATE", "synthetic-secret", "Technical Skills:", "JavaScript"):
         assert private not in caplog.text
+
+
+@pytest.mark.parametrize("failure", [None, httpx.ConnectTimeout, httpx.ReadTimeout,
+                                   httpx.WriteTimeout, httpx.PoolTimeout])
+def test_injected_client_stays_open_with_effective_request_timeout(failure):
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert request.extensions["timeout"] == {
+            "connect": 30.0, "read": 40.0, "write": 30.0, "pool": 30.0,
+        }
+        if failure:
+            raise failure("PRIVATE", request=request)
+        return httpx.Response(200, json={
+            "choices": [{"message": {"content": json.dumps(FAKE_GLM_JSON)}}],
+        })
+
+    with httpx.Client(transport=httpx.MockTransport(handler), timeout=1) as injected:
+        def extract():
+            return glm_client.extract_cv_fields(
+                "synthetic text", api_key="synthetic-secret",
+                base_url="https://synthetic.invalid/v1", model="glm-5.3",
+                read_timeout_seconds=40, client=injected,
+            )
+        if failure:
+            with pytest.raises(GlmExtractionError, match="timed out"):
+                extract()
+        else:
+            assert extract().raw_json == FAKE_GLM_JSON
+        assert not injected.is_closed
+        assert injected.timeout.read == 1
+        assert len(calls) == 1
 
 
 @pytest.mark.parametrize("phase", ["pdf", "provider"])

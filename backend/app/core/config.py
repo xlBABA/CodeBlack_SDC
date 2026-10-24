@@ -88,6 +88,10 @@ class Settings(BaseSettings):
     # key is shared (same RunPod account) — RUNPOD_API_KEY above.
     RUNPOD_GLM_BASE_URL: str = "https://api.runpod.ai/v2/b1dd8hy2hqo1nb/openai/v1"
     RUNPOD_GLM_MODEL: str = "glm-5.3"
+    # Controlled read-phase experiment only; not an overall request deadline.
+    RUNPOD_GLM_READ_TIMEOUT_SECONDS: float = Field(
+        default=30.0, gt=0, le=40, allow_inf_nan=False,
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:

@@ -29,7 +29,7 @@ export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true'
 
 const TIMEOUT_MS = 20_000
 const RETRY_DELAYS_MS = [700, 1600]
-// Uploads allow 60 s overall; backend httpx has 30 s per-phase (not total) limits.
+// Uploads allow 60 s overall; backend httpx phase limits are not a total deadline.
 const UPLOAD_TIMEOUT_MS = 60_000
 
 export type ApiErrorKind = 'http' | 'validation' | 'network' | 'timeout'

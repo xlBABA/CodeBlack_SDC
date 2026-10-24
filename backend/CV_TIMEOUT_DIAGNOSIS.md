@@ -1,5 +1,73 @@
 # CV extraction timeout diagnosis — 2026-10-24
 
+## Controlled read-timeout mitigation — local implementation only
+
+The subsequently approved experimental setting
+`RUNPOD_GLM_READ_TIMEOUT_SECONDS` defaults to **30** when absent and accepts
+finite positive numbers **up to 40**. Empty/text/zero/negative/non-finite values
+and values above 40 fail configuration validation; they never silently fall back.
+The actual API extraction pipeline passes it to an explicit `httpx.Timeout`:
+connect=30, read=configured, write=30, pool=30. Request-level timeouts also apply
+to injected clients without closing or changing those clients' defaults.
+There remains exactly one provider attempt, and owned clients close on success
+and failure. Timeout diagnostics name each phase separately, not a total deadline.
+
+Production evidence establishes ReadTimeout near 30 seconds, **not its root
+cause**. Queue/cold-start/execution telemetry was inaccessible and the platform
+HTTP deadline remains unverified. This is not a proven fix or a hard sub-60-second
+deadline. The historical investigation below predates this approved mitigation.
+
+No model, prompt, 12,000-character input bound, 1,200-token output bound, extraction
+schema, offline suggestions, confirmation/no-save behavior, manual-review envelope,
+or frontend 60-second upload deadline changed. The frontend edit is comment-only.
+No environment override was activated outside isolated test processes, no paid
+requests were made, and no commit, merge, push, production change or republish
+was performed as part of implementation.
+
+### Current validation
+
+From `backend/`, prefix both commands below with:
+`env -u RUNPOD_API_KEY -u RUNPOD_ENDPOINT_ID -u RUNPOD_GLM_READ_TIMEOUT_SECONDS DATABASE_URL=sqlite:// CATALOG_MODE=fixture MATCHING_MODE=fixture ENABLE_FIXTURES=true`
+
+```sh
+python -m pytest tests/test_config.py tests/test_cv_parse.py tests/test_cv_timeout_diagnostics.py -q
+python -m pytest -q
+```
+
+- Focused: **79 passed**, 0 failed, 0 skipped, 1 existing deprecation warning.
+- Full backend: **840 passed, 13 skipped**, 0 failed, 11 existing deprecation
+  warnings (Starlette/httpx and HTTP 422 naming). Existing skips remain disabled.
+- From `frontend/`: `npm run build` and `npm run lint` both passed.
+- Isolated in-memory databases, stripped provider credentials, mocked provider
+  responses and existing outbound HTTP transport guards were used. No inference
+  smoke test was run. The development backend workflow was restarted only.
+- Synthetic PDF API tests exercise default/40-second read settings, all four
+  timeout categories, unchanged payloads, safe logs, owned cleanup, unselected
+  offline skills and no profile persistence. Separate tests cover injected-client
+  ownership. Existing no-text, malformed-output and frontend deadline assertions
+  pass. These do not simulate a real 40-second provider wait or browser interaction.
+
+Exact changed files for this mitigation:
+`backend/app/core/config.py`, `backend/app/services/glm_client.py`,
+`backend/app/services/cv_extraction_service.py`, `backend/tests/conftest.py`,
+`backend/tests/test_config.py`, `backend/tests/test_cv_timeout_diagnostics.py`,
+`frontend/src/lib/api.ts` (comment only), `backend/CV_TIMEOUT_DIAGNOSIS.md`,
+and `.agents/memory/cv-timeout-evidence.md`.
+
+### Future activation and rollback — separate approval required
+
+Before any separately approved 40-second trial, consider the actual platform
+deadline and headroom for upload, PDF extraction, connect/write/pool and response
+handling. Read timeout is an inactivity limit, not a cap on total duration;
+trickling responses and multiple phases can exceed it. The browser still gives
+the entire upload 60 seconds. Do not infer safety from 40 being less than 60.
+
+If manual review persists, a browser/platform timeout occurs, or total duration
+reaches **50 seconds**, stop the trial and restore **30** or remove the override
+through the approved deployment process. Settings are cached and running processes
+must restart (or be republished through that process) to pick up changes.
+Neither production activation nor production restart/republish is authorized here.
+
 ## Conclusion
 
 The confirmed production failure mechanism is an upstream HTTP client timeout,

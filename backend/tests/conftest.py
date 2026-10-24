@@ -52,6 +52,7 @@ def _no_ambient_runpod_credentials(monkeypatch):
     with — and simply overrides — the clearing done here first."""
     monkeypatch.delenv("RUNPOD_API_KEY", raising=False)
     monkeypatch.delenv("RUNPOD_ENDPOINT_ID", raising=False)
+    monkeypatch.delenv("RUNPOD_GLM_READ_TIMEOUT_SECONDS", raising=False)
     # main.py resolves settings during import, before this fixture strips keys.
     from app.core.config import get_settings
     get_settings.cache_clear()

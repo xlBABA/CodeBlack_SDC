@@ -4,6 +4,25 @@ from pydantic import ValidationError
 from app.core.config import Settings
 
 
+def test_glm_read_timeout_default():
+    assert Settings(_env_file=None).RUNPOD_GLM_READ_TIMEOUT_SECONDS == 30.0
+
+
+@pytest.mark.parametrize("value", ["40", "30", "0.5"])
+def test_glm_read_timeout_environment(monkeypatch, value):
+    monkeypatch.setenv("RUNPOD_GLM_READ_TIMEOUT_SECONDS", value)
+    assert Settings(_env_file=None).RUNPOD_GLM_READ_TIMEOUT_SECONDS == float(value)
+
+
+@pytest.mark.parametrize("value", [
+    "", " ", "invalid", "0", "-1", "nan", "NaN", "inf", "-inf", "1e999", "40.01", "41",
+])
+def test_glm_read_timeout_invalid_environment(monkeypatch, value):
+    monkeypatch.setenv("RUNPOD_GLM_READ_TIMEOUT_SECONDS", value)
+    with pytest.raises(ValidationError, match="RUNPOD_GLM_READ_TIMEOUT_SECONDS"):
+        Settings(_env_file=None)
+
+
 def test_catalog_mode_defaults_to_fixture():
     assert Settings(_env_file=None).CATALOG_MODE == "fixture"
 

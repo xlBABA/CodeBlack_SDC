@@ -476,6 +476,7 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             api_key=api_key,
             base_url=settings.RUNPOD_GLM_BASE_URL,
             model=settings.RUNPOD_GLM_MODEL,
+            read_timeout_seconds=settings.RUNPOD_GLM_READ_TIMEOUT_SECONDS,
         )
     except GlmExtractionError as exc:
         logger.warning("CV extraction fell back to manual review (%s)", exc.reason)

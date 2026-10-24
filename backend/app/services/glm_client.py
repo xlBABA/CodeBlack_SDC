@@ -3,7 +3,7 @@
 Deliberately separate from app/services/hussain_matching/runpod_client.py
 — that module is Hussain's embedding provider (RUNPOD_ENDPOINT_ID=
 f0phohhegtydji) and is never touched or imported here. This module only
-ever reads RUNPOD_API_KEY and the two new RUNPOD_GLM_* settings
+ever reads RUNPOD_API_KEY and the RUNPOD_GLM_* settings
 (app/core/config.py).
 
 The API key is read fresh from Settings for each call (never cached on
@@ -105,6 +105,7 @@ def extract_cv_fields(
     api_key: str,
     base_url: str,
     model: str,
+    read_timeout_seconds: float = REQUEST_TIMEOUT_SECONDS,
     client: httpx.Client | None = None,
 ) -> GlmExtractionResult:
     """Calls RunPod's OpenAI-compatible GLM-5.3 endpoint. Raises
@@ -121,12 +122,16 @@ def extract_cv_fields(
     payload = _build_payload(cv_text, model)
     url = f"{base_url.rstrip('/')}/chat/completions"
     owns_client = client is None
-    http_client = client or httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS)
+    timeout = httpx.Timeout(
+        connect=30.0, read=read_timeout_seconds, write=30.0, pool=30.0,
+    )
+    http_client = client if client is not None else httpx.Client(timeout=timeout)
     started = monotonic()
     try:
         response = http_client.post(
             url,
             json=payload,
+            timeout=timeout,
             headers={
                 "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
@@ -134,9 +139,11 @@ def extract_cv_fields(
         )
     except httpx.TimeoutException as exc:
         logger.warning(
-            "GLM timeout category=%s elapsed_ms=%.1f phase_timeout_s=%.1f input_chars=%d",
+            "GLM timeout category=%s elapsed_ms=%.1f connect_timeout_s=%.1f "
+            "read_timeout_s=%.1f write_timeout_s=%.1f pool_timeout_s=%.1f input_chars=%d",
             type(exc).__name__, (monotonic() - started) * 1000,
-            REQUEST_TIMEOUT_SECONDS, len(payload["messages"][1]["content"]),
+            timeout.connect, timeout.read, timeout.write, timeout.pool,
+            len(payload["messages"][1]["content"]),
         )
         raise GlmExtractionError("The extraction service timed out.") from exc
     except httpx.HTTPError as exc:
