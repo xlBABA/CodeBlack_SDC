@@ -2,39 +2,40 @@
 
 ## Data-section narration (30-45 seconds, about 100 words)
 
-Say this out loud. Every app claim here was checked on the deployed API (https://mustaqbal-ai.replit.app) with GET requests.
+Say this out loud. Every app claim here was checked on the deployed app (https://mustaqbal-ai.replit.app) on 2026-10-24 at 19:50 UTC (2026-10-25 03:50 MYT) with GET requests, plus one earlier POST test with invented profiles (19:43 UTC).
 
 > "My part is the data behind Mustaqbal AI.
-> Our prepared catalog has 30 career roles and 20 skills, all from O*NET, the US Department of Labor's job database.
-> Each role has free learning resources; the first 8 have portfolio projects.
-> Every one has a dated, registered source.
-> Every role and skill links to a UN Sustainable Development Goal, with a reason.
-> The deployed app still shows only the first 8 roles, labelled cached.
-> The app's trend data is a placeholder, labelled fixture, not live.
-> Our GitHub snapshots are not connected yet.
-> And GitHub activity is not job demand."
+> The app has 30 career roles and 20 skills, from a real occupational dataset.
+> Every role and every skill links to a UN Sustainable Development Goal, with a reason you can read.
+> Some roles say 'limited skills coverage', because our 20 skills can't measure everything they need.
+> The trend section shows our saved GitHub snapshots from 21 and 22 October, labelled cached, not live.
+> That's developer activity, not job demand.
+> And the score is an alignment estimate, not a hiring chance."
 
 **What each sentence rests on:**
-- **30 roles, 20 skills (prepared):** counted in our data on `feat/jawad-30-roles` (standalone; validated, not merged). The deployed app still shows only the first 8 roles until Rehan's integration testing and a Replit Republish. Never say all 30 roles are live. The 22 newer O*NET titles and codes were checked by Jawad in a browser on 2026-10-24.
-- **SDGs, "cached" label:** on 2026-10-22, `GET /api/v1/sdgs/{role_id}` returned `data_mode: "cached"` for the 8 role IDs the app had, covering 20 distinct skills. Every mapping matched our data.
-- **Trends are "fixture":** `GET /api/v1/trends` returns `data_mode: "fixture"` and the warning "No real trend source is connected yet".
-- **Resources and projects:** in our data (16 resources, 17 projects for the first 8 roles, each with a dated, registered source). The app's roadmap and project endpoints are POST, so we did not check them.
+- **30 roles, 20 skills:** on 2026-10-24 at 19:50 UTC, `GET /api/v1/sdgs/{role_id}` returned role SDG mappings for all 30 role IDs. The one POST match test returned `catalog_coverage` 30 of 30, which the Roles page shows as "30 of 30 roles verified". The app lists at most 6 roles per profile. The 20 skills in the form are the same as `data/skills.json`. "Real occupational dataset" is the app's own note; the roles come from O*NET (CC BY 4.0, see the attribution line in `docs/prd-inputs-jawad.md`).
+- **SDGs, "cached" label:** `GET /api/v1/sdgs/{role_id}` returns `data_mode: "cached"` with one reason per role and per skill.
+- **Limited coverage:** the app adds this caveat to financial_analyst, financial_risk_specialist, information_security_analyst, logistician and public_health_analyst.
+- **Trends are "cached":** `GET /api/v1/trends` returns `data_mode: "cached"`, `source_status: "stale"` and 12 signals that equal our 12 snapshots (observed 2026-10-21 and 2026-10-22). 8 of our 20 skills have no trend signal.
+- **Alignment estimate:** every match has `score_type: "profile_alignment_estimate"`.
+- **"Demo data" badge:** the match, roadmap and project screens currently show a "Demo data" badge, because those responses carry `data_mode: "fixture"`. The label is being fixed. Their real source is our cached data. Don't call it demo, fixture or live data.
+- **Resources and projects:** in our data (16 resources; 17 projects, only for the first 8 roles), each with a dated, registered source. Not in the narration, because the app does not show the source register.
 
 ---
 
 ## Longer version (about 2.5 minutes)
 
 **Two kinds of numbers. Say which one you show:**
-- **App:** what the deployed API returned to a GET request (checked; `generated_at` 2026-10-22T18:34Z UTC).
+- **App:** what the deployed API returned to a GET request (checked; trends `generated_at` 2026-10-24T19:50:57Z UTC).
 - **Standalone:** output of my Python services (`services/catalog`, `services/sdg`, `services/trends`, `services/roadmaps`), run in the terminal on the data in branch `feat/jawad-30-roles`. It is **not confirmed in the app**.
-  - The app's roadmap and project endpoints are POST, and we sent no POST request, so app hours may differ.
+  - The app's roadmap and project endpoints are POST. We called them only once, with invented profiles, so app hours may differ from these.
   - The standalone trend output uses only the 12 saved (cached) snapshots, with no live GitHub request.
 
 **1. The roles (about 20 s): Standalone**
 *[Terminal: list the 30 roles.]*
 - "Our data has 30 career roles in 4 industry groups: 9 in Technology and AI, 8 in Business and Finance, 7 in Engineering and 6 in Healthcare and Sustainability."
 - "Each role comes from a real occupation in O*NET, the US Department of Labor's job database."
-- "We didn't invent any roles or skills. The other 22 roles are prepared and tested, but the deployed app still shows only the first 8 until our integration testing and the next Replit Republish."
+- "We didn't invent any roles or skills. All 30 roles are in the deployed app, which showed them when we checked on 24 October 2026 (UTC)."
 
 **2. One role's skills (about 25 s): Standalone**
 *[Terminal: Data Analyst skills with importance.]*
@@ -44,11 +45,11 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 - "For tools like SQL and Excel, O*NET doesn't give an importance score. So those numbers are team estimates."
 
 **3. Trend signal (about 30 s): App first, then Standalone**
-*[App: `GET /api/v1/trends`. Show `data_mode: "fixture"` and the warning.]*
-- "In the app, the trend section is a placeholder. It says fixture, not live, and warns that no real trend source is connected yet."
+*[App: `GET /api/v1/trends`. Show `data_mode: "cached"`, `source_status: "stale"` and the dates.]*
+- "In the app, the trend section shows our 12 saved GitHub snapshots. It says cached, not live. 8 of our 20 skills have no trend signal."
 
 *[Terminal (standalone): Data Analyst trend output, with status "cached" and the date.]*
-- "Our real trend data exists, but it's not connected to the app yet. Here it is from our own service."
+- "Here is the same data from our own service."
 - "It counts new GitHub projects for each skill, comparing the last 30 days with the 30 days before."
 - "For Excel, it's rising. For SQL, it's stable: 3,531 new projects, up from 3,273."
 - "The status says cached, last refreshed 21 October 2026. It's saved data, not live."
@@ -85,11 +86,11 @@ Say this out loud. Every app claim here was checked on the deployed API (https:/
 
 ---
 
-**Presenter rule:** Do not state a role's rank or score. Show matches only as example output; rankings change when the catalog or data changes (for example, Data Analyst moved from 3rd to 6th for a Python+SQL profile after 22 roles were added).
+**Presenter rule:** Do not state a role's rank or score. Show matches only as example output; rankings change when the catalog or data changes (for example, for a Python+SQL profile Data Analyst moved from 3rd to 6th after 22 roles were added, then to 5th after the Public Health Analyst rebuild).
 
 **Don't say:**
 - "trending", "live data" or "you will get hired"
-- that all 30 roles are live in the app
+- that the match, roadmap or project output is demo, fixture or live data (the "Demo data" badge is a label being fixed; the source is our cached data)
 - a role's rank or match score
 - that GitHub activity shows job demand
 - that a standalone number is what the app shows

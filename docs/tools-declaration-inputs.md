@@ -20,9 +20,9 @@ For the Mustaqbal AI Tools Declaration. My part covers `data/**`, `services/tren
 
 ## 30-role dataset
 
-**Status of the 30-role dataset: PREPARED, not live.** The 30 roles are on branch `feat/jawad-30-roles` (pushed, not merged). They are validated: all 8 of Jawad's test suites pass, and Rehan's cached-data validators accept them (checked read-only on his branches `feature/12b-team-integration` and `feature/13b-release-candidate`). The **deployed app still shows only the first 8 roles** until Rehan's integration testing and a Replit Republish. Do not claim that all 30 roles are live. The 20-skill catalog and the original 8 roles are unchanged.
+**Status of the 30-role dataset: in the deployed app.** The deployed app showed **30 roles** when checked on **2026-10-24 at 19:50 UTC (2026-10-25 03:50 MYT)**: `GET /api/v1/sdgs/{role_id}` returned role SDG mappings (`data_mode: "cached"`) for all 30 role IDs, and one earlier `POST /api/v1/careers/match` with an invented profile (19:43 UTC) returned `catalog_coverage` 30 of 30. The data is validated: all 8 of Jawad's test suites pass, and Rehan's cached-data validators accept it. The app's match, roadmap and project responses carry `data_mode: "fixture"` and the UI shows a "Demo data" badge; this label is being fixed. Their real source is our cached data.
 
-**Limited coverage** (fewer of our 20 skills fit these roles): `financial_analyst` and `financial_risk_specialist` (O*NET has not yet published their skills data); `information_security_analyst` and `logistician` (our 20 skills lack their main tools).
+**Limited coverage** (fewer of our 20 skills fit these roles; the app labels them): `financial_analyst` and `financial_risk_specialist` (O*NET has not yet published their skills data); `information_security_analyst` and `logistician` (our 20 skills lack their main tools); `public_health_analyst` (no health-specific skill in our 20).
 
 **Team estimates, not source data:** tool importances, required/optional flags, the inclusion rules (which O*NET skills a role gets: thinking skills only with an O*NET score of 50 or more, Attention to Detail only with a Work Style score of 100) and the SDG links and reasons.
 
@@ -33,7 +33,7 @@ Jawad checked the titles and codes of the 22 newer O*NET pages in a browser on 2
 | Source | Used for | Licence / terms |
 |---|---|---|
 | O*NET OnLine (US Dept. of Labor), 30 occupation pages plus 23 Software Skills CSV exports (fetched by Claude Code; for the 22 pages added on 2026-10-24, Jawad checked titles, codes and 3 mathematics scores in a browser) | Role skills, 0-100 importance scores and technology tools | CC BY 4.0, attribution required (page footer: "licensed under a Creative Commons Attribution 4.0 International License"). Attribution line: "Source: O*NET OnLine by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)." |
-| GitHub REST API — Search Repositories | Trend signal: new repositories per skill topic, 30 days vs the previous 30 | GitHub Terms of Service. 12 saved snapshots (retrieved 2026-10-21 and 2026-10-22) exist as data and in my standalone `services/trends`. The demo makes no live GitHub request. **Not shown in the app:** the deployed `/api/v1/trends` returns placeholder data labelled `fixture`. |
+| GitHub REST API — Search Repositories | Trend signal: new repositories per skill topic, 30 days vs the previous 30 | GitHub Terms of Service. 12 saved snapshots (retrieved 2026-10-21 and 2026-10-22) exist as data and in my standalone `services/trends`. The demo makes no live GitHub request. **Shown in the app:** on 2026-10-24 at 19:50 UTC, the deployed `/api/v1/trends` returned these 12 snapshots (`data_mode: "cached"`, `source_status: "stale"`). 8 of our 20 skills have no signal. Developer activity, NOT live and NOT job demand. |
 | Microsoft Learn: catalog API, 4 learning paths and modules, and 1 VBA documentation page | Learning resources; provider-stated hours from the catalog API's `duration_in_minutes` | Free to access |
 | MathWorks MATLAB Onramp, MIT OpenCourseWare 18.05, SAS Programming 1, Alison, MDN, GnuCash guide, 2 freeCodeCamp.org videos on YouTube | Learning resources | Free to access (see `docs/source-register.md`) |
 | Harvard CS50x 2026 | Learning resource (programming) | CC BY-NC-SA 4.0; we link only and never copy or redistribute it |
@@ -41,7 +41,7 @@ Jawad checked the titles and codes of the 22 newer O*NET pages in a browser on 2
 | Onshape CAD Basics | Learning resource and project tutorial (CAD) | Onshape's own terms of use; we link only |
 | UCI Machine Learning Repository: 8 datasets | Portfolio projects (linked, not copied) | CC BY 4.0 |
 | World Bank — World Development Indicators | Portfolio projects (linked, not copied) | Creative Commons Attribution 4.0 |
-| UN Sustainable Development Goals (17 goals and their targets; target wording for the 22 newer roles checked against the UN Statistics Division SDG API) | SDG mapping for every role and skill (team judgment). **Shown in the app for the first 8 roles only:** the deployed `/api/v1/sdgs/{role_id}` returns these mappings (`data_mode: "cached"`). | Public UN framework |
+| UN Sustainable Development Goals (17 goals and their targets; target wording for the 22 newer roles checked against the UN Statistics Division SDG API) | SDG mapping for every role and skill (team judgment). **Shown in the app for all 30 roles:** on 2026-10-24 at 19:50 UTC, the deployed `/api/v1/sdgs/{role_id}` returned role mappings for all 30 role IDs (`data_mode: "cached"`). | Public UN framework |
 
 ## Software and libraries
 
@@ -53,4 +53,4 @@ Jawad checked the titles and codes of the 22 newer O*NET pages in a browser on 2
 | Hussain's matcher (`services/matching`, his branch, used read-only) | Tested that my data works with his matcher, in a throwaway worktree. Nothing was committed there. |
 
 ## Not used in my part
-I did not use RunPod, Replit, or a Gemini/OpenAI model in my part. The app is deployed on Replit by Rehan (https://mustaqbal-ai.replit.app). I only read it with GET requests to check what it shows.
+I did not use RunPod, Replit, or a Gemini/OpenAI model in my part. The app is deployed on Replit by Rehan (https://mustaqbal-ai.replit.app). I checked it with GET requests, plus one test of its match, scenario, roadmap and project endpoints with invented profiles (no CV upload).
