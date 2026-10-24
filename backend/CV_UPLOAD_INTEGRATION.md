@@ -1,3 +1,9 @@
+# Timeout diagnostics
+
+See [CV_TIMEOUT_DIAGNOSIS.md](CV_TIMEOUT_DIAGNOSIS.md). The GLM client's 30-second
+limits apply per HTTP phase, not overall; the browser upload limit is 60 seconds.
+The API and explicit review/confirmation contract below are unchanged.
+
 # CV upload integration — for Mohammad (Milestone 11B)
 
 Covers `POST /api/v1/cv/parse`: PDF upload → local text extraction → RunPod GLM-5.3 → a **draft** for the user to review and confirm. Nothing here writes to the stored profile — that still only happens when you submit to the existing `POST /profile/analyze`, unchanged.

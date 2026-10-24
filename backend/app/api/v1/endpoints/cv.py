@@ -16,7 +16,11 @@ fallback/manual-review paths — see cv_extraction_service.py).
 """
 from __future__ import annotations
 
+import logging
+from time import monotonic
+
 from fastapi import APIRouter, Depends, File, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError
@@ -26,6 +30,7 @@ from app.services.cv_extraction_service import run_cv_extraction
 from app.services.cv_pdf import MAX_PDF_BYTES, CvPdfError, validate_and_extract
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Read in chunks, stopping as soon as the cap is exceeded, so an
 # oversized upload is rejected without first buffering the whole thing
@@ -67,21 +72,40 @@ async def parse_cv(
 ) -> CvParseResponse:
     declared_type = (file.content_type or "").lower()
     if declared_type and declared_type not in _ACCEPTED_CONTENT_TYPES:
+        await file.close()
         raise AppError(
             code="INVALID_CV_FILE",
             message="Only PDF files are accepted.",
             status_code=422,
         )
 
-    file_bytes = await _read_bounded(file, MAX_PDF_BYTES)
-
     try:
-        pdf_result = validate_and_extract(file_bytes)
+        file_bytes = await _read_bounded(file, MAX_PDF_BYTES)
+    finally:
+        await file.close()
+
+    started = monotonic()
+    try:
+        pdf_result = await run_in_threadpool(validate_and_extract, file_bytes)
     except CvPdfError as exc:
+        logger.warning("CV PDF rejected elapsed_ms=%.1f", (monotonic() - started) * 1000)
         raise AppError(code="INVALID_CV_FILE", message=exc.message, status_code=422) from exc
     finally:
         del file_bytes  # the raw upload is never needed again after this point
 
-    data, warnings = run_cv_extraction(pdf_result, settings)
+    pdf_elapsed_ms = (monotonic() - started) * 1000
+    logger.info(
+        "CV PDF complete elapsed_ms=%.1f pages=%d text_chars=%d",
+        pdf_elapsed_ms, pdf_result.page_count, len(pdf_result.text),
+    )
+    started = monotonic()
+    data, warnings = await run_in_threadpool(run_cv_extraction, pdf_result, settings)
+    # WARNING on fallback makes phase timings visible even with default logging.
+    logger.log(
+        logging.WARNING if data.status == "manual_review" else logging.INFO,
+        "CV extraction complete elapsed_ms=%.1f pdf_elapsed_ms=%.1f status=%s pages=%d text_chars=%d",
+        (monotonic() - started) * 1000, pdf_elapsed_ms, data.status,
+        pdf_result.page_count, len(pdf_result.text),
+    )
 
     return CvParseResponse(data=data, generated_at=utc_now_iso(), warnings=warnings)

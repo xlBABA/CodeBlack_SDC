@@ -11,6 +11,18 @@ from app.main import app
 
 
 @pytest.fixture(autouse=True)
+def _deny_real_http(monkeypatch):
+    """Transport-level guard: mocks and in-process ASGI remain usable."""
+    import httpx
+
+    def blocked(*args, **kwargs):
+        raise AssertionError("Real outbound HTTP is forbidden in backend tests")
+
+    monkeypatch.setattr(httpx.HTTPTransport, "handle_request", blocked)
+    monkeypatch.setattr(httpx.AsyncHTTPTransport, "handle_async_request", blocked)
+
+
+@pytest.fixture(autouse=True)
 def _reset_shared_hussain_provider():
     """Milestone 10B: get_matching_provider() now reuses one
     HussainMatchingProvider across requests (so its RunPod circuit
@@ -40,6 +52,11 @@ def _no_ambient_runpod_credentials(monkeypatch):
     with — and simply overrides — the clearing done here first."""
     monkeypatch.delenv("RUNPOD_API_KEY", raising=False)
     monkeypatch.delenv("RUNPOD_ENDPOINT_ID", raising=False)
+    # main.py resolves settings during import, before this fixture strips keys.
+    from app.core.config import get_settings
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
 
 
 @pytest.fixture

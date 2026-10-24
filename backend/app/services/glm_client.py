@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
+from time import monotonic
 
 import httpx
 
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 MAX_INPUT_CHARS = 12_000
 MAX_OUTPUT_TOKENS = 1_200
 REQUEST_TIMEOUT_SECONDS = 30.0
+# httpx applies this to each connect/read/write/pool phase, NOT total duration.
 
 _SYSTEM_PROMPT = (
     "You extract structured data from a student's CV/resume text. "
@@ -120,6 +122,7 @@ def extract_cv_fields(
     url = f"{base_url.rstrip('/')}/chat/completions"
     owns_client = client is None
     http_client = client or httpx.Client(timeout=REQUEST_TIMEOUT_SECONDS)
+    started = monotonic()
     try:
         response = http_client.post(
             url,
@@ -130,15 +133,26 @@ def extract_cv_fields(
             },
         )
     except httpx.TimeoutException as exc:
-        logger.warning("GLM request timed out after %.0fs", REQUEST_TIMEOUT_SECONDS)
+        logger.warning(
+            "GLM timeout category=%s elapsed_ms=%.1f phase_timeout_s=%.1f input_chars=%d",
+            type(exc).__name__, (monotonic() - started) * 1000,
+            REQUEST_TIMEOUT_SECONDS, len(payload["messages"][1]["content"]),
+        )
         raise GlmExtractionError("The extraction service timed out.") from exc
     except httpx.HTTPError as exc:
-        logger.warning("GLM request failed (%s)", type(exc).__name__)
+        logger.warning("GLM network failure category=%s elapsed_ms=%.1f",
+                       type(exc).__name__, (monotonic() - started) * 1000)
         raise GlmExtractionError("The extraction service could not be reached.") from exc
     finally:
         if owns_client:
             http_client.close()
 
+    logger.log(
+        logging.WARNING if response.status_code >= 400 else logging.INFO,
+        "GLM response status=%d elapsed_ms=%.1f input_chars=%d",
+        response.status_code, (monotonic() - started) * 1000,
+        len(payload["messages"][1]["content"]),
+    )
     if response.status_code == 401 or response.status_code == 403:
         logger.warning("GLM request rejected: HTTP %d (check RUNPOD_API_KEY)", response.status_code)
         raise GlmExtractionError("The extraction service rejected the request.")

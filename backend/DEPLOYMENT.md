@@ -1,3 +1,9 @@
+# Current CV timeout investigation
+
+See [CV_TIMEOUT_DIAGNOSIS.md](CV_TIMEOUT_DIAGNOSIS.md) for the October 24, 2026
+observed deployment evidence and user-controlled verification procedure. Historical
+setup guidance below is not evidence of the currently serving revision/settings.
+
 # Backend deployment readiness (Mustaqbal AI, formerly FuturePath AI)
 
 This covers local development and preparation for a future Replit

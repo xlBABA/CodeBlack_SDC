@@ -1,0 +1,1 @@
+- [CV timeout evidence](cv-timeout-evidence.md) — require runtime/payload parity and verified budgets before tuning timeouts; paid probes need explicit approval.
