@@ -309,20 +309,6 @@ A complete test run against the final combined integration and deployed configur
 
 ---
 
-## TODO — Final Submission Verification
-
-- [ ] Verify the final deployed `LLM_PROVIDER` and CV extraction model.
-- [ ] Confirm OpenRouter GLM-5.3 FlashX is active on the live Replit application if selected as the final provider.
-- [ ] Confirm `RUNPOD_API_KEY` and `RUNPOD_ENDPOINT_ID=f0phohhegtydji` are configured in the published deployment.
-- [ ] Verify RunPod semantic matching with the "Database Querying" → SQL acceptance test.
-- [ ] Confirm the deployed backend uses Hussain's RunPod-enabled matching adapter.
-- [ ] Run full regression tests on the final integrated source snapshot.
-- [ ] Update the Technical & Tools Declaration to include OpenRouter, model/provider selection, API access tier and third-party CV processing.
-- [ ] Verify the README, architecture documentation and final PDF declarations describe the same deployed implementation.
-- [ ] Add an architecture diagram image if required by the submission.
-
----
-
 ## Responsible AI Statement
 
 Mustaqbal AI is an educational career exploration prototype. It does not predict hiring outcomes or guarantee employment.
