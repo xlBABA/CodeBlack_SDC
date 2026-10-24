@@ -40,6 +40,10 @@ def _no_ambient_runpod_credentials(monkeypatch):
     with — and simply overrides — the clearing done here first."""
     monkeypatch.delenv("RUNPOD_API_KEY", raising=False)
     monkeypatch.delenv("RUNPOD_ENDPOINT_ID", raising=False)
+    # Same for the CV LLM settings: a developer's exported LLM_API_KEY
+    # must never reach a test (or a fake server a test starts).
+    for var in ("LLM_PROVIDER", "LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL", "LLM_TIMEOUT_SECONDS"):
+        monkeypatch.delenv(var, raising=False)
 
 
 @pytest.fixture

@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
 
 from pydantic import BaseModel, ValidationError
 
@@ -51,7 +52,7 @@ from app.schemas.cv import (
 )
 from app.schemas.profile import SkillRef, StudentProfile
 from app.services.cv_pdf import PdfExtractionResult
-from app.services.glm_client import GlmExtractionError, extract_cv_fields
+from app.services.glm_client import REQUEST_TIMEOUT_SECONDS, GlmExtractionError, extract_cv_fields
 from app.services.hussain_matching.normalizer import SkillNormalizer
 from app.services.role_catalog_cached import _load_json
 
@@ -75,6 +76,11 @@ UNVERIFIED_EVIDENCE_REASON = (
     "text, so it was not added automatically. Add it yourself if it's "
     "accurate."
 )
+# Generic, student-facing text for when automatic extraction can't run.
+CV_UNAVAILABLE_WARNING = (
+    "We couldn't read your CV automatically right now. Please review or "
+    "fill in your details below."
+)
 # Guards against a trivially short "evidence" string (e.g. a single
 # letter) that would make the substring check meaningless.
 MIN_EVIDENCE_CHARS = 2
@@ -87,6 +93,54 @@ _LIST_FIELD_MODELS: dict[str, type[BaseModel]] = {
     "experience": CvExperienceEntry,
     "certifications": CvCertificationEntry,
 }
+
+
+@dataclass(frozen=True)
+class _LlmCallConfig:
+    api_key: str
+    base_url: str
+    model: str
+    timeout: float
+    reasoning_effort: bool
+    key_name: str
+
+
+def _llm_call_config(settings: Settings) -> _LlmCallConfig | None:
+    """The LLM endpoint CV extraction calls, per LLM_PROVIDER.
+
+    "runpod" is unchanged: RUNPOD_API_KEY + RUNPOD_GLM_*, with
+    glm_client's own default timeout (a missing key is still reported by
+    extract_cv_fields itself). "openrouter" uses only LLM_API_KEY,
+    LLM_BASE_URL and LLM_MODEL — never RUNPOD_API_KEY — and returns None,
+    after logging which variable names are missing (never their values),
+    if any of them is unset."""
+    if settings.LLM_PROVIDER == "openrouter":
+        api_key = settings.LLM_API_KEY.get_secret_value() if settings.LLM_API_KEY else ""
+        values = {"LLM_API_KEY": api_key, "LLM_BASE_URL": settings.LLM_BASE_URL, "LLM_MODEL": settings.LLM_MODEL}
+        missing = [name for name, value in values.items() if not (value or "").strip()]
+        if missing:
+            logger.warning(
+                "CV extraction skipped: LLM_PROVIDER=openrouter but %s not set; "
+                "falling back to manual review",
+                ", ".join(missing),
+            )
+            return None
+        return _LlmCallConfig(
+            api_key=api_key.strip(),
+            base_url=settings.LLM_BASE_URL.strip(),
+            model=settings.LLM_MODEL.strip(),
+            timeout=settings.LLM_TIMEOUT_SECONDS,
+            reasoning_effort=False,
+            key_name="LLM_API_KEY",
+        )
+    return _LlmCallConfig(
+        api_key=settings.RUNPOD_API_KEY.get_secret_value() if settings.RUNPOD_API_KEY else "",
+        base_url=settings.RUNPOD_GLM_BASE_URL,
+        model=settings.RUNPOD_GLM_MODEL,
+        timeout=REQUEST_TIMEOUT_SECONDS,
+        reasoning_effort=True,
+        key_name="RUNPOD_API_KEY",
+    )
 
 
 def _load_skill_catalogue() -> list[dict]:
@@ -368,13 +422,26 @@ def run_cv_extraction(pdf_result: PdfExtractionResult, settings: Settings) -> tu
             [NO_TEXT_WARNING],
         )
 
-    api_key = settings.RUNPOD_API_KEY.get_secret_value() if settings.RUNPOD_API_KEY else ""
+    llm = _llm_call_config(settings)
+    if llm is None:
+        return (
+            CvParseData(
+                status="manual_review",
+                draft=_empty_draft(),
+                page_count=pdf_result.page_count,
+                extracted_text_preview=pdf_result.text[:500],
+            ),
+            [CV_UNAVAILABLE_WARNING],
+        )
     try:
         result = extract_cv_fields(
             pdf_result.text,
-            api_key=api_key,
-            base_url=settings.RUNPOD_GLM_BASE_URL,
-            model=settings.RUNPOD_GLM_MODEL,
+            api_key=llm.api_key,
+            base_url=llm.base_url,
+            model=llm.model,
+            timeout=llm.timeout,
+            reasoning_effort=llm.reasoning_effort,
+            key_name=llm.key_name,
         )
     except GlmExtractionError as exc:
         logger.warning("CV extraction fell back to manual review (%s)", exc.reason)
