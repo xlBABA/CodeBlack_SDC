@@ -260,24 +260,18 @@ def get_role_catalog(settings: Settings = Depends(get_settings)) -> RoleCatalogP
 
 def catalog_data_mode(settings: Settings) -> DataMode:
     """The envelope's data_mode for every route that depends on
-    get_role_catalog(). Always "fixture" for every CATALOG_MODE/
-    MATCHING_MODE combination supported today: even when CATALOG_MODE=
-    cached supplies real, cached O*NET-derived role/skill identifiers,
-    and even when MATCHING_MODE=hussain runs a real (if still unvalidated
-    and "initial team choice") algorithm instead of the fixture one, the
-    actual response content these routes return — match scores and score
-    breakdowns, roadmap resources (FixtureResourceCatalog) and
-    recommended/simulated projects (FixtureProjectCatalog) — is still
-    either fixture-generated or an unvalidated heuristic. A single
-    data_mode value can't mark a response "partly cached, partly
-    fixture"; labelling the whole response "cached" would let that
-    content masquerade as a cached/verified outcome
-    (REHAN_BACKEND_INTEGRATION.md: "don't let dummy scores accidentally
-    masquerade as real outcomes"). The cached role/skill provenance and
-    the active matching algorithm are both disclosed explicitly via
-    catalog_provenance_warnings()/matching_mode_warning() instead of via
-    this enum value.
+    get_role_catalog() (match, scenarios, roadmaps, projects).
+
+    "cached" only when the response is built from real inputs alone:
+    Jawad's cached role/skill/resource/project data (CATALOG_MODE=cached)
+    scored by Hussain's real matcher (MATCHING_MODE=hussain). Any fixture
+    input — the placeholder catalog or the fixture scoring formula —
+    keeps it "fixture", so placeholder output never masquerades as real
+    data. That the score itself is an unvalidated estimate is disclosed
+    separately, via catalog_provenance_warnings()/matching_mode_warning().
     """
+    if settings.CATALOG_MODE == "cached" and settings.MATCHING_MODE == "hussain":
+        return "cached"
     return "fixture"
 
 

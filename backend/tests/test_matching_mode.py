@@ -95,7 +95,9 @@ def test_careers_match_full_matrix(client: TestClient, catalog_mode, matching_mo
     expected = _expected_outcome(catalog_mode, matching_mode, enable_fixtures)
     assert response.status_code == expected, (catalog_mode, matching_mode, enable_fixtures, response.json())
     if expected == 200:
-        assert response.json()["data_mode"] == "fixture"  # never "cached", never "live" — see Step 5
+        # "cached" only when real cached data AND the real matcher are used; never "live".
+        real_inputs = catalog_mode == "cached" and matching_mode == "hussain"
+        assert response.json()["data_mode"] == ("cached" if real_inputs else "fixture")
     else:
         assert response.json()["error"]["code"] == "PROVIDER_UNAVAILABLE"
 
@@ -807,7 +809,7 @@ def test_hussain_mode_warnings_disclose_offline_operation_not_runpod_or_hiring(c
         _clear_override()
 
     body = response.json()
-    assert body["data_mode"] == "fixture"
+    assert body["data_mode"] == "cached"
     warnings_text = " ".join(body["warnings"]).lower()
     assert "hussain" not in warnings_text
     assert "matching_mode" not in warnings_text
@@ -1184,3 +1186,31 @@ def test_cached_trend_signals_produce_a_real_explainable_scenario_change(client:
     assert any(
         "Scenario adjusted the weight of" in c and "job demand" in c.lower() for c in fast_match["caveats"]
     )
+
+
+@pytest.mark.parametrize(
+    "catalog_mode,matching_mode,expected",
+    [("cached", "hussain", "cached"), ("cached", "fixture", "fixture"), ("fixture", "hussain", "fixture"),
+     ("fixture", "fixture", "fixture")],
+)
+def test_data_mode_is_cached_only_when_no_fixture_input_is_used(client: TestClient, catalog_mode, matching_mode, expected):
+    role_id = "data_analyst"  # exists in both the fixture and the cached catalog
+    requests = [
+        ("/api/v1/careers/match", {"profile": SQL_PROFILE}),
+        ("/api/v1/scenarios/simulate", {"profile": SQL_PROFILE, "scenario_id": "fast"}),
+        ("/api/v1/roadmaps/generate", {"profile": SQL_PROFILE, "role_id": role_id}),
+        ("/api/v1/projects/recommend", {"profile": SQL_PROFILE, "role_id": role_id}),
+    ]
+    _override_settings(CATALOG_MODE=catalog_mode, MATCHING_MODE=matching_mode)
+    try:
+        projects = client.post("/api/v1/projects/recommend", json={"profile": SQL_PROFILE, "role_id": role_id})
+        project_id = projects.json()["data"]["projects"][0]["project_id"]
+        requests.append(
+            ("/api/v1/projects/simulate", {"profile": SQL_PROFILE, "role_id": role_id, "project_id": project_id})
+        )
+        for path, body in requests:
+            response = client.post(path, json=body)
+            assert response.status_code == 200, (path, response.text)
+            assert response.json()["data_mode"] == expected, path
+    finally:
+        _clear_override()
