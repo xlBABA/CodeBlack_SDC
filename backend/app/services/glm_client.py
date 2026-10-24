@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 
 import httpx
@@ -79,6 +80,18 @@ class GlmExtractionError(Exception):
 @dataclass
 class GlmExtractionResult:
     raw_json: dict
+
+
+_JSON_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL | re.IGNORECASE)
+
+
+def _strip_json_fence(content: str) -> str:
+    """Models sometimes wrap a JSON reply in a ```json ... ``` markdown
+    fence despite being asked not to; unwrap it rather than discarding an
+    otherwise valid reply. Anything else is returned unchanged."""
+    stripped = content.strip()
+    match = _JSON_FENCE.match(stripped)
+    return match.group(1) if match else stripped
 
 
 def _build_payload(cv_text: str, model: str, reasoning_effort: bool = True) -> dict:
@@ -157,7 +170,7 @@ def extract_cv_fields(
     try:
         body = response.json()
         content = body["choices"][0]["message"]["content"]
-        parsed = json.loads(content)
+        parsed = json.loads(_strip_json_fence(content))
     except (KeyError, IndexError, TypeError, ValueError) as exc:
         logger.warning("GLM response was not usable (%s)", type(exc).__name__)
         raise GlmExtractionError("The extraction service returned an unreadable result.") from exc

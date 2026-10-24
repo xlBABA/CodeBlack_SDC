@@ -264,12 +264,24 @@ def _clean_glm_json(raw_json: dict) -> dict:
     """Pre-processes GLM's raw JSON so a single malformed list entry (a
     null list, a legacy-format skill string, an oversized/mistyped
     field) never fails the whole GlmCvExtraction.model_validate() call
-    below (Milestone 12C-8E). Top-level scalar fields (name/summary) are
-    left untouched; if THEY are the wrong type, model_validate() is still
-    the final, honest fallback-to-manual_review safety net — this
-    function only ever removes or repairs individual list entries, never
-    invents a value GLM didn't actually provide."""
+    below (Milestone 12C-8E). An invalid top-level name/summary is set
+    to None (never replaced with a guessed value); model_validate() is
+    still the final, honest fallback-to-manual_review safety net for
+    anything else. This function only ever removes or repairs values,
+    never invents one GLM didn't actually provide."""
     cleaned = dict(raw_json)
+    for field_name in ("name", "summary"):
+        # An invalid top-level scalar (wrong type, oversized) becomes None
+        # instead of failing the whole extraction below.
+        if cleaned.get(field_name) is not None:
+            try:
+                GlmCvExtraction.model_validate({field_name: cleaned[field_name]})
+            except ValidationError as exc:
+                logger.info(
+                    "Dropping an invalid GLM %r value (the rest of the extraction is kept): %s",
+                    field_name, _validation_error_summary(exc),
+                )
+                cleaned[field_name] = None
     if "skills" in cleaned:
         cleaned["skills"] = _clean_skills_field(cleaned["skills"])
     for field_name, model_cls in _LIST_FIELD_MODELS.items():

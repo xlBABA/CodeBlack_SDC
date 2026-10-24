@@ -656,3 +656,60 @@ def test_endpoint_never_calls_the_real_glm_client_in_any_test_above():
     import app.services.cv_extraction_service as service_module
 
     assert service_module.extract_cv_fields.__module__ == "app.services.glm_client"
+
+
+# --- Fenced replies and invalid top-level scalars ----------------------------
+
+
+@pytest.mark.parametrize(
+    "content",
+    ['```json\n{"skills": ["Python"]}\n```', '```\n{"skills": ["Python"]}\n```', '  ```JSON {"skills": ["Python"]} ```  '],
+)
+def test_glm_client_unwraps_a_markdown_json_fence(content):
+    import httpx
+
+    from app.services.glm_client import extract_cv_fields
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+
+    result = extract_cv_fields(
+        "some cv text", api_key="dummy", base_url="https://llm.invalid/v1", model="m",
+        client=httpx.Client(transport=httpx.MockTransport(_handler)),
+    )
+    assert result.raw_json == {"skills": ["Python"]}
+
+
+def test_glm_client_still_rejects_prose_around_a_fence():
+    import httpx
+
+    from app.services.glm_client import extract_cv_fields
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        content = 'Here you go: ```json {"skills": []} ```'
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+
+    with pytest.raises(GlmExtractionError):
+        extract_cv_fields(
+            "some cv text", api_key="dummy", base_url="https://llm.invalid/v1", model="m",
+            client=httpx.Client(transport=httpx.MockTransport(_handler)),
+        )
+
+
+@pytest.mark.parametrize(
+    "bad_fields",
+    [{"name": {"first": "Jane"}}, {"summary": ["CS", "undergraduate"]}, {"name": 42, "summary": "x" * 2001}],
+)
+def test_invalid_top_level_name_or_summary_becomes_none_and_keeps_the_rest(client: TestClient, bad_fields):
+    with patch(
+        "app.services.cv_extraction_service.extract_cv_fields",
+        return_value=GlmExtractionResult(raw_json={**FAKE_GLM_JSON, **bad_fields}),
+    ):
+        response = _post_cv(client, VALID_PDF)
+
+    data = response.json()["data"]
+    assert data["status"] == "ok"
+    for field in bad_fields:
+        assert data["draft"][field] is None
+    assert {s["skill_id"] for s in data["draft"]["mapped_skills"]} == {"python", "sql"}
+    assert data["draft"]["education"]
